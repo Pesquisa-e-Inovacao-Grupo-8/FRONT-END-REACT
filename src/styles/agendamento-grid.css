@@ -46,6 +46,40 @@
   gap: 0.5rem;
 }
 
+.modal-highlight {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  border-radius: 10px;
+  padding: 0.7rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+}
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border: 1px solid #16a34a;
+  background: #16a34a;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-whatsapp:disabled {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
 .modal-actions {
   display: flex;
   flex-direction: column;
@@ -70,13 +104,14 @@
   background: white;
   padding: 1rem;
   border-radius: 0.75rem;
-  border: 1px solid rgba(102, 126, 234, 0.18);
+  border: 1.5px solid rgba(102, 126, 234, 0.3);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
   pointer-events: auto;
   position: relative;
   width: 100%;
+  height: 120%;
   min-width: 0;
 }
 
@@ -157,7 +192,9 @@
   display: grid;
   grid-template-columns: 72px 1fr;
   gap: 0.75rem;
-  max-height: calc(100vh - 420px);
+  max-height: none;
+  min-height: 0;
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   border: 1px solid #e7eaf2;
@@ -217,6 +254,39 @@
   border-top: 1px dashed #e7ecf7;
 }
 
+.agendamento-grid__current-time {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  border-top: 2px solid #ef4444;
+  pointer-events: none;
+}
+
+.agendamento-grid__current-time-dot {
+  position: absolute;
+  left: 0.4rem;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.agendamento-grid__current-time-label {
+  position: absolute;
+  right: 0.5rem;
+  top: -11px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #b91c1c;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 999px;
+  padding: 0.08rem 0.45rem;
+}
+
 .agendamento-grid__add-hour {
   position: absolute;
   right: 0.45rem;
@@ -258,6 +328,15 @@
   gap: 0.5rem;
 }
 
+.agendamento-grid__event-time-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.12rem;
+  min-width: 108px;
+  flex-shrink: 0;
+}
+
 .agendamento-grid__event:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 14px rgba(102, 126, 234, 0.25);
@@ -268,7 +347,6 @@
   font-weight: 700;
   color: #3d4a77;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .agendamento-grid__event-client {
@@ -287,11 +365,11 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex-shrink: 0;
+  max-width: 140px;
 }
 
 .agendamento-grid__event-payment {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: #334155;
   white-space: nowrap;
@@ -299,6 +377,28 @@
   text-overflow: ellipsis;
   flex-shrink: 0;
   margin-left: auto;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.12rem 0.46rem;
+  line-height: 1.2;
+}
+
+.agendamento-grid__event-payment--pendente {
+  background: #fff7d6;
+  color: #8a5a00;
+  border-color: #f2d381;
+}
+
+.agendamento-grid__event-payment--confirmado {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #86efac;
+}
+
+.agendamento-grid__event-payment--finalizado {
+  background: #e2e8f0;
+  color: #334155;
+  border-color: #cbd5e1;
 }
 
 .agendamento-grid__event-inline {
@@ -312,6 +412,11 @@
 
 .agendamento-grid__event--small .agendamento-grid__event-time {
   font-size: 0.68rem;
+}
+
+.agendamento-grid__event--small .agendamento-grid__event-time-group {
+  min-width: 96px;
+  gap: 0.08rem;
 }
 
 .agendamento-grid__event--small .agendamento-grid__event-client {
@@ -329,6 +434,10 @@
 .agendamento-grid__event--tiny {
   padding: 0.2rem 0.38rem;
   gap: 0.25rem;
+}
+
+.agendamento-grid__event--tiny .agendamento-grid__event-time-group {
+  min-width: auto;
 }
 
 .agendamento-grid__event--tiny .agendamento-grid__event-service {
@@ -369,7 +478,8 @@
 /* RESPONSIVIDADE */
 @media (max-width: 768px) {
   .agendamento-grid {
-    padding: 1rem;
+    padding: 0.75rem;
+    height: auto;
   }
 
   .agendamento-grid__header {
@@ -393,7 +503,7 @@
     grid-template-columns: 62px 1fr;
     gap: 0.5rem;
     padding: 0.45rem;
-    max-height: none;
+    max-height: 60vh;
   }
 
   .agendamento-grid__timeline-hour {
@@ -427,16 +537,36 @@
     padding: 0.16rem 0.35rem;
   }
 
+  .agendamento-grid__current-time-label {
+    font-size: 0.6rem;
+    padding: 0.05rem 0.35rem;
+    right: 0.25rem;
+    top: -10px;
+  }
+
+  .agendamento-grid__current-time-dot {
+    width: 8px;
+    height: 8px;
+    top: -4px;
+  }
 
 }
 
 @media (max-width: 460px) {
+  .agendamento-grid {
+    height: auto;
+    padding: 0.6rem;
+  }
+
   .agendamento-grid__timeline {
-    grid-template-columns: 54px 1fr;
+    grid-template-columns: 48px 1fr;
+    gap: 0.3rem;
+    padding: 0.3rem;
+    max-height: 55vh;
   }
 
   .agendamento-grid__header {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .agendamento-grid__event-time {
@@ -448,6 +578,14 @@
   }
 
   .agendamento-grid__event-service {
-    font-size: 0.66rem;
+    font-size: 0.64rem;
+  }
+
+  .agendamento-grid__event-payment {
+    display: none;
+  }
+
+  .agendamento-grid__summary {
+    padding: 0.45rem 0.55rem;
   }
 }

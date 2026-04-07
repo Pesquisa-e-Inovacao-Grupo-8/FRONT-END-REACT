@@ -1,11 +1,49 @@
 {
+  "funcionarias": [
+    {
+      "id": 1,
+      "nome": "Ana",
+      "especialidade": "Cabelo",
+      "servicos": [
+        "Corte Feminino",
+        "Escova",
+        "Hidratação",
+        "Coloração"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 2,
+      "nome": "Beatriz",
+      "especialidade": "Unhas",
+      "servicos": [
+        "Manicure",
+        "Pedicure",
+        "Spa dos Pés",
+        "Alongamento de Unhas"
+      ],
+      "ativo": true
+    },
+    {
+      "id": 3,
+      "nome": "Camila",
+      "especialidade": "Estética",
+      "servicos": [
+        "Design de Sobrancelha",
+        "Depilação",
+        "Limpeza de Pele",
+        "Maquiagem"
+      ],
+      "ativo": true
+    }
+  ],
   "agendamentos": [
     {
       "id": 1,
       "dia": 10,
-      "mes": 3,
+      "mes": 4,
       "ano": 2026,
-      "data": "10/03/2026",
+      "data": "10/04/2026",
       "servico": "Cabelo + Unha",
       "preco": 100,
       "cliente": "João Silva",
@@ -15,7 +53,7 @@
       "status": true,
       "pagamento": "CONFIRMADO",
       "funcionaria": "Ana",
-      "ordem_pagamento": "46b5d26b-e627-4c24-a0b9-dc6240975f3e-JoaoSilva"
+      "ordem_agendamento": "46b5d26b-e627-4c24-a0b9-dc6240975f3e-JoaoSilva"
     },
     {
       "id": 2,
@@ -32,7 +70,7 @@
       "status": true,
       "pagamento": "PENDENTE",
       "funcionaria": "Beatriz",
-      "ordem_pagamento": "a1b2c3d4-e111-2222-3333-444455556666-MariaSouza"
+      "ordem_agendamento": "a1b2c3d4-e111-2222-3333-444455556666-MariaSouza"
     },
     {
       "id": 3,
@@ -49,7 +87,7 @@
       "status": true,
       "pagamento": "PENDENTE",
       "funcionaria": "Camila",
-      "ordem_pagamento": "f9e8d7c6-b555-6666-7777-888899990000-CarlosPereira"
+      "orderm_agendamento": "f9e8d7c6-b555-6666-7777-888899990000-CarlosPereira"
     },
     {
       "id": 4,
@@ -66,14 +104,14 @@
       "status": false,
       "pagamento": "PENDENTE",
       "funcionaria": "Ana",
-      "ordem_pagamento": "bb001122-ccdd-eeff-0011-223344556677-FernandaLima"
+      "orderm_agendamento": "bb001122-ccdd-eeff-0011-223344556677-FernandaLima"
     },
     {
       "id": 5,
       "dia": 5,
       "mes": 4,
       "ano": 2026,
-      "data": "05/04/2026",
+      "data": "10/04/2026",
       "servico": "Coloração",
       "preco": 250,
       "cliente": "Roberto Alves",
@@ -83,7 +121,23 @@
       "status": true,
       "pagamento": "PAGO",
       "funcionaria": "Beatriz",
-      "ordem_pagamento": "dd99ee88-ff77-0066-1155-224433667788-RobertoAlves"
+      "orderm_agendamento": "dd99ee88-ff77-0066-1155-224433667788-RobertoAlves"
+    },
+    {
+      "cliente": "José",
+      "servico": "Corte Feminino",
+      "data": "07/04/2026",
+      "hora": "14:40",
+      "duracaoMinutos": 30,
+      "pagamentoAdiantado": false,
+      "funcionaria": "Ana",
+      "dia": 7,
+      "pagamentoStatus": "PENDENTE",
+      "mes": 4,
+      "ano": 2026,
+      "status": "PENDENTE",
+      "pagamento": "PENDENTE",
+      "id": 6
     }
   ]
 }

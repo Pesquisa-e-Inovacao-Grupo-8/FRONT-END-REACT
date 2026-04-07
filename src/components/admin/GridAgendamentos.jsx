@@ -21,12 +21,33 @@ const toHourString = (minutes) => {
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 const getPagamentoStatus = (agendamento) => {
-  return (agendamento.pagamentoStatus || agendamento.status_pagamento || (agendamento.pagamentoAdiantado ? 'PAGO' : 'PENDENTE')).toUpperCase();
+  return (
+    agendamento.pagamentoStatus
+    || agendamento.status_pagamento
+    || agendamento.pagamento
+    || (agendamento.pagamentoAdiantado ? 'PAGO' : 'PENDENTE')
+  ).toUpperCase();
+};
+
+const getPagamentoVisual = (status = '') => {
+  if (['FINALIZADO', 'CONCLUIDO', 'CONCLUÍDO'].includes(status)) {
+    return { label: 'Finalizado', className: 'finalizado' };
+  }
+
+  if (['PAGO', 'CONFIRMADO', 'APROVADO'].includes(status)) {
+    return { label: 'Confirmado', className: 'confirmado' };
+  }
+
+  return { label: 'Pendente', className: 'pendente' };
 };
 
 export default function GridAgendamento({ dia, mes, ano, agendamentosDoDia = [], funcionaria }) {
   const [modalAgendamento, setModalAgendamento] = useState(null);
   const [agendamentos, setAgendamentos] = useState(agendamentosDoDia);
+  const [agoraMinutos, setAgoraMinutos] = useState(() => {
+    const agora = new Date();
+    return (agora.getHours() * 60) + agora.getMinutes();
+  });
   const DAY_START_MINUTES = DAY_START_HOUR * 60;
   const DAY_END_MINUTES = DAY_END_HOUR * 60;
   const TOTAL_MINUTES = DAY_END_MINUTES - DAY_START_MINUTES;
@@ -35,6 +56,18 @@ export default function GridAgendamento({ dia, mes, ano, agendamentosDoDia = [],
   useEffect(() => {
     setAgendamentos(agendamentosDoDia);
   }, [dia, mes, ano, agendamentosDoDia]);
+
+  useEffect(() => {
+    const atualizarAgora = () => {
+      const agora = new Date();
+      setAgoraMinutos((agora.getHours() * 60) + agora.getMinutes());
+    };
+
+    atualizarAgora();
+    const timer = setInterval(atualizarAgora, 60 * 1000);
+
+    return () => clearInterval(timer);
+  }, []);
   
   const agendamentosVisiveis = agendamentos.filter((item) => item.status !== "CANCELADO");
   const agendamentosTimeline = agendamentosVisiveis
@@ -65,6 +98,14 @@ export default function GridAgendamento({ dia, mes, ano, agendamentosDoDia = [],
   const timelineHeight = totalHoras * HOUR_HEIGHT;
   const marcadoresHora = Array.from({ length: totalHoras + 1 }, (_, i) => DAY_START_HOUR + i);
   const marcadoresMeiaHora = Array.from({ length: totalHoras * 2 + 1 }, (_, i) => i);
+  const hoje = new Date();
+  const diaSelecionadoEhHoje = Number(dia) === hoje.getDate()
+    && Number(mes) === (hoje.getMonth() + 1)
+    && Number(ano) === hoje.getFullYear();
+  const horarioAtualNoIntervalo = agoraMinutos >= DAY_START_MINUTES && agoraMinutos <= DAY_END_MINUTES;
+  const mostrarLinhaHorarioAtual = diaSelecionadoEhHoje && horarioAtualNoIntervalo;
+  const linhaHorarioAtualTop = ((agoraMinutos - DAY_START_MINUTES) / 60) * HOUR_HEIGHT;
+  const horarioAtualLabel = toHourString(agoraMinutos);
 
   return (
     <div className="agendamento-grid">
@@ -99,10 +140,22 @@ export default function GridAgendamento({ dia, mes, ano, agendamentosDoDia = [],
             />
           ))}
 
+          {mostrarLinhaHorarioAtual && (
+            <div
+              className="agendamento-grid__current-time"
+              style={{ top: `${linhaHorarioAtualTop}px` }}
+              aria-label={`Horário atual: ${horarioAtualLabel}`}
+            >
+              <span className="agendamento-grid__current-time-dot" />
+              <span className="agendamento-grid__current-time-label">Agora {horarioAtualLabel}</span>
+            </div>
+          )}
+
           {agendamentosTimeline.map((agendamento) => {
             const isTiny = agendamento.height <= 52;
             const isSmall = agendamento.height > 52 && agendamento.height <= 76;
             const pagamentoStatus = getPagamentoStatus(agendamento);
+            const pagamentoVisual = getPagamentoVisual(pagamentoStatus);
 
             return (
               <button
@@ -113,10 +166,14 @@ export default function GridAgendamento({ dia, mes, ano, agendamentosDoDia = [],
                 onClick={() => setModalAgendamento(agendamento)}
                 title={`${agendamento.cliente} • ${agendamento.inicioLabel} - ${agendamento.fimLabel} • Pagamento: ${pagamentoStatus}`}
               >
-                <span className="agendamento-grid__event-time">{agendamento.inicioLabel} - {agendamento.fimLabel}</span>
+                <div className="agendamento-grid__event-time-group">
+                  <span className="agendamento-grid__event-time">{agendamento.inicioLabel} - {agendamento.fimLabel}</span>
+                  <span className="agendamento-grid__event-service">{agendamento.servico || 'Serviço'}</span>
+                </div>
                 <span className="agendamento-grid__event-client">{agendamento.cliente}</span>
-                <span className="agendamento-grid__event-service">{agendamento.servico || 'Serviço'}</span>
-                <span className="agendamento-grid__event-payment">{pagamentoStatus === 'PAGO' ? 'Pago' : pagamentoStatus === 'PENDENTE' ? 'Pendente' : pagamentoStatus}</span>
+                <span className={`agendamento-grid__event-payment agendamento-grid__event-payment--${pagamentoVisual.className}`}>
+                  {pagamentoVisual.label}
+                </span>
               </button>
             );
           })}

@@ -27,6 +27,32 @@
   line-height: 1;
 }
 
+.agendamentos-topbar {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.agendamentos-topbar .funcionaria-selector-box {
+  margin-bottom: 0;
+  flex: 0 0 calc(50% - 7px);
+  max-width: calc(50% - 7px);
+  min-width: 0;
+}
+
+.agendamentos-topbar .novo-agendamento-container {
+  margin: 0;
+  flex: 0 0 calc(50% - 7px);
+  max-width: calc(50% - 7px);
+  min-width: 0;
+}
+
+.agendamentos-topbar .novo-agendamento-container .header {
+  margin-bottom: 0;
+  height: 100%;
+}
+
 .display-flex { display: flex; }
 .linha { flex-direction: row; }
 .coluna { flex-direction: column; }
@@ -82,7 +108,7 @@
 
 .container {
   padding: 15px;
-  border: none;
+  border: 1.5px solid rgba(102, 126, 234, 0.3);
   border-radius: 10px;
   background: white;
   margin: 1% auto;
@@ -219,16 +245,23 @@
 
 .layout-principal {
   align-items: stretch;
+  gap: 14px !important;
+  height: calc(100vh - 280px) !important;
+  margin-top: 20px;
 }
 
 .layout-principal__calendar {
-  flex: 1 1 0;
+  flex: 0 0 calc(50% - 7px);
+  max-width: calc(50% - 7px);
   min-width: 0;
+  height: 100%;
 }
 
 .layout-principal__grid {
-  flex: 1 1 0;
+  flex: 0 0 calc(50% - 7px);
+  max-width: calc(50% - 7px);
   min-width: 0;
+  height: 100%;
 }
 
 /* RESPONSIVIDADE */
@@ -243,11 +276,49 @@
   .layout-principal__grid {
     flex: 1 1 auto;
     min-width: 0;
+    max-width: 100%;
     width: 100%;
   }
 }
 
+@media (max-width: 1024px) {
+  .agendamentos-topbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .agendamentos-topbar .novo-agendamento-container,
+  .agendamentos-topbar .funcionaria-selector-box {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .agendamentos-topbar .funcionaria-selector-box {
+    margin-bottom: 0;
+  }
+
+  .btn-funcionarias {
+    flex: 1 1 calc(33.33% - 8px);
+    min-width: 120px;
+    margin: 0;
+  }
+}
+
 @media (max-width: 768px) {
+  .agendamentos-topbar {
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 60px;
+  }
+
+  .agendamentos-topbar .novo-agendamento-container,
+  .agendamentos-topbar .funcionaria-selector-box {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+
   .funcionaria-selector-box {
     display: flex;
     flex-direction: column;
@@ -255,6 +326,10 @@
     width: 100%;
     margin-top: 70px;
     padding: 10px 12px;
+  }
+
+  .agendamentos-topbar .funcionaria-selector-box {
+    margin-top: 0;
   }
 
   .funcionaria-selector-label {
@@ -310,6 +385,7 @@
   .layout-principal__calendar,
   .layout-principal__grid {
     width: 100%;
+    max-width: 100%;
     min-width: 0;
   }
 
@@ -330,7 +406,7 @@
 
   .novo-agendamento-modal {
     width: min(96vw, 560px);
-    max-height: 90vh;
+    max-height: 92vh;
     border-radius: 14px;
   }
 
@@ -353,6 +429,45 @@
 
   .content-admin {
     margin-left: 0 !important;
+  }
+
+  .novo-agendamento-modal .formulario {
+    padding: 12px;
+  }
+
+  .campos {
+    gap: 8px;
+  }
+
+  .campo {
+    flex: 1 1 100%;
+  }
+
+  .campo input,
+  .campo select {
+    font-size: 16px; /* evita zoom automático no iOS */
+    padding: 10px;
+  }
+
+  .botoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .botoes .btn-app {
+    width: 100%;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 460px) {
+  .btn-funcionarias {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .header h2 {
+    font-size: 1rem;
   }
 }
 

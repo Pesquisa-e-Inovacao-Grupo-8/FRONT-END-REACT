@@ -25,10 +25,11 @@ const temAlteracoes = (formData, funcionariaAtual) => {
   );
 };
 
-export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria }) {
+export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, servicosDisponiveis = [] }) {
   const [aberto, setAberto] = useState(false);
   const [formData, setFormData] = useState({ ...INITIAL_STATE, funcionaria });
   const tituloModal = dadosIniciais ? "Completar Agendamento" : "Criar Agendamento";
+  const hojeInput = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     if (dadosIniciais) {
@@ -49,6 +50,14 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria }
   }, [funcionaria, aberto]);
 
   useEffect(() => {
+    setFormData((prev) => {
+      if (!prev.servico) return prev;
+      if (servicosDisponiveis.includes(prev.servico)) return prev;
+      return { ...prev, servico: "" };
+    });
+  }, [servicosDisponiveis]);
+
+  useEffect(() => {
     const onEscape = (e) => {
       if (e.key === "Escape") setAberto(false);
     };
@@ -66,6 +75,14 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria }
     e.preventDefault();
     if (!formData.cliente || !formData.data || !formData.hora) {
       alert("Preencha cliente, data e horário!");
+      return;
+    }
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const dataSelecionada = new Date(`${formData.data}T00:00:00`);
+    if (dataSelecionada < hoje) {
+      alert("Não é permitido criar agendamento em data passada.");
       return;
     }
 
@@ -123,11 +140,16 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria }
                 </div>
                 <div className="campo">
                   <label>Serviço</label>
-                  <input type="text" name="servico" placeholder="Serviço" value={formData.servico} onChange={handleChange} />
+                  <select name="servico" value={formData.servico} onChange={handleChange} required>
+                    <option value="" disabled>Selecione um serviço</option>
+                    {(servicosDisponiveis || []).map((servico) => (
+                      <option key={servico} value={servico}>{servico}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="campo">
                   <label>Data</label>
-                  <input type="date" name="data" value={formData.data} onChange={handleChange} required />
+                  <input type="date" name="data" min={hojeInput} value={formData.data} onChange={handleChange} required />
                 </div>
                 <div className="campo">
                   <label>Horário</label>

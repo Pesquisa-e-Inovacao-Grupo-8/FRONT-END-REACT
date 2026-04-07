@@ -3,6 +3,8 @@ import NewSchedule from "../../components/admin/NovoAgendamento";
 import Calendar from "../../components/admin/Calendario";
 import AgendamentoGrid from "../../components/admin/GridAgendamentos";
 import { usePagamentoStatusCheck } from '../../js/pagamento-status-check';
+import { getFuncionarias } from '../../js/funcionarias';
+import { getAgendamentos, salvarAgendamento } from '../../js/agendamento';
 
 const toMinutes = (hora = '00:00') => {
   const [h, m] = String(hora).split(':').map(Number);
@@ -27,42 +29,80 @@ const temConflitoHorario = (novo, existentes, funcionariaAtual) => {
   });
 };
 
+const normalizarAgendamento = (agendamento) => {
+  const statusNormalizado = typeof agendamento.status === 'string'
+    ? agendamento.status.toUpperCase()
+    : (agendamento.status ? 'CONFIRMADO' : 'PENDENTE');
+
+  return {
+    ...agendamento,
+    status: statusNormalizado,
+    pagamentoStatus: (agendamento.pagamentoStatus || agendamento.status_pagamento || agendamento.pagamento || '').toUpperCase()
+  };
+};
+
 export default function AgendamentosPage() {
-  const FUNCIONARIAS = ["Ana", "Beatriz", "Camila"];
-  const [funcionariaAtual, setFuncionariaAtual] = useState(FUNCIONARIAS[0]);
+  const [perfisProfissionais, setPerfisProfissionais] = useState({});
+  const FUNCIONARIAS = Object.keys(perfisProfissionais);
+  const [funcionariaAtual, setFuncionariaAtual] = useState('');
 
   // Estado de agendamentos
-  const [agendamentos, setAgendamentos] = useState([
-    { 
-      id: 1, dia: 10, mes: 3, ano: 2026, data: "10/03/2026", servico:"Cabelo + Unha", preco: 100, 
-      cliente: "João Silva", email: "Joao@gmail.com", telefone:"5511983536784", hora: "10:00", 
-      status: "CONFIRMADO", funcionaria: "Ana", 
-      ordem_pagamento: "46b5d26b-e627-4c24-a0b9-dc6240975f3e-JoãoSilva"
-    },
-    { 
-      id: 2, dia: 15, mes: 3, ano: 2026, data: "15/03/2026", servico:"Cabelo + Unha", preco: 100, 
-      cliente: "Maria Souza", email: "Maria@gmail.com", telefone:"5511983536784", hora: "14:00", 
-      status: "PENDENTE", funcionaria: "Beatriz", 
-      ordem_pagamento: "a1b2c3d4-e111-2222-3333-444455556666-MariaSouza"
-    },
-    { 
-      id: 3, dia: 18, mes: 3, ano: 2026, data: "18/03/2026", servico:"Cabelo + Unha", preco: 1000, 
-      cliente: "Carlos Pereira", email: "Carlos@gmail.com", telefone:"5511983536784", hora: "09:00", 
-      status: "PENDENTE", funcionaria: "Camila", 
-      ordem_pagamento: "f9e8d7c6-b555-6666-7777-888899990000-CarlosPereira"
-    },
-  ]);
+  const [agendamentos, setAgendamentos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [erroApi, setErroApi] = useState('');
 
   // Dia, mês e ano selecionados
-  const [diaAtual, setDiaAtual] = useState(10);
-  const [mesAtual, setMesAtual] = useState(3);
-  const [anoAtual, setAnoAtual] = useState(2026);
+  const [diaAtual, setDiaAtual] = useState(() => new Date().getDate());
+  const [mesAtual, setMesAtual] = useState(() => new Date().getMonth() + 1);
+  const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear());
 
   // Agendamento rápido
   const [dadosRapidos, setDadosRapidos] = useState(null);
 
   // Polling de pendentes a cada 5 segundos
   const { pendentes } = usePagamentoStatusCheck();
+
+  const carregarAgendamentos = async () => {
+    try {
+      const agendamentosApi = await getAgendamentos();
+      setAgendamentos((agendamentosApi || []).map(normalizarAgendamento));
+    } catch (error) {
+      console.error('[AgendamentosPage] Falha ao recarregar agendamentos:', error);
+    }
+  };
+
+  useEffect(() => {
+    const carregarDadosIniciais = async () => {
+      try {
+        setLoading(true);
+        setErroApi('');
+
+        const [funcionariasApi, agendamentosApi] = await Promise.all([
+          getFuncionarias(),
+          getAgendamentos()
+        ]);
+
+        const perfis = (funcionariasApi || []).reduce((acc, profissional) => {
+          acc[profissional.nome] = profissional.servicos || [];
+          return acc;
+        }, {});
+
+        setPerfisProfissionais(perfis);
+
+        const primeira = Object.keys(perfis)[0] || '';
+        setFuncionariaAtual((anterior) => anterior || primeira);
+
+        setAgendamentos((agendamentosApi || []).map(normalizarAgendamento));
+      } catch (error) {
+        console.error('[AgendamentosPage] Falha ao carregar dados do backend:', error);
+        setErroApi('Não foi possível carregar dados do backend.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarDadosIniciais();
+  }, []);
 
   useEffect(() => {
     if (!pendentes.length) return;
@@ -78,9 +118,8 @@ export default function AgendamentosPage() {
   }, [pendentes]);
 
   // Função para adicionar agendamento novo
-  const adicionarAgendamento = (novo) => {
+  const adicionarAgendamento = async (novo) => {
     const [ano, mes, dia] = novo.data.split("-");
-    const dataFormatada = `${dia}/${mes}/${ano}`;
     const novoFormatado = {
       ...novo,
       dia: parseInt(dia, 10),
@@ -94,15 +133,23 @@ export default function AgendamentosPage() {
       return;
     }
 
-    setAgendamentos(prev => [
-      ...prev,
-      {
+    try {
+      const payload = {
         ...novoFormatado,
-        id: Math.random(), // ou gerar uuid
-        data: dataFormatada,
-        status: novo.status || "PENDENTE"
-      }
-    ]);
+        data: novo.data,
+        duracaoMinutos: parseInt(novoFormatado.duracaoMinutos, 10) || 60,
+        status: (novo.status || 'PENDENTE').toUpperCase(),
+        pagamento: novo.pagamentoStatus || 'PENDENTE'
+      };
+
+      await salvarAgendamento(payload);
+      await carregarAgendamentos();
+    } catch (error) {
+      console.error('[AgendamentosPage] Falha ao salvar agendamento:', error);
+      alert('Erro ao salvar agendamento no backend.');
+      return;
+    }
+
     setDadosRapidos(null);
   };
 
@@ -112,28 +159,45 @@ export default function AgendamentosPage() {
 
   return (
     <div style={{ padding: '20px' }}>
-      {/* Seleção de funcionária */}
-      <div className="funcionaria-selector-box">
-        <span className="funcionaria-selector-label">Profissional</span>
-        <div className="aba-funcionaria">
-          {FUNCIONARIAS.map((nome) => (
-            <button
-              key={nome}
-              type="button"
-              className={`btn-app btn-funcionarias ${funcionariaAtual === nome ? 'ativo' : ''}`}
-              onClick={() => setFuncionariaAtual(nome)}
-            >
-              {nome}
-            </button>
-          ))}
+      {erroApi && (
+        <div style={{ marginBottom: '10px', color: '#b91c1c', fontWeight: 600 }}>
+          {erroApi}
         </div>
+      )}
+
+      <div className="agendamentos-topbar">
+        {/* Seleção de funcionária */}
+        <div className="funcionaria-selector-box">
+          <span className="funcionaria-selector-label">Profissional</span>
+          <div className="aba-funcionaria">
+            {loading ? (
+              <span>Carregando profissionais...</span>
+            ) : (
+              FUNCIONARIAS.map((nome) => (
+                <button
+                  key={nome}
+                  type="button"
+                  className={`btn-app btn-funcionarias ${funcionariaAtual === nome ? 'ativo' : ''}`}
+                  onClick={() => setFuncionariaAtual(nome)}
+                >
+                  {nome}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Barra de abrir modal */}
+        <NewSchedule
+          aoSalvar={adicionarAgendamento}
+          dadosIniciais={dadosRapidos}
+          funcionaria={funcionariaAtual}
+          servicosDisponiveis={perfisProfissionais[funcionariaAtual] || []}
+        />
       </div>
 
-      {/* Formulário de novo agendamento */}
-      <NewSchedule aoSalvar={adicionarAgendamento} dadosIniciais={dadosRapidos} funcionaria={funcionariaAtual} />
-
       {/* Layout principal: calendário + grade de horários */}
-      <div className="display-flex linha layout-principal" style={{ display: 'flex', gap: '40px', height: 'calc(100vh - 280px)', marginTop: '20px' }}>
+      <div className="display-flex linha layout-principal" style={{ display: 'flex' }}>
         <div className="layout-principal__calendar">
           <Calendar
             agendamentos={agendamentosDaProfissional}
@@ -141,11 +205,19 @@ export default function AgendamentosPage() {
             selectedMonth={mesAtual}
             selectedYear={anoAtual}
             onDaySelect={setDiaAtual}
-            onMonthChange={(m, y) => { setMesAtual(m); setAnoAtual(y); setDiaAtual(1); }}
+            onMonthChange={(m, y) => {
+              const hoje = new Date();
+              const mesAtualReal = hoje.getMonth() + 1;
+              const anoAtualReal = hoje.getFullYear();
+              const diaInicial = (m === mesAtualReal && y === anoAtualReal) ? hoje.getDate() : 1;
+              setMesAtual(m);
+              setAnoAtual(y);
+              setDiaAtual(diaInicial);
+            }}
             funcionaria={funcionariaAtual}
           />
         </div>
-        <div className="layout-principal__grid" style={{ flex: 1, height: '100%' }}>
+        <div className="layout-principal__grid">
           <AgendamentoGrid
             dia={diaAtual}
             mes={mesAtual}
