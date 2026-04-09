@@ -4,6 +4,12 @@ import Navbar from "./components/home/Navbar";
 import Sidebar from "./components/admin/Sidebar";
 import AgendamentosPage from "./pages/admin/Agendamentos";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Cadastro from "./pages/Cadastro";
+import Serviços from "./pages/Serviços"
+import Agendamento from "./pages/Agendamento";
+import AgendamentosUsuário from "./pages/AgendamentosUsuário";
+
 
 const LayoutNavbar = () => (
   <>
@@ -51,9 +57,11 @@ export default function App() {
       <Routes>
         <Route element={<LayoutNavbar />}>
           <Route index element={<Home />} />
-          <Route path="servicos" element={<h1>Serviços</h1>} />
-          <Route path="agendamento" element={<h1>Agendamento</h1>} />
-          <Route path="agendamentos" element={<h1>Agendamentos</h1>} />
+          <Route path="login" element={<Login/>}/>
+          <Route path="cadastrar" element={<Cadastro/>}/>
+          <Route path="servicos" element={<Serviços/>} />
+          <Route path="agendamento" element={<Agendamento/>} />
+          <Route path="agendamentos" element={<AgendamentosUsuário/>} />
         </Route>
         <Route path="/admin" element={<LayoutSidebar />}>
           <Route path="agendamentos" element={<AgendamentosPage />} />
