@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const NAV_LINKS = [
-  { to: "/", label: "Início", active: true },
+  { to: "/", label: "Início" },
   { to: "/servicos", label: "Serviços" },
   { to: "/agendamento", label: "Agendamento" },
   { to: "/agendamentos", label: "Meus Agendamentos" },
@@ -11,18 +11,25 @@ const NAV_LINKS = [
 export default function Navbar() {
   return (
     <nav className="navbar">
-      <Link to="/" className="navbar-logo">Tukotomi</Link>
+      <NavLink to="/" className="navbar-logo">
+        Tukotomi
+      </NavLink>
+
       <ul className="navbar-links">
         {NAV_LINKS.map(link => (
           <li key={link.to}>
-            <Link to={link.to} className={link.active ? "active" : ""}>
+            <NavLink to={link.to} className={({ isActive }) => (isActive ? "active" : "")}>
               {link.label}
-            </Link>
+            </NavLink>
           </li>
         ))}
+
         <li>
-          <Link to="/cadastrar" className="btn-cadastrar">Cadastrar</Link>
+          <NavLink to="/cadastrar" className="btn-cadastrar">
+            Cadastrar
+          </NavLink>
         </li>
+        
       </ul>
     </nav>
   );

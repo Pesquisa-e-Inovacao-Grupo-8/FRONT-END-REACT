@@ -15,7 +15,6 @@ export default function Login() {
     <div className="container-principal">
 
       <div className="container-foto">
-        <img src="https://img.freepik.com/fotos-premium/retrato-de-mulher-rindo-e-cuidados-com-a-pele-beleza-no-estudio-sensacao-suave-e-cosmeticos-em-fundo-cinza-tratamento-facial-de-pessoa-feminina-e-pele-macia-para-resultados-de-dermatologia-toque-e-orgulho-de-brilho_590464-504208.jpg?semt=ais_hybrid&w=740&q=80" alt="Foto" />
       </div>
 
       <div className="container-login">

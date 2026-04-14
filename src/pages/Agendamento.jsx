@@ -128,28 +128,30 @@ export default function Agendamento() {
           <p>Escolha o melhor horário para sua transformação</p>
         </div>
 
-        {!done && (
-          <div className="stepper">
-            {STEP_LABELS.map((label, i) => {
-              const num = i + 1;
-              const isActive = step === num;
-              const isDone = step > num;
-              return (
-                <div key={label} style={{ display: "flex", alignItems: "center", flex: 1 }}>
-                  <div className="step-item" style={{ flex: "none" }}>
-                    <div className={`step-circle ${isActive ? "active" : isDone ? "done" : "inactive"}`}>
-                      {isDone ? "✓" : num}
+        <div className="stepper-container">
+          {!done && (
+            <div className="stepper">
+              {STEP_LABELS.map((label, i) => {
+                const num = i + 1;
+                const isActive = step === num;
+                const isDone = step > num;
+                return (
+                  <div key={label} style={{ display: "flex", alignItems: "center", flex: 1 }}>
+                    <div className="step-item" style={{ flex: "none" }}>
+                      <div className={`step-circle ${isActive ? "active" : isDone ? "done" : "inactive"}`}>
+                        {isDone ? "✓" : num}
+                      </div>
+                      <div className={`step-label ${isActive ? "active" : ""}`}>{label}</div>
                     </div>
-                    <div className={`step-label ${isActive ? "active" : ""}`}>{label}</div>
+                    {i < STEP_LABELS.length - 1 && (
+                      <div className={`step-line ${isDone ? "done" : ""}`} style={{ flex: 1, margin: "0 4px", marginTop: "-28px" }} />
+                    )}
                   </div>
-                  {i < STEP_LABELS.length - 1 && (
-                    <div className={`step-line ${isDone ? "done" : ""}`} style={{ flex: 1, margin: "0 4px", marginTop: "-28px" }} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         <div className="booking-card">
 

@@ -94,6 +94,13 @@
   }
 
   /* STEPPER */
+
+  .stepper-container{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-left: 140px;
+  }
   .stepper {
     display: flex;
     align-items: center;

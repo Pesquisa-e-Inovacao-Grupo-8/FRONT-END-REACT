@@ -9,25 +9,35 @@ body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  margin: 5%;
+  margin-top: 100px;
 }
 
-img{
-  height: 90%;
-  width: 90%;
-  border-radius: 10px;
-  box-shadow: 1px 1px 10px #706f6f;
-}
 
 .container-login {
   background: #fff;
-  border-radius: 12px;
-  padding: 2.5rem 2rem;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+  padding: 40px;
+  height: 600px;
   width: 100%;
-  max-width: 380px;
+  max-width: 30%;
   box-shadow: 5px 7px 15px #706f6f;
   
 }
+
+.container-foto{
+  height: 600px;
+  width: 35%;
+  background-image: url('../assets/login-img-01.jpg');
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  border-left: 1px solid #ddd;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: right;
+  box-shadow: 5px 7px 15px #706f6f;
+}
+
 
 .titulo h2 {
   font-size: 1.5rem;
