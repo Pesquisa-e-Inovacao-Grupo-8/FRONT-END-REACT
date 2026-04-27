@@ -50,7 +50,7 @@ export default function Serviços() {
       <section className="cta-section">
         <h2>Pronta para experimentar?</h2>
         <p>Agende agora e garanta seu horário preferido</p>
-        <button className="cta-btn">Fazer Agendamento</button>
+        <button className="cta-btn"><a href="/login">Fazer Agendamento</a></button>
       </section>
 
       <footer className="footer">

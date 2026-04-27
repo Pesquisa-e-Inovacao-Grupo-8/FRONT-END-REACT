@@ -2,7 +2,9 @@ import Hero from "../components/home/Hero";
 import Features from "../components/home/Features";
 import Services from "../components/home/Services";
 import CTA from "../components/home/CTA";
+import Footer from "../components/home/Footer"
 import "../styles/home.css";
+
 
 export default function Home() {
   return (
@@ -11,6 +13,7 @@ export default function Home() {
       <Features />
       <Services />
       <CTA />
+      <Footer />
     </main>
   );
 }
