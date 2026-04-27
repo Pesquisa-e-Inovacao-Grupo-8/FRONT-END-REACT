@@ -9,7 +9,7 @@ export async function getFuncionarias() {
     const funcionariasFormatadas = dadosBrutos.map(prof => ({
       id: prof.id,
       nome: prof.usuario ? prof.usuario.nome : 'Profissional Sem Nome',
-      servicos: prof.especialidade ? [prof.especialidade] : [] 
+      servicos: prof.servicos ? prof.servicos : []
     }));  
     return funcionariasFormatadas;
     
