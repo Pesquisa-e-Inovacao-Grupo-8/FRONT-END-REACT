@@ -31,6 +31,19 @@ export default function Agendamento() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", notes: "" });
   const [step3Errors, setStep3Errors] = useState({});
 
+   // Filtro: mostra profissionais que fazem o serviço selecionado
+  const profissionaisFiltrados = serviceId 
+    ? profissionaisDb.filter(p => {
+        const servicoSelecionado = servicosDb.find(s => s.id === serviceId);
+        if (!servicoSelecionado) return true;
+        
+        // Verifica se na lista de serviços do profissional existe o ID ou o Nome do serviço
+        return p.servicos && p.servicos.some(s => 
+          s === serviceId || s.id === serviceId || s === servicoSelecionado.nome || s.nome === servicoSelecionado.nome
+        );
+      })
+    : profissionaisDb;
+
   // Efeito para carregar Serviços e Profissionais do Backend ao montar a tela
   useEffect(() => {
     async function carregarOpcoes() {
@@ -98,11 +111,13 @@ export default function Agendamento() {
     setIsSubmitting(true);
     
     const servicoSelecionado = servicosDb.find(s => s.id === serviceId);
+    const meuId = localStorage.getItem("userId");
     
     // Monta o payload no formato que nosso Orquestrador espera
     const payloadCompleto = {
       serviceId,
       professionalId,
+      clienteId: meuId,
       date,
       time: timeSlot,
       duracaoServico: servicoSelecionado ? servicoSelecionado.duracaoMinutos : 60,
@@ -214,9 +229,9 @@ export default function Agendamento() {
                   onChange={e => { setProfessionalId(e.target.value); setStep1Errors(p => ({ ...p, professionalId: "" })); }}
                 >
                   <option value="">Selecione um profissional</option>
-                  {profissionaisDb.map(p => (
+                  {profissionaisFiltrados.map(p => (
                     <option key={p.id} value={p.id}>
-                      {p.nome} — {p.servicos[0] || 'Especialista'}
+                      {p.nome}
                     </option>
                   ))}
                 </select>

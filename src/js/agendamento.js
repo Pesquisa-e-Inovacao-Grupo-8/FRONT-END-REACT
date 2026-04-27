@@ -1,7 +1,7 @@
 import axios from 'axios';
+import api from '../api';
 
-const CREATE_AGENDAMENTO_URL = 'http://127.0.0.1:5000/flask-infinity-pay/create-agendamento';
-const LISTAR_AGENDAMENTOS_URL = 'http://localhost:8080';
+const FLASK_URL = 'http://127.0.0.1:5000/flask-infinity-pay';
 
 export function cancelarAgendamento(agendamento) {
     agendamento.status = 'CANCELADO';
@@ -15,7 +15,7 @@ export function finalizarAgendamento(agendamento) {
 
 export async function gerarLinkPagamento(agendamento) {
     try {
-        const response = await axios.post(`${CREATE_AGENDAMENTO_URL}/create-checkout`, agendamento);
+        const response = await axios.post(`${FLASK_URL}/create-checkout`, agendamento);
         console.log('Resposta do Infinity Pay:', response.data);
         return response.data;
     } catch (error) {
@@ -23,18 +23,7 @@ export async function gerarLinkPagamento(agendamento) {
         throw new Error('Falha ao gerar link de pagamento');
     }
 }
-/*
-export async function salvarAgendamento(agendamento) {
-   try {
-        const response = await axios.post(`${CREATE_AGENDAMENTO_URL}/create-agendamento`, agendamento);
-        return response.data;
-    } catch (error) {
-        console.error('Falha ao criar agendamento via Flask:', error);
-        throw new Error('Falha ao criar agendamento');
-    }
-}*/
 
-// Salvar agendamento (Ignorando o Flask para teste)
 export async function salvarAgendamento(payload) {
     try {
         const [hInicio, mInicio] = payload.hora.split(':').map(Number);
@@ -51,16 +40,14 @@ export async function salvarAgendamento(payload) {
             horaInicio: horaInicioFormatada,
             horaFim: horaFimFormatada,
             status: payload.status || 'PENDENTE',
-            ordemPedido: 'ORD-TESTE-FRONT', // Fake
-            clienteId: '523e4567-e89b-12d3-a456-426614174001', // ID da Maria (criada no data.sql)
-            profissionalId: '323e4567-e89b-12d3-a456-426614174001' // ID da Ana Paula
+            ordemPedido: 'ORD-TESTE-FRONT',
+            clienteId: '523e4567-e89b-12d3-a456-426614174001', // MOCK Maria Silva
+            profissionalId: '323e4567-e89b-12d3-a456-426614174001' // MOCK Ana Paula
         };
 
         console.log("Tentando criar no Spring Boot:", agendamentoDTO);
-        const response = await axios.post(`${LISTAR_AGENDAMENTOS_URL}/agendamentos`, agendamentoDTO);
-        const novoAgendamento = response.data;
-                
-        return novoAgendamento;
+        const response = await api.post(`/agendamentos`, agendamentoDTO);
+        return response.data;
 
     } catch (error) {
         console.error('Falha ao criar agendamento via Spring Boot Mock:', error);
@@ -68,28 +55,27 @@ export async function salvarAgendamento(payload) {
     }
 }
 
-
 export async function criarAgendamento(payload) {
     return salvarAgendamento(payload);
 }
+
 export async function getAgendamentos() {
    try {
         const [agendamentosRes, agendamentoServicosRes] = await Promise.all([
-            axios.get(`${LISTAR_AGENDAMENTOS_URL}/agendamentos`),
-            axios.get(`${LISTAR_AGENDAMENTOS_URL}/agendamentoServicos`)
+            api.get(`/agendamentos`),
+            api.get(`/agendamentoServicos`)
         ]);
 
         const agendamentosBrutos = agendamentosRes.data;
         const relacoesServicos = agendamentoServicosRes.data;
 
         const agendamentosFormatados = agendamentosBrutos.map(agend => {
-            
             const relacao = relacoesServicos.find(rel => rel.agendamento && rel.agendamento.id === agend.id);
             const nomeServico = relacao && relacao.servico ? relacao.servico.nome : 'Serviço Padrão';
 
             const [ano, mes, dia] = agend.data.split('-');
             
-            const horaInicio = agend.horaInicio.substring(0, 5); // Ex: 14:00
+            const horaInicio = agend.horaInicio.substring(0, 5);
             const horaFim = agend.horaFim.substring(0, 5);
             
             const [hInicio, mInicio] = horaInicio.split(':').map(Number);
@@ -116,16 +102,14 @@ export async function getAgendamentos() {
         return agendamentosFormatados;
 
     } catch (error) {
-        console.error("Erro ao buscar agendamentos do Spring Boot:", error);
+        console.error("Erro ao buscar agendamentos com Token JWT:", error);
         return [];
     }
-    
 }
 
-// Função para buscar os serviços disponíveis para o Select
 export async function getServicos() {
     try {
-        const response = await axios.get(`${LISTAR_AGENDAMENTOS_URL}/servicos`);
+        const response = await api.get(`/servicos`);
         return response.data;
     } catch (error) {
         console.error("Erro ao buscar serviços:", error);
@@ -133,13 +117,10 @@ export async function getServicos() {
     }
 }
 
-// Orquestrador: Salva o agendamento e depois vincula o serviço
 export async function agendarPeloCliente(dadosFormulario) {
     try {
-        // 1. Prepara os horários (Convertendo de "14:00" para "14:00:00")
         const [hInicio, mInicio] = dadosFormulario.time.split(':').map(Number);
         
-        // Pega a duração do serviço (ou chuta 60 min) e calcula a hora do fim
         const duracao = dadosFormulario.duracaoServico || 60;
         const totalMinutosFim = (hInicio * 60) + mInicio + duracao;
         const hFim = Math.floor(totalMinutosFim / 60);
@@ -148,26 +129,24 @@ export async function agendarPeloCliente(dadosFormulario) {
         const horaInicioFormatada = `${String(hInicio).padStart(2, '0')}:${String(mInicio).padStart(2, '0')}:00`;
         const horaFimFormatada = `${String(hFim).padStart(2, '0')}:${String(mFim).padStart(2, '0')}:00`;
 
-        // 2. Monta o DTO do Agendamento
+        const meuId = localStorage.getItem("userId");
+
         const agendamentoDTO = {
-            data: dadosFormulario.date, // Ex: "2026-04-25"
+            data: dadosFormulario.date, 
             horaInicio: horaInicioFormatada,
             horaFim: horaFimFormatada,
             status: 'PENDENTE',
             ordemPedido: `WEB-${Date.now()}`,
-            // MOCK: Usando o ID da Maria Silva até fazermos o Login
-            clienteId: '523e4567-e89b-12d3-a456-426614174001', 
-            profissionalId: dadosFormulario.professionalId // Vem do select
+            clienteId: meuId,
+            profissionalId: dadosFormulario.professionalId 
         };
 
-        // 3. Cria o Agendamento no Spring Boot
         console.log("Criando agendamento...", agendamentoDTO);
-        const responseAgendamento = await axios.post(`${LISTAR_AGENDAMENTOS_URL}/agendamentos`, agendamentoDTO);
+        const responseAgendamento = await api.post(`/agendamentos`, agendamentoDTO);
         const novoAgendamento = responseAgendamento.data;
 
-        // 4. Cria a relação do Serviço com esse Agendamento
         console.log("Vinculando serviço...");
-        await axios.post(`${LISTAR_AGENDAMENTOS_URL}/agendamentoServicos`, {
+        await api.post(`/agendamentoServicos`, {
             agendamentoId: novoAgendamento.id,
             servicoId: dadosFormulario.serviceId
         });
@@ -179,29 +158,22 @@ export async function agendarPeloCliente(dadosFormulario) {
         throw error;
     }
 }
-// ----------------------------------------------------------------------
-// 4. MEUS AGENDAMENTOS (Fluxo do Cliente Logado)
-// ----------------------------------------------------------------------
 
-// Busca agendamentos de um cliente específico e formata para a tela de histórico
 export async function getAgendamentosPorCliente(clienteId) {
     try {
-        const todosAgendamentos = await getAgendamentos(); // Reaproveita nossa lógica de 'costura'
-        // Filtra apenas os agendamentos que pertencem à ID da Maria (ou do logado futuramente)
-        // Nota: No nosso tradutor, o objeto cliente não estava vindo com ID. 
-        // Vamos ajustar o getAgendamentos original ou filtrar pelo nome por enquanto:
-        return todosAgendamentos.filter(a => a.cliente === 'Maria Silva');
+        const meuNome = localStorage.getItem("userName");
+        const todosAgendamentos = await getAgendamentos(); 
+        
+        return todosAgendamentos.filter(a => a.cliente === meuNome);
     } catch (error) {
         console.error("Erro ao filtrar meus agendamentos:", error);
         return [];
     }
 }
 
-// Envia a alteração de status para o Spring Boot (ex: CANCELADO ou FINALIZADO)
 export async function atualizarStatusAgendamento(agendamentoId, novoStatus) {
     try {
-        // Primeiro buscamos o agendamento atual para não perder os outros dados no PUT
-        const res = await axios.get(`${LISTAR_AGENDAMENTOS_URL}/agendamentos/${agendamentoId}`);
+        const res = await api.get(`/agendamentos/${agendamentoId}`);
         const agendamentoAtual = res.data;
 
         const agendamentoAtualizado = {
@@ -209,7 +181,7 @@ export async function atualizarStatusAgendamento(agendamentoId, novoStatus) {
             status: novoStatus
         };
 
-        const response = await axios.put(`${LISTAR_AGENDAMENTOS_URL}/agendamentos/${agendamentoId}`, agendamentoAtualizado);
+        const response = await api.put(`/agendamentos/${agendamentoId}`, agendamentoAtualizado);
         return response.data;
     } catch (error) {
         console.error("Erro ao atualizar status no servidor:", error);

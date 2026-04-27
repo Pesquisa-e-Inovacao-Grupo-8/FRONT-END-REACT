@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NewSchedule from "../../components/admin/NovoAgendamento";
 import Calendar from "../../components/admin/Calendario";
 import AgendamentoGrid from "../../components/admin/GridAgendamentos";
@@ -42,24 +43,20 @@ const normalizarAgendamento = (agendamento) => {
 };
 
 export default function AgendamentosPage() {
+  const navigate = useNavigate();
   const [perfisProfissionais, setPerfisProfissionais] = useState({});
   const FUNCIONARIAS = Object.keys(perfisProfissionais);
   const [funcionariaAtual, setFuncionariaAtual] = useState('');
 
-  // Estado de agendamentos
   const [agendamentos, setAgendamentos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erroApi, setErroApi] = useState('');
 
-  // Dia, mês e ano selecionados
   const [diaAtual, setDiaAtual] = useState(() => new Date().getDate());
   const [mesAtual, setMesAtual] = useState(() => new Date().getMonth() + 1);
   const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear());
 
-  // Agendamento rápido
   const [dadosRapidos, setDadosRapidos] = useState(null);
-
-  // Polling de pendentes a cada 5 segundos
   const { pendentes } = usePagamentoStatusCheck();
 
   const carregarAgendamentos = async () => {
@@ -77,25 +74,38 @@ export default function AgendamentosPage() {
         setLoading(true);
         setErroApi('');
 
+        const nomeLogado = localStorage.getItem("userName");
+        const papelLogado = localStorage.getItem("userRole");
+
         const [funcionariasApi, agendamentosApi] = await Promise.all([
           getFuncionarias(),
           getAgendamentos()
         ]);
 
         const perfis = (funcionariasApi || []).reduce((acc, profissional) => {
-          acc[profissional.nome] = profissional.servicos || [];
+          // Se o profissional é novo e não tem especialidade, colocamos "Geral"
+          acc[profissional.nome] = profissional.servicos.length > 0 
+            ? profissional.servicos 
+            : ['Configuração Pendente'];
           return acc;
         }, {});
-
+        
         setPerfisProfissionais(perfis);
 
-        const primeira = Object.keys(perfis)[0] || '';
-        setFuncionariaAtual((anterior) => anterior || primeira);
+        // LÓGICA DE SELEÇÃO INICIAL:
+        // Se eu sou profissional, quero ver MINHA agenda primeiro.
+        // Se eu for admin ou o nome não bater, pega a primeira da lista.
+        if (papelLogado === "PROFISSIONAL" && perfis[nomeLogado]) {
+          setFuncionariaAtual(nomeLogado);
+        } else {
+          const primeira = Object.keys(perfis)[0] || '';
+          setFuncionariaAtual(primeira);
+        }
 
         setAgendamentos((agendamentosApi || []).map(normalizarAgendamento));
       } catch (error) {
-        console.error('[AgendamentosPage] Falha ao carregar dados do backend:', error);
-        setErroApi('Não foi possível carregar dados do backend.');
+        console.error('[AgendamentosPage] Falha ao carregar dados:', error);
+        setErroApi('Não foi possível carregar dados do backend. Verifique se está logado.');
       } finally {
         setLoading(false);
       }
@@ -166,9 +176,28 @@ export default function AgendamentosPage() {
       )}
 
       <div className="agendamentos-topbar">
-        {/* Seleção de funcionária */}
         <div className="funcionaria-selector-box">
-          <span className="funcionaria-selector-label">Profissional</span>
+          <span className="funcionaria-selector-label">
+            {localStorage.getItem("userRole") === "PROFISSIONAL" ? "Minha Agenda e Equipe" : "Profissionais"}
+          </span>
+          {localStorage.getItem("userRole") === "PROFISSIONAL" && (
+              <button 
+                onClick={() => navigate("/admin/configuracoes")}
+                style={{
+                  backgroundColor: "transparent", 
+                  color: "#b8960c", 
+                  border: "1px solid #b8960c", 
+                  padding: "4px 10px", 
+                  borderRadius: "5px", 
+                  cursor: "pointer", 
+                  fontSize: "0.85rem",
+                  fontWeight: "bold"
+                }}
+                title="Configurar meus serviços"
+              >
+                ⚙️ Especialidades
+              </button>
+            )}
           <div className="aba-funcionaria">
             {loading ? (
               <span>Carregando profissionais...</span>
@@ -180,7 +209,8 @@ export default function AgendamentosPage() {
                   className={`btn-app btn-funcionarias ${funcionariaAtual === nome ? 'ativo' : ''}`}
                   onClick={() => setFuncionariaAtual(nome)}
                 >
-                  {nome}
+                  {/*Se for o próprio profissional loggado, vai aparecer a estrelinha */}
+                  {nome === localStorage.getItem("userName") ? `⭐ ${nome}` : nome}
                 </button>
               ))
             )}

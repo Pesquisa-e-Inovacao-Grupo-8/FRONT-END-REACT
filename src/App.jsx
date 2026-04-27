@@ -12,6 +12,7 @@ import Cadastro from "./pages/Cadastro";
 import Serviços from "./pages/Serviços";
 import Agendamento from "./pages/Agendamento";
 import AgendamentosUsuário from "./pages/AgendamentosUsuário";
+import ConfiguracoesProfissional from "./pages/admin/ConfiguracoesProfissional";
 
 
 const LayoutNavbar = () => (
@@ -20,6 +21,11 @@ const LayoutNavbar = () => (
     <Outlet />
   </>
 );
+
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" />;
+};
 
 const LayoutSidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -103,6 +109,7 @@ export default function App() {
           }
         >
           <Route path="agendamentos" element={<AgendamentosPage />} />
+          <Route path="configuracoes" element={<ConfiguracoesProfissional />} />
         </Route>
       </Routes>
     </BrowserRouter>

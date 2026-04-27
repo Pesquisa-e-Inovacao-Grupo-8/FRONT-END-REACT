@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { getAgendamentosPorCliente, atualizarStatusAgendamento } from '../js/agendamento.js';
 import '../styles/agendamentos-usuario.css'
 
-const ID_CLIENTE_TESTE = '523e4567-e89b-12d3-a456-426614174001';
-
 function formatDate(dateStr) {
   const d = new Date(dateStr.ano, dateStr.mes - 1, dateStr.dia, 12, 0, 0);
   return d.toLocaleDateString("pt-BR", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
@@ -26,9 +24,21 @@ export default function AgendamentosUsuário() {
 
   const carregarMeusDados = async () => {
     setLoading(true);
-    const dados = await getAgendamentosPorCliente(ID_CLIENTE_TESTE);
-    setBookings(dados);
-    setLoading(false);
+    const meuId = localStorage.getItem("userId");
+    if (!meuId) {
+      setBookings([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const dados = await getAgendamentosPorCliente(meuId);
+      setBookings(dados);
+    } catch (error) {
+      console.error("Erro ao carregar meus agendamentos:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

@@ -1,10 +1,10 @@
-import axios from 'axios';
+import api from '../api';
 
-const LISTAR_FUNCIONARIAS_URL = 'http://localhost:8080/profissionais';
+const LISTAR_FUNCIONARIAS_URL = '/profissionais';
 
 export async function getFuncionarias() {
  try {
-    const response = await axios.get(LISTAR_FUNCIONARIAS_URL);
+    const response = await api.get(LISTAR_FUNCIONARIAS_URL);
     const dadosBrutos = response.data;
     const funcionariasFormatadas = dadosBrutos.map(prof => ({
       id: prof.id,

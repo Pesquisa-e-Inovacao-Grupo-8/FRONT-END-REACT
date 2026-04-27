@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 
 export default function CardServico() {
 const [servicos, setServicos] = useState([]);
@@ -7,7 +7,7 @@ const [servicos, setServicos] = useState([]);
   const [erro, setErro] = useState(''); 
 
   useEffect(() => {
-    axios.get('http://localhost:8080/servicos')
+    api.get('/servicos')
       .then((response) => {
         setServicos(response.data);
         setLoading(false);

@@ -9,29 +9,46 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
+async function handleSubmit(e) {
     e.preventDefault();
 
     try {
+      // 1. Faz o login e pega o token
       const response = await axios.post("http://localhost:8080/auth/login", {
         email,
         senha
       });
-
       const token = response.data.token;
-
       localStorage.setItem("token", token);
 
-      alert("Login realizado!");
+      // 2. Busca a lista de usuários para saber quem logou
+      const usersRes = await axios.get("http://localhost:8080/usuarios", {
+          headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      const usuarioLogado = usersRes.data.find(u => u.email === email);
+      
+      if (usuarioLogado) {
+          localStorage.setItem("userId", usuarioLogado.id);
+          localStorage.setItem("userName", usuarioLogado.nome);
+          localStorage.setItem("userRole", usuarioLogado.tipo); // Guarda se é CLIENTE ou PROFISSIONAL
 
-      navigate("/");
+          alert("Login realizado com sucesso!");
+
+         if (usuarioLogado.tipo === "PROFISSIONAL") {
+              window.location.href = "/admin/agendamentos";
+          } else {
+              window.location.href = "/";
+          }
+      } else {
+          navigate("/");
+      }
 
     } catch (error) {
       console.error(error);
       alert("Email ou senha inválidos");
     }
   }
-
   return (
     <div className="container-principal">
       <div className="container-foto"></div>
