@@ -9,11 +9,16 @@ export function usePagamentoStatusCheck(interval = INTERVALO) {
 
   const checarPendentes = async () => {
     try {
-      const res = await fetch(ENDPOINT);
+      /* * CÓDIGO ORIGINAL (Comentado temporariamente para não dar erro)
+       * const res = await fetch(ENDPOINT);
+       * if (!res.ok) return;
+       * const data = await res.json();
+       * setPendentes(data);
+       */
 
-      if (!res.ok) return;
-      const data = await res.json();
-      setPendentes(data);
+      // MOCK TEMPORÁRIO: Simplesmente diz que não tem nenhum pagamento atualizado
+      // para não travar o console e nem a tela.
+      setPendentes([]);
 
     } catch (err) {
       console.error('[PagamentoStatusCheck] Erro ao verificar pendentes:', err);

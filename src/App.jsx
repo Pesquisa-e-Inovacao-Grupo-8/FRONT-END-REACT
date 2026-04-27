@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import Navbar from "./components/home/Navbar";
 import Sidebar from "./components/admin/Sidebar";
+import VLibras from "./components/utils/VLibras";
 
 import AgendamentosPage from "./pages/admin/Agendamentos";
 import Home from "./pages/Home";
@@ -11,11 +12,8 @@ import Cadastro from "./pages/Cadastro";
 import Serviços from "./pages/Serviços";
 import Agendamento from "./pages/Agendamento";
 import AgendamentosUsuário from "./pages/AgendamentosUsuário";
+import ConfiguracoesProfissional from "./pages/admin/ConfiguracoesProfissional";
 
-function PrivateRoute({ children }) {
-  const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" />;
-}
 
 const LayoutNavbar = () => (
   <>
@@ -23,6 +21,11 @@ const LayoutNavbar = () => (
     <Outlet />
   </>
 );
+
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" />;
+};
 
 const LayoutSidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -68,6 +71,7 @@ const LayoutSidebar = () => {
 export default function App() {
   return (
     <BrowserRouter>
+    <VLibras />
       <Routes>
         <Route element={<LayoutNavbar />}>
           <Route index element={<Home />} />
@@ -105,6 +109,7 @@ export default function App() {
           }
         >
           <Route path="agendamentos" element={<AgendamentosPage />} />
+          <Route path="configuracoes" element={<ConfiguracoesProfissional />} />
         </Route>
       </Routes>
     </BrowserRouter>
