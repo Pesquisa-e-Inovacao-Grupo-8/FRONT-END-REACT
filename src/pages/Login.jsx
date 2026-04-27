@@ -1,21 +1,40 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../styles/login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    console.log("Email:", email);
-    console.log("Senha:", senha);
-  };
+
+    try {
+      const response = await axios.post("http://localhost:8080/auth/login", {
+        email,
+        senha
+      });
+
+      const token = response.data.token;
+
+      localStorage.setItem("token", token);
+
+      alert("Login realizado!");
+
+      navigate("/");
+
+    } catch (error) {
+      console.error(error);
+      alert("Email ou senha inválidos");
+    }
+  }
 
   return (
     <div className="container-principal">
-
-      <div className="container-foto">
-      </div>
+      <div className="container-foto"></div>
 
       <div className="container-login">
         <div className="titulo">
@@ -28,7 +47,6 @@ export default function Login() {
             <label>E-mail</label>
             <input
               type="email"
-              placeholder="seu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -39,40 +57,13 @@ export default function Login() {
             <label>Senha</label>
             <input
               type="password"
-              placeholder="Digite sua senha"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
-            /> 
-          </div>
-
-          <div className="confirmar">
-            <div className="lembrar">
-              <input type="checkbox" />
-              <span>Lembrar de mim</span>
-            </div>
-
-            <a href="#">Esqueceu a senha?</a>
+            />
           </div>
 
           <button type="submit">Entrar</button>
-
-          <div className="links">
-            <p>
-              Não tem uma conta? <a href="#">Cadastre-se</a>
-            </p>
-          </div>
-
-           <hr />
-            
-
-          <div className="rodape">
-            <p>
-              Ao fazer login, você concorda com nossos
-              <a href="#">Termos de Uso</a> e
-              <a href="#">Política de Privacidade</a>
-            </p>
-          </div>
         </form>
       </div>
     </div>
