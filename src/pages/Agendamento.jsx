@@ -1,27 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getServicos, agendarPeloCliente } from "../js/agendamento.js";
+import { getFuncionarias } from "../js/funcionarias.js";
 import "../styles/agendamento-usuario.css";
-
-const SERVICES = [
-  { value: "", label: "Selecione um serviço" },
-  { value: "corte-feminino", label: "Corte Feminino — R$ 120 · 1h" },
-  { value: "coloracao-completa", label: "Coloração Completa — R$ 280 · 2h30" },
-  { value: "hidratacao-premium", label: "Hidratação Premium — R$ 150 · 1h30" },
-  { value: "mechas-balayage", label: "Mechas Balayage — R$ 380 · 3h" },
-  { value: "limpeza-pele", label: "Limpeza de Pele Profunda — R$ 180 · 1h30" },
-  { value: "massagem-relaxante", label: "Massagem Relaxante — R$ 160 · 1h" },
-  { value: "maquiagem-social", label: "Maquiagem Social — R$ 150 · 1h" },
-  { value: "maquiagem-noiva", label: "Maquiagem Noiva — R$ 350 · 2h" },
-  { value: "manicure-completa", label: "Manicure Completa — R$ 60 · 45min" },
-  { value: "alongamento-gel", label: "Alongamento em Gel — R$ 180 · 2h" },
-];
-
-const PROFESSIONALS = [
-  { value: "", label: "Selecione um profissional" },
-  { value: "ana", label: "Ana Paula — Cabelo & Coloração" },
-  { value: "juliana", label: "Juliana Costa — Estética & Massagem" },
-  { value: "fernanda", label: "Fernanda Lima — Maquiagem" },
-  { value: "patricia", label: "Patrícia Souza — Unhas & Estética" },
-];
 
 const TIME_SLOTS = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
 const UNAVAILABLE = ["12:00", "16:00"];
@@ -31,10 +11,15 @@ const STEP_LABELS = ["Serviço", "Data e Hora", "Seus Dados"];
 export default function Agendamento() {
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Estados Dinâmicos puxados do Spring Boot
+  const [servicosDb, setServicosDb] = useState([]);
+  const [profissionaisDb, setProfissionaisDb] = useState([]);
 
   // Step 1
-  const [service, setService] = useState("");
-  const [professional, setProfessional] = useState("");
+  const [serviceId, setServiceId] = useState("");
+  const [professionalId, setProfessionalId] = useState("");
   const [step1Errors, setStep1Errors] = useState({});
 
   // Step 2
@@ -46,11 +31,28 @@ export default function Agendamento() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", notes: "" });
   const [step3Errors, setStep3Errors] = useState({});
 
+  // Efeito para carregar Serviços e Profissionais do Backend ao montar a tela
+  useEffect(() => {
+    async function carregarOpcoes() {
+      try {
+        const [servicosApi, profissionaisApi] = await Promise.all([
+          getServicos(),
+          getFuncionarias()
+        ]);
+        setServicosDb(servicosApi || []);
+        setProfissionaisDb(profissionaisApi || []);
+      } catch (error) {
+        console.error("Falha ao carregar opções do backend:", error);
+      }
+    }
+    carregarOpcoes();
+  }, []);
+
   // ---- Validation ----
   function validateStep1() {
     const errs = {};
-    if (!service) errs.service = "Selecione um serviço.";
-    if (!professional) errs.professional = "Selecione um profissional.";
+    if (!serviceId) errs.serviceId = "Selecione um serviço.";
+    if (!professionalId) errs.professionalId = "Selecione um profissional.";
     setStep1Errors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -59,7 +61,7 @@ export default function Agendamento() {
     const errs = {};
     if (!date) errs.date = "Selecione uma data.";
     else {
-      const d = new Date(date);
+      const d = new Date(date + "T00:00:00");
       const today = new Date(); today.setHours(0,0,0,0);
       if (d < today) errs.date = "A data não pode ser no passado.";
     }
@@ -92,36 +94,44 @@ export default function Agendamento() {
     if (step > 1) setStep(step - 1);
   }
 
-  function handleConfirm() {
-    // CRUD: aqui você chamaria sua API/backend
-    const booking = {
-      id: `TUK-${Date.now()}`,
-      service: SERVICES.find(s => s.value === service)?.label,
-      professional: PROFESSIONALS.find(p => p.value === professional)?.label,
+  async function handleConfirm() {
+    setIsSubmitting(true);
+    
+    const servicoSelecionado = servicosDb.find(s => s.id === serviceId);
+    
+    // Monta o payload no formato que nosso Orquestrador espera
+    const payloadCompleto = {
+      serviceId,
+      professionalId,
       date,
       time: timeSlot,
-      ...form,
-      createdAt: new Date().toISOString(),
+      duracaoServico: servicoSelecionado ? servicoSelecionado.duracaoMinutos : 60,
+      ...form
     };
-    console.log("✅ Agendamento criado:", booking);
-    // Simula POST para API
-    // await fetch('/api/bookings', { method: 'POST', body: JSON.stringify(booking) });
-    setDone(true);
+
+    try {
+      await agendarPeloCliente(payloadCompleto);
+      setDone(true);
+    } catch (error) {
+      alert("Ocorreu um erro ao salvar o agendamento. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function resetAll() {
     setStep(1); setDone(false);
-    setService(""); setProfessional(""); setStep1Errors({});
+    setServiceId(""); setProfessionalId(""); setStep1Errors({});
     setDate(""); setTimeSlot(""); setStep2Errors({});
     setForm({ name: "", phone: "", email: "", notes: "" }); setStep3Errors({});
   }
 
-  const serviceLabel = SERVICES.find(s => s.value === service)?.label?.split("—")[0]?.trim();
-  const professionalLabel = PROFESSIONALS.find(p => p.value === professional)?.label?.split("—")[0]?.trim();
+  // Pega os nomes bonitos para mostrar no resumo final
+  const serviceLabel = servicosDb.find(s => s.id === serviceId)?.nome || '';
+  const professionalLabel = profissionaisDb.find(p => p.id === professionalId)?.nome || '';
 
   return (
     <>
-
       <div className="page">
         <div className="booking-hero">
           <h1>Agende seu <em>Horário</em></h1>
@@ -182,25 +192,35 @@ export default function Agendamento() {
               <div className="field">
                 <label>Serviço</label>
                 <select
-                  className={step1Errors.service ? "error" : ""}
-                  value={service}
-                  onChange={e => { setService(e.target.value); setStep1Errors(p => ({ ...p, service: "" })); }}
+                  className={step1Errors.serviceId ? "error" : ""}
+                  value={serviceId}
+                  onChange={e => { setServiceId(e.target.value); setStep1Errors(p => ({ ...p, serviceId: "" })); }}
                 >
-                  {SERVICES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  <option value="">Selecione um serviço</option>
+                  {servicosDb.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.nome} — R$ {s.preco.toFixed(2).replace('.', ',')} · {s.duracaoMinutos}min
+                    </option>
+                  ))}
                 </select>
-                {step1Errors.service && <div className="error-msg">{step1Errors.service}</div>}
+                {step1Errors.serviceId && <div className="error-msg">{step1Errors.serviceId}</div>}
               </div>
 
               <div className="field">
                 <label>Profissional</label>
                 <select
-                  className={step1Errors.professional ? "error" : ""}
-                  value={professional}
-                  onChange={e => { setProfessional(e.target.value); setStep1Errors(p => ({ ...p, professional: "" })); }}
+                  className={step1Errors.professionalId ? "error" : ""}
+                  value={professionalId}
+                  onChange={e => { setProfessionalId(e.target.value); setStep1Errors(p => ({ ...p, professionalId: "" })); }}
                 >
-                  {PROFESSIONALS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                  <option value="">Selecione um profissional</option>
+                  {profissionaisDb.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome} — {p.servicos[0] || 'Especialista'}
+                    </option>
+                  ))}
                 </select>
-                {step1Errors.professional && <div className="error-msg">{step1Errors.professional}</div>}
+                {step1Errors.professionalId && <div className="error-msg">{step1Errors.professionalId}</div>}
               </div>
 
               <div className="card-actions">
@@ -256,12 +276,10 @@ export default function Agendamento() {
             </>
           )}
 
-
           {!done && step === 3 && (
             <>
               <div className="card-title">Seus Dados</div>
 
-    
               <div className="summary-box">
                 <h3>Resumo da Escolha</h3>
                 <div className="summary-row"><span>Serviço</span><span>{serviceLabel}</span></div>
@@ -325,8 +343,10 @@ export default function Agendamento() {
               </div>
 
               <div className="card-actions">
-                <button className="btn-back" onClick={handleBack}>Voltar</button>
-                <button className="btn-next" onClick={handleNext}>Confirmar Agendamento</button>
+                <button className="btn-back" onClick={handleBack} disabled={isSubmitting}>Voltar</button>
+                <button className="btn-next" onClick={handleConfirm} disabled={isSubmitting}>
+                  {isSubmitting ? "Processando..." : "Confirmar Agendamento"}
+                </button>
               </div>
             </>
           )}

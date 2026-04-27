@@ -1,23 +1,20 @@
-const LISTAR_FUNCIONARIAS_URL = 'http://127.0.0.1:8080/spring/funcionarias/listar';
+import axios from 'axios';
+
+const LISTAR_FUNCIONARIAS_URL = 'http://localhost:8080/profissionais';
 
 export async function getFuncionarias() {
-  const res = await fetch(LISTAR_FUNCIONARIAS_URL, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Falha ao listar funcionárias (${res.status})`);
+ try {
+    const response = await axios.get(LISTAR_FUNCIONARIAS_URL);
+    const dadosBrutos = response.data;
+    const funcionariasFormatadas = dadosBrutos.map(prof => ({
+      id: prof.id,
+      nome: prof.usuario ? prof.usuario.nome : 'Profissional Sem Nome',
+      servicos: prof.especialidade ? [prof.especialidade] : [] 
+    }));  
+    return funcionariasFormatadas;
+    
+  } catch (error) {
+    console.error("Falha ao listar funcionárias do backend:", error);
+    return []; 
   }
-
-  const data = await res.json();
-
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.funcionarias)) return data.funcionarias;
-  if (Array.isArray(data?.content)) return data.content;
-
-  return [];
 }
