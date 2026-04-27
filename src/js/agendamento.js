@@ -40,9 +40,10 @@ export async function salvarAgendamento(payload) {
             horaInicio: horaInicioFormatada,
             horaFim: horaFimFormatada,
             status: payload.status || 'PENDENTE',
-            ordemPedido: 'ORD-TESTE-FRONT',
-            clienteId: '523e4567-e89b-12d3-a456-426614174001', // MOCK Maria Silva
-            profissionalId: '323e4567-e89b-12d3-a456-426614174001' // MOCK Ana Paula
+            ordemPedido: payload.ordemPedido || `ADM-${Date.now()}`,
+            clienteId: payload.clienteId || localStorage.getItem("userId"), 
+            profissionalId: payload.profissionalId || payload.professionalId,
+            servicoId: payload.servicoId || payload.serviceId
         };
 
         console.log("Tentando criar no Spring Boot:", agendamentoDTO);
@@ -95,7 +96,8 @@ export async function getAgendamentos() {
                 servico: nomeServico,
                 
                 status: agend.status,
-                pagamentoStatus: agend.pagamentoStatus || 'PENDENTE' 
+                pagamentoStatus: agend.pagamentoStatus || 'PENDENTE',
+                valorTotal: agend.valorTotal
             };
         });
 
@@ -138,7 +140,8 @@ export async function agendarPeloCliente(dadosFormulario) {
             status: 'PENDENTE',
             ordemPedido: `WEB-${Date.now()}`,
             clienteId: meuId,
-            profissionalId: dadosFormulario.professionalId 
+            profissionalId: dadosFormulario.professionalId,
+            servicoId: dadosFormulario.serviceId
         };
 
         console.log("Criando agendamento...", agendamentoDTO);

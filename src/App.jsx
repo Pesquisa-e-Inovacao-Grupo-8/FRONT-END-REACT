@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "./components/home/Navbar";
 import Sidebar from "./components/admin/Sidebar";
 import VLibras from "./components/utils/VLibras";
+import WIPPage from "./components/WIPPage";
 
 import AgendamentosPage from "./pages/admin/Agendamentos";
 import Home from "./pages/Home";
@@ -108,7 +109,11 @@ export default function App() {
             </PrivateRoute>
           }
         >
+          <Route path="dashboard" element={<WIPPage title="Dashboard" />} />
           <Route path="agendamentos" element={<AgendamentosPage />} />
+          <Route path="financeiro" element={<WIPPage title="Financeiro" />} />
+          <Route path="clientes" element={<WIPPage title="Clientes" />} />
+          <Route path="relatorios" element={<WIPPage title="Relatórios" />} />
           <Route path="configuracoes" element={<ConfiguracoesProfissional />} />
         </Route>
       </Routes>
