@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "./components/home/Navbar";
 import Sidebar from "./components/admin/Sidebar";
 import VLibras from "./components/utils/VLibras";
+import WIPPage from "./components/WIPPage";
 
 import AgendamentosPage from "./pages/admin/Agendamentos";
 import Home from "./pages/Home";
@@ -13,6 +14,7 @@ import Serviços from "./pages/Serviços";
 import Agendamento from "./pages/Agendamento";
 import AgendamentosUsuário from "./pages/AgendamentosUsuário";
 import ConfiguracoesProfissional from "./pages/admin/ConfiguracoesProfissional";
+import AdminMasterDashboard from "./pages/admin/AdminMasterDashboard";
 
 
 const LayoutNavbar = () => (
@@ -108,9 +110,23 @@ export default function App() {
             </PrivateRoute>
           }
         >
+          <Route path="dashboard" element={<WIPPage title="Dashboard" />} />
           <Route path="agendamentos" element={<AgendamentosPage />} />
+          <Route path="financeiro" element={<WIPPage title="Financeiro" />} />
+          <Route path="clientes" element={<WIPPage title="Clientes" />} />
+          <Route path="relatorios" element={<WIPPage title="Relatórios" />} />
           <Route path="configuracoes" element={<ConfiguracoesProfissional />} />
+          
         </Route>
+        
+        <Route
+          path="/admin-master"
+          element={
+            <PrivateRoute>
+              <AdminMasterDashboard />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

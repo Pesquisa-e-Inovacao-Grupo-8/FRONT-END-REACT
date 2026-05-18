@@ -35,10 +35,12 @@ async function handleSubmit(e) {
 
           alert("Login realizado com sucesso!");
 
-         if (usuarioLogado.tipo === "PROFISSIONAL") {
-              window.location.href = "/admin/agendamentos";
+        if (usuarioLogado.tipo === "ADMIN") {
+              navigate("/admin-master"); 
+          } else if (usuarioLogado.tipo === "PROFISSIONAL") {
+            navigate("/admin/agendamentos"); 
           } else {
-              window.location.href = "/";
+            navigate("/"); 
           }
       } else {
           navigate("/");
