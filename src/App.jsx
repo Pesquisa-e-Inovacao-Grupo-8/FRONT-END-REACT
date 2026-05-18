@@ -14,6 +14,7 @@ import Serviços from "./pages/Serviços";
 import Agendamento from "./pages/Agendamento";
 import AgendamentosUsuário from "./pages/AgendamentosUsuário";
 import ConfiguracoesProfissional from "./pages/admin/ConfiguracoesProfissional";
+import AdminMasterDashboard from "./pages/admin/AdminMasterDashboard";
 
 
 const LayoutNavbar = () => (
@@ -115,7 +116,17 @@ export default function App() {
           <Route path="clientes" element={<WIPPage title="Clientes" />} />
           <Route path="relatorios" element={<WIPPage title="Relatórios" />} />
           <Route path="configuracoes" element={<ConfiguracoesProfissional />} />
+          
         </Route>
+        
+        <Route
+          path="/admin-master"
+          element={
+            <PrivateRoute>
+              <AdminMasterDashboard />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

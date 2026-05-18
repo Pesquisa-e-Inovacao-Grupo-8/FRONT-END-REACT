@@ -48,7 +48,7 @@ export default function Cadastro() {
         ativo: true
       };
 
-      await axios.post("http://localhost:8080/usuarios/usuarios", payload);
+      await axios.post("http://localhost:8080/usuarios", payload);
 
       alert("Conta criada com sucesso! Faça login para entrar no seu painel.");
       navigate("/login");
