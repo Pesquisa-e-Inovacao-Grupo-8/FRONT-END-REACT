@@ -15,7 +15,8 @@ import Agendamento from "./pages/Agendamento";
 import AgendamentosUsuário from "./pages/AgendamentosUsuário";
 import ConfiguracoesProfissional from "./pages/admin/ConfiguracoesProfissional";
 import AdminMasterDashboard from "./pages/admin/AdminMasterDashboard";
-
+import VitrinePacotes from "./pages/VitrinePacotes";
+import Financeiro from "./pages/admin/Financeiro";
 
 const LayoutNavbar = () => (
   <>
@@ -100,7 +101,16 @@ export default function App() {
               </PrivateRoute>
             }
           />
+                  <Route
+            path="pacotes"
+            element={
+              <PrivateRoute>
+                <VitrinePacotes />
+              </PrivateRoute>
+            }
+          />
         </Route>
+
 
         <Route
           path="/admin"
@@ -112,7 +122,7 @@ export default function App() {
         >
           <Route path="dashboard" element={<WIPPage title="Dashboard" />} />
           <Route path="agendamentos" element={<AgendamentosPage />} />
-          <Route path="financeiro" element={<WIPPage title="Financeiro" />} />
+          <Route path="financeiro" element={<Financeiro />} />
           <Route path="clientes" element={<WIPPage title="Clientes" />} />
           <Route path="relatorios" element={<WIPPage title="Relatórios" />} />
           <Route path="configuracoes" element={<ConfiguracoesProfissional />} />
