@@ -1,3 +1,4 @@
+//src/pages/Agendamento.jsx
 import { useState, useEffect } from "react";
 import { getServicos, agendarPeloCliente } from "../js/agendamento.js";
 import { getFuncionarias } from "../js/funcionarias.js";

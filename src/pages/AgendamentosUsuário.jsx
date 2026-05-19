@@ -1,3 +1,4 @@
+//src/pages/AgendamentoUsuario.jsx
 import { useState, useEffect } from 'react';
 import { getAgendamentosPorCliente, atualizarStatusAgendamento } from '../js/agendamento.js';
 import '../styles/agendamentos-usuario.css'

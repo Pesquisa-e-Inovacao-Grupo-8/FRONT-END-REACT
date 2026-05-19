@@ -1,3 +1,4 @@
+//src/components/admin/ModalAgendamentos.jsx
 import React, { useState } from "react";
 import { cancelarAgendamento , finalizarAgendamento , gerarLinkPagamento } from "../../js/agendamento.js";
 import "../../styles/agendamento-grid.css";

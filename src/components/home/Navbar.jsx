@@ -1,19 +1,23 @@
+// src/components/home/Navbar.jsx
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
+  const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const nomeSalvo = localStorage.getItem("userName");
+    const roleSalvo = localStorage.getItem("userRole");
 
     if (token) {
       setIsLoggedIn(true);
-      setUserName(nomeSalvo ? nomeSalvo.split(" ")[0] : "Cliente");
+      setUserName(nomeSalvo ? nomeSalvo.split(" ")[0] : "Usuario");
+      setUserRole(roleSalvo || "CLIENTE");
     }
   }, []);
 
@@ -21,16 +25,28 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
     
     setIsLoggedIn(false);
+    setUserRole("");
     navigate("/login");
   };
 
-  const BASE_LINKS = [
-    { to: "/", label: "Início" },
-    { to: "/servicos", label: "Serviços" },
-    { to: "/agendamento", label: "Agendamento" },
-  ];
+let navLinks = [{ to: "/", label: "Início" }];
+
+  if (userRole === "PROFISSIONAL") {
+    navLinks.push({ to: "/admin/agendamentos", label: "Painel Profissional" });
+  } else if (userRole === "ADMIN") {
+    navLinks.push({ to: "/admin-master", label: "Painel Master" });
+  } else {
+    navLinks.push({ to: "/servicos", label: "Serviços" });
+    navLinks.push({ to: "/pacotes", label: "Pacotes" });
+    navLinks.push({ to: "/agendamento", label: "Agendamento" });
+    
+    if (isLoggedIn) {
+      navLinks.push({ to: "/agendamentos", label: "Meus Agendamentos" });
+    }
+  }
 
   return (
     <nav className="navbar">
@@ -39,7 +55,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
       </NavLink>
 
       <ul className="navbar-links">
-        {BASE_LINKS.map(link => (
+        {navLinks.map(link => (
           <li key={link.to}>
             <NavLink to={link.to} className={({ isActive }) => (isActive ? "active" : "")}>
               {link.label}
@@ -48,26 +64,18 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
         ))}
 
         {isLoggedIn ? (
-          <>
-            <li>
-              <NavLink to="/agendamentos" className={({ isActive }) => (isActive ? "active" : "")}>
-                Meus Agendamentos
-              </NavLink>
-            </li>
-            
-            <li style={{ display: "flex", alignItems: "center", marginLeft: "15px", gap: "15px" }}>
-              <span style={{ fontWeight: "bold", color: "#b8960c" }}>
-                Olá, {userName}
-              </span>
-              <button 
-                onClick={handleLogout} 
-                className="btn-cadastrar" 
-                style={{ cursor: "pointer", border: "none", fontFamily: "inherit" }}
-              >
-                Sair
-              </button>
-            </li>
-          </>
+          <li style={{ display: "flex", alignItems: "center", marginLeft: "15px", gap: "15px" }}>
+            <span style={{ fontWeight: "bold", color: "#b8960c" }}>
+              Olá, {userName}
+            </span>
+            <button 
+              onClick={handleLogout} 
+              className="btn-cadastrar" 
+              style={{ cursor: "pointer", border: "none", fontFamily: "inherit" }}
+            >
+              Sair
+            </button>
+          </li>
         ) : (
           <>
             <li>

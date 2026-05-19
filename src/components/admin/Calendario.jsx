@@ -1,3 +1,4 @@
+//src/components/admin/Calendario.jsx
 import React from 'react';
 import { ChevronLeft, ChevronRight, User } from 'lucide-react';
 import '../../styles/calendar.css';
