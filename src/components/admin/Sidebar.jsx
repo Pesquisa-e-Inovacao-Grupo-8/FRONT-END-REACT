@@ -33,19 +33,11 @@ export default function Sidebar({ open, onClose }) {
         </NavLink>
 
         <NavLink 
-          to="/admin/clientes" 
+          to="/admin/configuracoes" 
           className={({ isActive }) => `item ${isActive ? 'active' : ''}`}
           onClick={onClose}
         >
-          Clientes
-        </NavLink>
-
-        <NavLink 
-          to="/admin/relatorios" 
-          className={({ isActive }) => `item ${isActive ? 'active' : ''}`}
-          onClick={onClose}
-        >
-          Relatórios
+          Configurações
         </NavLink>
 
         <NavLink 
