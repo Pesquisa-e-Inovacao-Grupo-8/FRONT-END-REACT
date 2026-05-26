@@ -7,6 +7,7 @@ import AgendamentoGrid from "../../components/admin/GridAgendamentos";
 import { usePagamentoStatusCheck } from '../../js/pagamento-status-check';
 import { getFuncionarias } from '../../js/funcionarias';
 import { getAgendamentos, salvarAgendamento } from '../../js/agendamento';
+import api from '../../api';
 
 const toMinutes = (hora = '00:00') => {
   const [h, m] = String(hora).split(':').map(Number);
@@ -49,6 +50,9 @@ export default function AgendamentosPage() {
   const FUNCIONARIAS = Object.keys(perfisProfissionais);
   const [funcionariaAtual, setFuncionariaAtual] = useState('');
 
+  // ESTADO NOVO: Guardar a lista original de funcionárias para buscar o ID depois
+  const [listaOriginalFuncionarias, setListaOriginalFuncionarias] = useState([]);
+
   const [agendamentos, setAgendamentos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erroApi, setErroApi] = useState('');
@@ -58,6 +62,7 @@ export default function AgendamentosPage() {
   const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear());
 
   const [dadosRapidos, setDadosRapidos] = useState(null);
+  const [servicosDoSalao, setServicosDoSalao] = useState([]);
   const { pendentes } = usePagamentoStatusCheck();
 
   const carregarAgendamentos = async () => {
@@ -78,24 +83,39 @@ export default function AgendamentosPage() {
         const nomeLogado = localStorage.getItem("userName");
         const papelLogado = localStorage.getItem("userRole");
 
-        const [funcionariasApi, agendamentosApi] = await Promise.all([
+        const [funcionariasApi, agendamentosApi, resServicos] = await Promise.all([
           getFuncionarias(),
-          getAgendamentos()
+          getAgendamentos(),
+          api.get("/servicos")
         ]);
 
+        console.log("Serviços brutos da API:", resServicos.data);
+        console.log("Funcionárias brutas da API:", funcionariasApi);
+
+        // Guarda a lista completa para o modal usar depois!
+        setListaOriginalFuncionarias(funcionariasApi || []);
+        setServicosDoSalao(resServicos.data);
+
         const perfis = (funcionariasApi || []).reduce((acc, profissional) => {
-          // Se o profissional é novo e não tem especialidade, colocamos "Geral"
-          acc[profissional.nome] = profissional.servicos.length > 0 
-            ? profissional.servicos 
-            : ['Configuração Pendente'];
+          let servicosFinal;
+
+          if (profissional.servicos && profissional.servicos.length > 0) {
+            servicosFinal = profissional.servicos.map(servicoId => {
+              return resServicos.data.find(s => s.id === servicoId);
+            }).filter(s => s !== undefined);
+          }
+
+          if (!servicosFinal || servicosFinal.length === 0) {
+            servicosFinal = resServicos.data;
+          }
+
+          acc[profissional.nome] = servicosFinal;
           return acc;
         }, {});
-        
-        setPerfisProfissionais(perfis);
 
-        // LÓGICA DE SELEÇÃO INICIAL:
-        // Se eu sou profissional, quero ver MINHA agenda primeiro.
-        // Se eu for admin ou o nome não bater, pega a primeira da lista.
+        setPerfisProfissionais(perfis);
+        console.log("Perfis calculados finais:", perfis);
+
         if (papelLogado === "PROFISSIONAL" && perfis[nomeLogado]) {
           setFuncionariaAtual(nomeLogado);
         } else {
@@ -128,8 +148,11 @@ export default function AgendamentosPage() {
     );
   }, [pendentes]);
 
-  // Função para adicionar agendamento novo
   const adicionarAgendamento = async (novo) => {
+    if (!novo.data) {
+        alert("Erro: Data não informada.");
+        return;
+    }
     const [ano, mes, dia] = novo.data.split("-");
     const novoFormatado = {
       ...novo,
@@ -164,7 +187,9 @@ export default function AgendamentosPage() {
     setDadosRapidos(null);
   };
 
-  // Filtra agendamentos da profissional e do dia selecionado
+  // BUSCA O ID AQUI ANTES DE PASSAR PRO MODAL
+  const profissionalAtualObj = listaOriginalFuncionarias.find(f => f.nome === funcionariaAtual);
+
   const agendamentosDaProfissional = agendamentos.filter(a => a.funcionaria === funcionariaAtual);
   const filtrados = agendamentosDaProfissional.filter(a => a.dia === diaAtual && a.mes === mesAtual && a.ano === anoAtual);
 
@@ -182,23 +207,23 @@ export default function AgendamentosPage() {
             {localStorage.getItem("userRole") === "PROFISSIONAL" ? "Minha Agenda e Equipe" : "Profissionais"}
           </span>
           {localStorage.getItem("userRole") === "PROFISSIONAL" && (
-              <button 
-                onClick={() => navigate("/admin/configuracoes")}
-                style={{
-                  backgroundColor: "transparent", 
-                  color: "#b8960c", 
-                  border: "1px solid #b8960c", 
-                  padding: "4px 10px", 
-                  borderRadius: "5px", 
-                  cursor: "pointer", 
-                  fontSize: "0.85rem",
-                  fontWeight: "bold"
-                }}
-                title="Configurar meus serviços"
-              >
-                ⚙️ Especialidades
-              </button>
-            )}
+            <button
+              onClick={() => navigate("/admin/configuracoes")}
+              style={{
+                backgroundColor: "transparent",
+                color: "#b8960c",
+                border: "1px solid #b8960c",
+                padding: "4px 10px",
+                borderRadius: "5px",
+                cursor: "pointer",
+                fontSize: "0.85rem",
+                fontWeight: "bold"
+              }}
+              title="Configurar meus serviços"
+            >
+              ⚙️ Especialidades
+            </button>
+          )}
           <div className="aba-funcionaria">
             {loading ? (
               <span>Carregando profissionais...</span>
@@ -210,7 +235,6 @@ export default function AgendamentosPage() {
                   className={`btn-app btn-funcionarias ${funcionariaAtual === nome ? 'ativo' : ''}`}
                   onClick={() => setFuncionariaAtual(nome)}
                 >
-                  {/*Se for o próprio profissional loggado, vai aparecer a estrelinha */}
                   {nome === localStorage.getItem("userName") ? `⭐ ${nome}` : nome}
                 </button>
               ))
@@ -218,16 +242,16 @@ export default function AgendamentosPage() {
           </div>
         </div>
 
-        {/* Barra de abrir modal */}
+        {/* PASSA O ID DA PROFISSIONAL AQUI */}
         <NewSchedule
           aoSalvar={adicionarAgendamento}
           dadosIniciais={dadosRapidos}
           funcionaria={funcionariaAtual}
+          profissionalId={profissionalAtualObj ? profissionalAtualObj.id : null}
           servicosDisponiveis={perfisProfissionais[funcionariaAtual] || []}
         />
       </div>
 
-      {/* Layout principal: calendário + grade de horários */}
       <div className="display-flex linha layout-principal" style={{ display: 'flex' }}>
         <div className="layout-principal__calendar">
           <Calendar

@@ -26,36 +26,30 @@ export async function gerarLinkPagamento(agendamento) {
 
 export async function salvarAgendamento(payload) {
     try {
-        const [hInicio, mInicio] = payload.hora.split(':').map(Number);
-        
-        const totalMinutosFim = (hInicio * 60) + mInicio + parseInt(payload.duracaoMinutos);
-        const hFim = Math.floor(totalMinutosFim / 60);
-        const mFim = totalMinutosFim % 60;
-        
-        const horaInicioFormatada = `${String(hInicio).padStart(2, '0')}:${String(mInicio).padStart(2, '0')}:00`;
-        const horaFimFormatada = `${String(hFim).padStart(2, '0')}:${String(mFim).padStart(2, '0')}:00`;
-
+        // O payload vindo do NovoAgendamento.jsx JÁ ESTÁ FORMATADO corretamente.
+        // Não precisamos de .split aqui.
         const agendamentoDTO = {
             data: payload.data, // YYYY-MM-DD
-            horaInicio: horaInicioFormatada,
-            horaFim: horaFimFormatada,
+            horaInicio: payload.horaInicio, 
+            horaFim: payload.horaFim,
             status: payload.status || 'PENDENTE',
-            ordemPedido: payload.ordemPedido || `ADM-${Date.now()}`,
-            clienteId: payload.clienteId || localStorage.getItem("userId"), 
-            profissionalId: payload.profissionalId || payload.professionalId,
-            servicoId: payload.servicoId || payload.serviceId
+            ordemPedido: payload.ordemPedido,
+            clienteId: payload.clienteId || null, 
+            nomeClienteAvulso: payload.nomeClienteAvulso || null,
+            telefoneClienteAvulso: payload.telefoneClienteAvulso || null,
+            profissionalId: payload.profissionalId,
+            servicoId: payload.servicoId
         };
 
-        console.log("Tentando criar no Spring Boot:", agendamentoDTO);
+        console.log("Enviando para Spring Boot:", agendamentoDTO);
         const response = await api.post(`/agendamentos`, agendamentoDTO);
         return response.data;
 
     } catch (error) {
-        console.error('Falha ao criar agendamento via Spring Boot Mock:', error);
+        console.error('Falha ao criar agendamento no Spring Boot:', error);
         throw new Error('Falha ao criar agendamento');
     }
 }
-
 export async function criarAgendamento(payload) {
     return salvarAgendamento(payload);
 }
@@ -70,41 +64,29 @@ export async function getAgendamentos() {
         const agendamentosBrutos = agendamentosRes.data;
         const relacoesServicos = agendamentoServicosRes.data;
 
-        const agendamentosFormatados = agendamentosBrutos.map(agend => {
+        return agendamentosBrutos.map(agend => {
+            // Extração segura da data
+            const [ano, mes, dia] = (agend.data || "2000-01-01").toString().split("-").map(Number);
+            
             const relacao = relacoesServicos.find(rel => rel.agendamento && rel.agendamento.id === agend.id);
             const nomeServico = relacao && relacao.servico ? relacao.servico.nome : 'Serviço Padrão';
-
-            const [ano, mes, dia] = agend.data.split('-');
             
-            const horaInicio = agend.horaInicio.substring(0, 5);
-            const horaFim = agend.horaFim.substring(0, 5);
-            
-            const [hInicio, mInicio] = horaInicio.split(':').map(Number);
-            const [hFim, mFim] = horaFim.split(':').map(Number);
-            const duracaoTotal = ((hFim * 60) + mFim) - ((hInicio * 60) + mInicio);
+            const horaInicio = agend.horaInicio ? agend.horaInicio.toString().substring(0, 5) : "00:00";
+            const horaFim = agend.horaFim ? agend.horaFim.toString().substring(0, 5) : "00:00";
 
             return {
                 id: agend.id,
-                dia: parseInt(dia, 10),
-                mes: parseInt(mes, 10),
-                ano: parseInt(ano, 10),
+                dia, mes, ano,
                 hora: horaInicio,
-                duracaoMinutos: duracaoTotal > 0 ? duracaoTotal : 60, 
-                
-                cliente: agend.cliente && agend.cliente.usuario ? agend.cliente.usuario.nome : 'Cliente Não Informado',
-                funcionaria: agend.profissional && agend.profissional.usuario ? agend.profissional.usuario.nome : 'Profissional Não Informado',
+                cliente: agend.cliente?.usuario?.nome || agend.nomeClienteAvulso || 'Avulso',
+                funcionaria: agend.profissional?.usuario?.nome || 'Profissional Não Informado',
                 servico: nomeServico,
-                
                 status: agend.status,
-                pagamentoStatus: agend.pagamentoStatus || 'PENDENTE',
-                valorTotal: agend.valorTotal
+                pagamentoStatus: agend.pagamentoStatus || 'PENDENTE'
             };
         });
-
-        return agendamentosFormatados;
-
     } catch (error) {
-        console.error("Erro ao buscar agendamentos com Token JWT:", error);
+        console.error("Erro ao buscar agendamentos:", error);
         return [];
     }
 }

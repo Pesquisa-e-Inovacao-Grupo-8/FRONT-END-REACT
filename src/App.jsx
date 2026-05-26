@@ -17,6 +17,7 @@ import ConfiguracoesProfissional from "./pages/admin/ConfiguracoesProfissional";
 import AdminMasterDashboard from "./pages/admin/AdminMasterDashboard";
 import VitrinePacotes from "./pages/VitrinePacotes";
 import Financeiro from "./pages/admin/Financeiro";
+import Dashboard from "./pages/admin/Dashboard";
 
 const LayoutNavbar = () => (
   <>
@@ -120,11 +121,9 @@ export default function App() {
             </PrivateRoute>
           }
         >
-          <Route path="dashboard" element={<WIPPage title="Dashboard" />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="agendamentos" element={<AgendamentosPage />} />
           <Route path="financeiro" element={<Financeiro />} />
-          <Route path="clientes" element={<WIPPage title="Clientes" />} />
-          <Route path="relatorios" element={<WIPPage title="Relatórios" />} />
           <Route path="configuracoes" element={<ConfiguracoesProfissional />} />
           
         </Route>
