@@ -16,7 +16,7 @@ export default function Navbar() {
 
     if (token) {
       setIsLoggedIn(true);
-      setUserName(nomeSalvo ? nomeSalvo.split(" ")[0] : "Usuario");
+      setUserName(nomeSalvo ? nomeSalvo.split(" ")[0] : "Usuário");
       setUserRole(roleSalvo || "CLIENTE");
     }
   }, []);
@@ -26,13 +26,13 @@ export default function Navbar() {
     localStorage.removeItem("userId");
     localStorage.removeItem("userName");
     localStorage.removeItem("userRole");
-    
+
     setIsLoggedIn(false);
     setUserRole("");
     navigate("/login");
   };
 
-let navLinks = [{ to: "/", label: "Início" }];
+  let navLinks = [{ to: "/", label: "Início" }];
 
   if (userRole === "PROFISSIONAL") {
     navLinks.push({ to: "/admin/agendamentos", label: "Painel Profissional" });
@@ -42,9 +42,10 @@ let navLinks = [{ to: "/", label: "Início" }];
     navLinks.push({ to: "/servicos", label: "Serviços" });
     navLinks.push({ to: "/pacotes", label: "Pacotes" });
     navLinks.push({ to: "/agendamento", label: "Agendamento" });
-    
+
     if (isLoggedIn) {
       navLinks.push({ to: "/agendamentos", label: "Meus Agendamentos" });
+      navLinks.push({ to: "/configuracoes-usuario", label: "Minha Conta" });
     }
   }
 
@@ -55,23 +56,53 @@ let navLinks = [{ to: "/", label: "Início" }];
       </NavLink>
 
       <ul className="navbar-links">
-        {navLinks.map(link => (
+        {navLinks.map((link) => (
           <li key={link.to}>
-            <NavLink to={link.to} className={({ isActive }) => (isActive ? "active" : "")}>
+            <NavLink
+              to={link.to}
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
               {link.label}
             </NavLink>
           </li>
         ))}
 
         {isLoggedIn ? (
-          <li style={{ display: "flex", alignItems: "center", marginLeft: "15px", gap: "15px" }}>
-            <span style={{ fontWeight: "bold", color: "#b8960c" }}>
+          <li
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginLeft: "15px",
+              gap: "15px",
+            }}
+          >
+            <span
+              style={{
+                fontWeight: "bold",
+                color: "#b8960c",
+                display: "flex",
+                alignItems: "center",
+                height: "48px",
+              }}
+            >
               Olá, {userName}
             </span>
-            <button 
-              onClick={handleLogout} 
-              className="btn-cadastrar" 
-              style={{ cursor: "pointer", border: "none", fontFamily: "inherit" }}
+
+            <button
+              onClick={handleLogout}
+              className="btn-cadastrar"
+              style={{
+                cursor: "pointer",
+                border: "none",
+                fontFamily: "inherit",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "48px",
+                padding: "0 28px",
+                margin: 0,
+                lineHeight: 1,
+              }}
             >
               Sair
             </button>
@@ -79,10 +110,14 @@ let navLinks = [{ to: "/", label: "Início" }];
         ) : (
           <>
             <li>
-              <NavLink to="/login" className={({ isActive }) => (isActive ? "active" : "")}>
+              <NavLink
+                to="/login"
+                className={({ isActive }) => (isActive ? "active" : "")}
+              >
                 Login
               </NavLink>
             </li>
+
             <li>
               <NavLink to="/cadastrar" className="btn-cadastrar">
                 Cadastrar
