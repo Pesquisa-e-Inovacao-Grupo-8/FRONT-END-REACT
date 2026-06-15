@@ -72,24 +72,6 @@ const salvarEspecialidades = async () => {
 
   return (
     <div className="page" style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
-        <button 
-        onClick={() => navigate("/admin/agendamentos")}
-        style={{ 
-          marginBottom: "20px", 
-          padding: "8px 0", 
-          cursor: "pointer", 
-          border: "none", 
-          backgroundColor: "transparent", 
-          color: "#b8960c", 
-          fontWeight: "bold", 
-          fontSize: "1rem", 
-          display: "flex", 
-          alignItems: "center", 
-          gap: "5px" 
-        }}
-      >
-        Voltar
-      </button>
       <div className="page-hero">
         <h1>Meu <em>Perfil Profissional</em></h1>
         <p>Selecione quais serviços você está habilitado a realizar no salão</p>

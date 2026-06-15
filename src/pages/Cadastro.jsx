@@ -7,9 +7,6 @@ import "../styles/cadastro.css";
 export default function Cadastro() {
   const navigate = useNavigate();
 
-  // Estado para controlar se é Cliente ou Profissional
-  const [tipoUsuario, setTipoUsuario] = useState("CLIENTE");
-
   // Estados do formulário
   const [form, setForm] = useState({
     nome: "",
@@ -45,7 +42,7 @@ export default function Cadastro() {
         telefone: form.telefone,
         email: form.email,
         senha: form.senha,
-        tipo: tipoUsuario, // "CLIENTE" ou "PROFISSIONAL"
+        tipo: "CLIENTE", // Fixo como cliente
         ativo: true
       };
 
@@ -68,24 +65,6 @@ export default function Cadastro() {
       <div className="container-cadastro">
         <h1>Crie sua conta</h1>
         <p>Junte-se a nós e descubra uma nova experiência em beleza</p>
-
-        {/* BOTOES DE ESCOLHA DE PERFIL */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button 
-            type="button" 
-            onClick={() => setTipoUsuario("CLIENTE")}
-            style={{ flex: 1, padding: "10px", backgroundColor: tipoUsuario === "CLIENTE" ? "#b8960c" : "#eee", color: tipoUsuario === "CLIENTE" ? "#fff" : "#333", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}
-          >
-            Sou Cliente
-          </button>
-          <button 
-            type="button" 
-            onClick={() => setTipoUsuario("PROFISSIONAL")}
-            style={{ flex: 1, padding: "10px", backgroundColor: tipoUsuario === "PROFISSIONAL" ? "#1a1a2e" : "#eee", color: tipoUsuario === "PROFISSIONAL" ? "#fff" : "#333", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}
-          >
-            Sou Profissional
-          </button>
-        </div>
 
         {erro && <div style={{ color: "red", marginBottom: "15px" }}>{erro}</div>}
 
@@ -126,7 +105,7 @@ export default function Cadastro() {
           </div>
 
           <button type="submit" disabled={loading} style={{ marginTop: "20px" }}>
-            {loading ? "Criando conta..." : `Cadastrar como ${tipoUsuario === "CLIENTE" ? "Cliente" : "Profissional"}`}
+            {loading ? "Criando conta..." : "Cadastrar"}
           </button>
 
           <p className="cadastro">
