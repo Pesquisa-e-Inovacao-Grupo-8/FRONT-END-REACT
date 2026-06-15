@@ -270,6 +270,12 @@
     margin-bottom: 36px;
     font-weight: 300;
   }
+
+  .cta-section a{
+    text-decoration: none;
+    color: #ddd;
+  }
+
   .cta-btn {
     background: transparent;
     border: 1.5px solid rgba(255,255,255,0.7);
