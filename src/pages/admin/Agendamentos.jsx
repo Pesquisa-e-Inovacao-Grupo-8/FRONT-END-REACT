@@ -279,6 +279,7 @@ export default function AgendamentosPage() {
             ano={anoAtual}
             agendamentosDoDia={filtrados}
             funcionaria={funcionariaAtual}
+            onAtualizar={carregarAgendamentos}
           />
         </div>
       </div>

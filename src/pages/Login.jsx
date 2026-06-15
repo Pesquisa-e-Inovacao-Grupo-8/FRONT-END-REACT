@@ -37,7 +37,7 @@ async function handleSubmit(e) {
           alert("Login realizado com sucesso!");
 
         if (usuarioLogado.tipo === "ADMIN") {
-              navigate("/admin-master"); 
+              navigate("/admin/dashboard");
           } else if (usuarioLogado.tipo === "PROFISSIONAL") {
             navigate("/admin/agendamentos"); 
           } else {
