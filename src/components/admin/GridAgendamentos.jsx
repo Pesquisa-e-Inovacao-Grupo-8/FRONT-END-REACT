@@ -42,7 +42,7 @@ const getPagamentoVisual = (status = '') => {
   return { label: 'Pendente', className: 'pendente' };
 };
 
-export default function GridAgendamento({ dia, mes, ano, agendamentosDoDia = [], funcionaria }) {
+export default function GridAgendamento({ dia, mes, ano, agendamentosDoDia = [], funcionaria, onAtualizar }) {
   const [modalAgendamento, setModalAgendamento] = useState(null);
   const [agendamentos, setAgendamentos] = useState(agendamentosDoDia);
   const [agoraMinutos, setAgoraMinutos] = useState(() => {
@@ -182,7 +182,7 @@ export default function GridAgendamento({ dia, mes, ano, agendamentosDoDia = [],
       </div>
 
       {modalAgendamento && (
-        <ModalAgendamento agendamento={modalAgendamento} onClose={() => setModalAgendamento(null)} />
+        <ModalAgendamento agendamento={modalAgendamento} onClose={() => setModalAgendamento(null)} onAtualizar={onAtualizar} />
       )}
     </div>
   );

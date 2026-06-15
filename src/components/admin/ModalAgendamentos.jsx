@@ -1,12 +1,14 @@
-//src/components/admin/ModalAgendamentos.jsx
+// src/components/admin/ModalAgendamentos.jsx
 import React, { useState } from "react";
 import { cancelarAgendamento , finalizarAgendamento , gerarLinkPagamento } from "../../js/agendamento.js";
+import api from "../../api";
 import "../../styles/agendamento-grid.css";
 import "../../styles/app.css";
 
-export default function ModalAgendamento({ agendamento, onClose, onFinalizar, onCancelar }) {
+export default function ModalAgendamento({ agendamento, onClose, onAtualizar, onFinalizar, onCancelar }) {
   const [checkoutUrl, setCheckoutUrl] = useState(agendamento.link_pagamento || "");
   const [gerandoLink, setGerandoLink] = useState(false);
+  const [dandoBaixa, setDandoBaixa] = useState(false);
 
   const statusPagamento = (agendamento.pagamentoStatus || agendamento.status_pagamento || (agendamento.pagamentoAdiantado ? 'PAGO' : 'PENDENTE')).toUpperCase();
   const telefone = agendamento.telefone || '';
@@ -14,6 +16,8 @@ export default function ModalAgendamento({ agendamento, onClose, onFinalizar, on
   const ordemPagamento = agendamento.ordem_pagamento || agendamento.ordemPagamento || 'Não informada';
   const mensagemWhats = encodeURIComponent(`Olá, ${agendamento.cliente}! Sobre seu agendamento de ${agendamento.servico} em ${agendamento.data} às ${agendamento.hora}.`);
   const whatsappUrl = telefoneLimpo ? `https://wa.me/${telefoneLimpo}?text=${mensagemWhats}` : '';
+
+  const jaEstaPago = statusPagamento === 'PAGO' || statusPagamento === 'APROVADO';
 
   const handleGerarLink = async () => {
     try {
@@ -30,6 +34,26 @@ export default function ModalAgendamento({ agendamento, onClose, onFinalizar, on
       alert('Erro ao gerar link de pagamento.');
     } finally {
       setGerandoLink(false);
+    }
+  };
+
+  const handleDarBaixa = async () => {
+    if (window.confirm("Confirmar o recebimento deste valor por fora (Dinheiro/Pix Direto)? O status será alterado para PAGO.")) {
+      try {
+        setDandoBaixa(true);
+        await api.patch(`/agendamentos/${agendamento.id}/pagamento`, { status: "PAGO" });
+        
+        alert("Baixa realizada com sucesso!");
+        
+        if (onAtualizar) onAtualizar();
+        onClose();
+        
+      } catch (error) {
+        console.error("Erro ao dar baixa:", error);
+        alert("Não foi possível processar a baixa. Verifique a API.");
+      } finally {
+        setDandoBaixa(false);
+      }
     }
   };
 
@@ -61,20 +85,37 @@ export default function ModalAgendamento({ agendamento, onClose, onFinalizar, on
           <div><b>Duração:</b> {agendamento.duracaoMinutos || agendamento.duracao || 60} min</div>
           <div><b>Pagamento adiantado:</b> {agendamento.pagamentoAdiantado ? 'Sim' : 'Não'}</div>
           <div><b>Status do pagamento:</b> {statusPagamento}</div>
-          <button 
-          className="btn-app"
-          onClick={handleGerarLink}
-          disabled={gerandoLink}
-          >
-            {gerandoLink ? 'Gerando...' : 'Gerar Link de Pagamento'}
+          
+          <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+            <button 
+              className="btn-app"
+              onClick={handleGerarLink}
+              disabled={gerandoLink || jaEstaPago}
+              style={{ flex: 1 }}
+            >
+              {gerandoLink ? 'Gerando...' : 'Gerar Link'}
             </button>
-            {checkoutUrl && (
-              <div className="redirect">
-                <a href={checkoutUrl} target="_blank" rel="noreferrer">Abrir Checkout</a>
-              </div>
+
+            {!jaEstaPago && (
+              <button 
+                className="btn-app"
+                onClick={handleDarBaixa}
+                disabled={dandoBaixa}
+                style={{ flex: 1, backgroundColor: '#28a745', color: '#fff', border: 'none' }}
+              >
+                {dandoBaixa ? 'Processando...' : 'Receber (Baixa)'}
+              </button>
             )}
+          </div>
+
+          {checkoutUrl && (
+            <div className="redirect" style={{ marginTop: '10px' }}>
+              <a href={checkoutUrl} target="_blank" rel="noreferrer">Abrir Checkout</a>
+            </div>
+          )}
         </div>
-        <div className="display-flex linha">
+
+        <div className="display-flex linha" style={{ marginTop: '20px' }}>
           <button
             className="btn-app btn-salvar"
             style={{width: '50%'}}
@@ -84,7 +125,6 @@ export default function ModalAgendamento({ agendamento, onClose, onFinalizar, on
             }}
           >
             Finalizar Agendamento
-
           </button>
           <button
             className="btn-app btn-cancelar"
@@ -95,7 +135,6 @@ export default function ModalAgendamento({ agendamento, onClose, onFinalizar, on
             }}
           >
             Cancelar Agendamento
-
           </button>
         </div>
       </div>
