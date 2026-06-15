@@ -66,7 +66,7 @@ async function handleSubmit(e) {
           <div className="credenciais">
             <label>E-mail</label>
             <input
-              type="email"
+              type="email" placeholder="seuemail@exemplo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -76,7 +76,7 @@ async function handleSubmit(e) {
           <div className="credenciais">
             <label>Senha</label>
             <input
-              type="password"
+              type="password" placeholder="********"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
