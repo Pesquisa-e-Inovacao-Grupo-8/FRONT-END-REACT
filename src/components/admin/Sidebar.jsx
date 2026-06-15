@@ -1,12 +1,12 @@
 // src/components/admin/Sidebar.jsx
 import { NavLink } from "react-router-dom";
-import '../../styles/sidebar.css';
+import "../../styles/sidebar.css";
 
 export default function Sidebar({ open, onClose }) {
   const role = localStorage.getItem("userRole"); // "ADMIN" ou "PROFISSIONAL"
 
   return (
-    <aside className={`sidebar ${open ? 'open' : ''}`}>
+    <aside className={`sidebar ${open ? "open" : ""}`}>
       <div className="sidebar-logo">Tukotomi</div>
 
       <nav className="sidebar-menu">
@@ -82,7 +82,11 @@ export default function Sidebar({ open, onClose }) {
           to="/" 
           className="item"
           onClick={onClose}
-          style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '16px' }}
+          style={{
+            marginTop: "auto",
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            paddingTop: "16px",
+          }}
         >
           ← Voltar à Home
         </NavLink>

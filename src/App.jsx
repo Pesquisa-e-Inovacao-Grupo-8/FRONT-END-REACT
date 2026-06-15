@@ -14,6 +14,7 @@ import Serviços from "./pages/Serviços";
 import Agendamento from "./pages/Agendamento";
 import AgendamentosUsuário from "./pages/AgendamentosUsuário";
 import ConfiguracoesProfissional from "./pages/admin/ConfiguracoesProfissional";
+import ConfiguracoesUsuario from "./pages/admin/ConfiguracoesUsuario";
 import AdminMasterDashboard from "./pages/admin/AdminMasterDashboard";
 import VitrinePacotes from "./pages/VitrinePacotes";
 import Financeiro from "./pages/admin/Financeiro";
