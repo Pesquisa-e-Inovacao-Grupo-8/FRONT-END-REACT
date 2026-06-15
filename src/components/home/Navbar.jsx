@@ -84,7 +84,10 @@ let navLinks = [{ to: "/", label: "Início" }];
               </NavLink>
             </li>
             <li>
-              <NavLink to="/cadastrar" className="btn-cadastrar">
+              <NavLink 
+                to="/cadastrar" 
+                className={({ isActive }) => isActive ? "btn-cadastrar" : "btn-cadastrar"}
+              >
                 Cadastrar
               </NavLink>
             </li>

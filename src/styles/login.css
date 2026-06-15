@@ -10,7 +10,8 @@ body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  margin-top: 100px;
+  margin-top: 50px;
+  margin-bottom: 50px;
 }
 
 
@@ -28,7 +29,7 @@ body {
 
 .container-foto{
   height: 600px;
-  width: 35%;
+  width: 50%;
   background-image: url('../assets/login-img-01.jpg');
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
