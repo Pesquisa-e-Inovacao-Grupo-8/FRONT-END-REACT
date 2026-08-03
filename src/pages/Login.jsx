@@ -3,15 +3,24 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/login.css";
+import Toast from "../components/Toast";
+import { validarLogin } from "../utils/validacaoCadastro";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [toast, setToast] = useState({ mensagem: "", tipo: "erro" });
 
   const navigate = useNavigate();
 
 async function handleSubmit(e) {
     e.preventDefault();
+
+    const erroValidacao = validarLogin({ email, senha });
+    if (erroValidacao) {
+      setToast({ mensagem: erroValidacao, tipo: "erro" });
+      return;
+    }
 
     try {
       // 1. Faz o login e pega o token
@@ -34,8 +43,6 @@ async function handleSubmit(e) {
           localStorage.setItem("userName", usuarioLogado.nome);
           localStorage.setItem("userRole", usuarioLogado.tipo); // Guarda se é CLIENTE ou PROFISSIONAL
 
-          alert("Login realizado com sucesso!");
-
         if (usuarioLogado.tipo === "ADMIN") {
               navigate("/admin/dashboard");
           } else if (usuarioLogado.tipo === "PROFISSIONAL") {
@@ -49,11 +56,15 @@ async function handleSubmit(e) {
 
     } catch (error) {
       console.error(error);
-      alert("Email ou senha inválidos");
+      setToast({
+        mensagem: error.response?.data?.message || "E-mail ou senha inválidos.",
+        tipo: "erro"
+      });
     }
   }
   return (
     <div className="container-principal">
+      <Toast {...toast} onClose={() => setToast({ mensagem: "", tipo: "erro" })} />
       <div className="container-foto"></div>
 
       <div className="container-login">
@@ -62,7 +73,7 @@ async function handleSubmit(e) {
           <p>Entre com sua conta para continuar</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="credenciais">
             <label>E-mail</label>
             <input

@@ -156,3 +156,36 @@ button[type="submit"]:hover { background: #b89a30; }
 }
 
 .rodape a { color: #c9a227; text-decoration: none; }
+
+/* Layout para celulares */
+@media (max-width: 600px) {
+  .container-principal {
+    min-height: 100svh;
+    margin: 0;
+    padding: 24px 16px;
+    box-sizing: border-box;
+  }
+
+  .container-foto {
+    display: none;
+  }
+
+  .container-login {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    min-height: 0;
+    padding: 28px 20px;
+    box-sizing: border-box;
+    border-radius: 12px;
+  }
+
+  .container-login form {
+    gap: 4px;
+  }
+
+  .credenciais input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

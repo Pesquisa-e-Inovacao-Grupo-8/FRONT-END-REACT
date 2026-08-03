@@ -137,3 +137,44 @@ button {
 .termos span {
   color: #caa42d;
 }
+
+/* Layout para celulares */
+@media (max-width: 600px) {
+  .container-principal-cadastro {
+    min-height: 100svh;
+    margin: 0;
+    padding: 24px 16px;
+    box-sizing: border-box;
+  }
+
+  .container-foto-cadastro {
+    display: none;
+  }
+
+  .container-cadastro {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    padding: 28px 20px;
+    box-sizing: border-box;
+    border-radius: 12px;
+  }
+
+  .container-cadastro form {
+    gap: 8px;
+  }
+
+  .container-cadastro input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .input-wrapper {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .input-wrapper input {
+    width: 100%;
+  }
+}

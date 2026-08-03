@@ -8,6 +8,7 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState("");
+  const [menuAberto, setMenuAberto] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -29,6 +30,7 @@ export default function Navbar() {
 
     setIsLoggedIn(false);
     setUserRole("");
+    setMenuAberto(false);
     navigate("/login");
   };
 
@@ -55,12 +57,24 @@ export default function Navbar() {
         Tukotomi
       </NavLink>
 
-      <ul className="navbar-links">
+      <button
+        type="button"
+        className="navbar-menu-btn"
+        onClick={() => setMenuAberto((aberto) => !aberto)}
+        aria-expanded={menuAberto}
+        aria-controls="menu-principal"
+        aria-label={menuAberto ? "Fechar menu" : "Abrir menu"}
+      >
+        {menuAberto ? "×" : "☰"}
+      </button>
+
+      <ul id="menu-principal" className={`navbar-links ${menuAberto ? "navbar-links--aberto" : ""}`}>
         {navLinks.map((link) => (
           <li key={link.to}>
             <NavLink
               to={link.to}
               className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={() => setMenuAberto(false)}
             >
               {link.label}
             </NavLink>
@@ -69,40 +83,15 @@ export default function Navbar() {
 
         {isLoggedIn ? (
           <li
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginLeft: "15px",
-              gap: "15px",
-            }}
+            className="navbar-user-actions"
           >
-            <span
-              style={{
-                fontWeight: "bold",
-                color: "#b8960c",
-                display: "flex",
-                alignItems: "center",
-                height: "48px",
-              }}
-            >
+            <span className="navbar-user-name">
               Olá, {userName}
             </span>
 
             <button
               onClick={handleLogout}
               className="btn-cadastrar"
-              style={{
-                cursor: "pointer",
-                border: "none",
-                fontFamily: "inherit",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "48px",
-                padding: "0 28px",
-                margin: 0,
-                lineHeight: 1,
-              }}
             >
               Sair
             </button>
@@ -113,6 +102,7 @@ export default function Navbar() {
               <NavLink
                 to="/login"
                 className={({ isActive }) => (isActive ? "active" : "")}
+                onClick={() => setMenuAberto(false)}
               >
                 Login
               </NavLink>
@@ -122,6 +112,7 @@ export default function Navbar() {
               <NavLink 
                 to="/cadastrar" 
                 className={({ isActive }) => isActive ? "btn-cadastrar" : "btn-cadastrar"}
+                onClick={() => setMenuAberto(false)}
               >
                 Cadastrar
               </NavLink>

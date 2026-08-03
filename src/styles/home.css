@@ -48,6 +48,25 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
   list-style: none;
 }
 
+.navbar-menu-btn {
+  display: none;
+}
+
+.navbar-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-left: 15px;
+}
+
+.navbar-user-name {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  color: #b8960c;
+  font-weight: bold;
+}
+
 .navbar-links a {
   font-size: 0.9rem;
   color: var(--text);
@@ -389,5 +408,81 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
 
 @media (max-width: 600px) {
   .features-grid { grid-template-columns: 1fr 1fr; }
-  .navbar-links { gap: 1rem; }
+
+  .hero-image {
+    display: none;
+  }
+
+  .hero {
+    padding: 3rem 1.5rem;
+  }
+
+  .navbar {
+    position: sticky;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 1.25rem;
+  }
+
+  .navbar-menu-btn {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(201, 168, 76, 0.35);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--dark);
+    font-size: 1.7rem;
+    line-height: 1;
+  }
+
+  .navbar-links {
+    position: absolute;
+    top: 64px;
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px 1.25rem 18px;
+    background: rgba(255, 255, 255, 0.98);
+    border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .navbar-links--aberto {
+    display: flex;
+  }
+
+  .navbar-links li {
+    width: 100%;
+  }
+
+  .navbar-links a {
+    display: block;
+    padding: 12px 0;
+    font-size: 1rem;
+  }
+
+  .navbar-links .btn-cadastrar {
+    margin-top: 8px;
+    padding: 12px 18px;
+    text-align: center;
+  }
+
+  .navbar-user-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin: 8px 0 0;
+  }
+
+  .navbar-user-name {
+    height: auto;
+    padding: 8px 0;
+  }
 }
