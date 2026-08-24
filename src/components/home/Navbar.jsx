@@ -37,7 +37,7 @@ export default function Navbar() {
   if (userRole === "PROFISSIONAL") {
     navLinks.push({ to: "/admin/agendamentos", label: "Painel Profissional" });
   } else if (userRole === "ADMIN") {
-    navLinks.push({ to: "/admin-master", label: "Painel Master" });
+    navLinks.push({ to: "/admin/dashboard", label: "Painel Master" });
   } else {
     navLinks.push({ to: "/servicos", label: "Serviços" });
     navLinks.push({ to: "/pacotes", label: "Pacotes" });

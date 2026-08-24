@@ -1,7 +1,7 @@
 //src/pages/AgendamentoUsuario.jsx
 import { useState, useEffect, useRef } from 'react';
 import axios from "axios";
-import { io } from "socket.io-client";
+//import { io } from "socket.io-client";
 import { getAgendamentosPorCliente, atualizarStatusAgendamento } from '../js/agendamento.js';
 import '../styles/agendamentos-usuario.css'
 

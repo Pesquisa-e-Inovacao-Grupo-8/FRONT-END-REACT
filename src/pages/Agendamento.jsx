@@ -45,6 +45,21 @@ export default function Agendamento() {
       })
     : profissionaisDb;
 
+    useEffect(() => {
+  const userId = localStorage.getItem("userId");
+  if (userId) {
+    // Busca dados reais se logado
+    api.get(`/usuarios/${userId}`).then(res => {
+      setForm({
+        name: res.data.nome || "",
+        phone: res.data.telefone || "",
+        email: res.data.email || "",
+        notes: ""
+      });
+    }).catch(err => console.log("Usuário não encontrado", err));
+  }
+}, []);
+
   // Efeito para carregar Serviços e Profissionais do Backend ao montar a tela
   useEffect(() => {
     async function carregarOpcoes() {

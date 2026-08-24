@@ -10,7 +10,6 @@ export default function Sidebar({ open, onClose }) {
       <div className="sidebar-logo">Tukotomi</div>
 
       <nav className="sidebar-menu">
-<<<<<<< HEAD
         
         {/* Renderiza apenas para ADMIN */}
         {role === "ADMIN" && (
@@ -53,25 +52,11 @@ export default function Sidebar({ open, onClose }) {
         <NavLink 
           to="/admin/agendamentos" 
           className={({ isActive }) => `item ${isActive ? 'active' : ''}`}
-=======
-        <NavLink
-          to="/admin/dashboard"
-          className={({ isActive }) => `item ${isActive ? "active" : ""}`}
-          onClick={onClose}
-        >
-          Dashboard
-        </NavLink>
-
-        <NavLink
-          to="/admin/agendamentos"
-          className={({ isActive }) => `item ${isActive ? "active" : ""}`}
->>>>>>> e3ef8066e8a8a7960666b2224ba6b73c808baac9
           onClick={onClose}
         >
           Agenda
         </NavLink>
 
-<<<<<<< HEAD
         {/* Renderiza apenas para ADMIN */}
         {role === "ADMIN" && (
           <NavLink 
@@ -87,40 +72,14 @@ export default function Sidebar({ open, onClose }) {
         <NavLink 
           to="/admin/configuracoes" 
           className={({ isActive }) => `item ${isActive ? 'active' : ''}`}
-=======
-        <NavLink
-          to="/admin/financeiro"
-          className={({ isActive }) => `item ${isActive ? "active" : ""}`}
-          onClick={onClose}
-        >
-          Financeiro
-        </NavLink>
-
-        <NavLink
-          to="/admin/configuracoes-usuario"
-          className={({ isActive }) => `item ${isActive ? "active" : ""}`}
->>>>>>> e3ef8066e8a8a7960666b2224ba6b73c808baac9
           onClick={onClose}
         >
           Configurações
         </NavLink>
 
-<<<<<<< HEAD
         {/* Voltar Home - Disponível para todos */}
         <NavLink 
           to="/" 
-=======
-        <NavLink
-          to="/admin/configuracoes-profissional"
-          className={({ isActive }) => `item ${isActive ? "active" : ""}`}
-          onClick={onClose}
-        >
-          Config. Profissional
-        </NavLink>
-
-        <NavLink
-          to="/"
->>>>>>> e3ef8066e8a8a7960666b2224ba6b73c808baac9
           className="item"
           onClick={onClose}
           style={{

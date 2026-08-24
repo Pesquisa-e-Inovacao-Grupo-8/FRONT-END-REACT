@@ -93,10 +93,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <VLibras />
-<<<<<<< HEAD
-=======
 
->>>>>>> e3ef8066e8a8a7960666b2224ba6b73c808baac9
       <Routes>
         {/* ROTAS PÚBLICAS COM NAVBAR */}
         <Route element={<LayoutNavbar />}>
@@ -128,10 +125,6 @@ export default function App() {
               </PrivateRoute>
             }
           />
-<<<<<<< HEAD
-        </Route>
-       {/* ROTAS ADMINISTRATIVAS / PROFISSIONAIS COM SIDEBAR UNIFICADA */}
-=======
 
           <Route
             path="pacotes"
@@ -151,8 +144,6 @@ export default function App() {
             }
           />
         </Route>
-
->>>>>>> e3ef8066e8a8a7960666b2224ba6b73c808baac9
         <Route
           path="/admin"
           element={
@@ -161,7 +152,6 @@ export default function App() {
             </PrivateRoute>
           }
         >
-<<<<<<< HEAD
           {/* ROTAS EXCLUSIVAS DE ADMIN */}
           <Route 
             path="dashboard" 
@@ -194,31 +184,6 @@ export default function App() {
             element={<PrivateRoute allowedRoles={["ADMIN", "PROFISSIONAL"]}><ConfiguracoesProfissional /></PrivateRoute>} 
           />
         </Route>
-=======
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="agendamentos" element={<AgendamentosPage />} />
-          <Route path="financeiro" element={<Financeiro />} />
-
-          <Route
-            path="configuracoes-profissional"
-            element={<ConfiguracoesProfissional />}
-          />
-
-          <Route
-            path="configuracoes-usuario"
-            element={<ConfiguracoesUsuario visao="admin" />}
-          />
-        </Route>
-
-        <Route
-          path="/admin-master"
-          element={
-            <PrivateRoute>
-              <AdminMasterDashboard />
-            </PrivateRoute>
-          }
-        />
->>>>>>> e3ef8066e8a8a7960666b2224ba6b73c808baac9
       </Routes>
     </BrowserRouter>
   );
