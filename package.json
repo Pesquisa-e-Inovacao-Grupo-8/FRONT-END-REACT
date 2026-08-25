@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "^2.0.1",
+    "@stomp/stompjs": "^7.3.0",
     "apexcharts": "^5.10.4",
     "axios": "^1.15.2",
     "cors": "^2.8.6",
@@ -19,7 +20,7 @@
     "react-apexcharts": "^2.1.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.13.2",
-    "socket.io-client": "^4.8.3"
+    "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
