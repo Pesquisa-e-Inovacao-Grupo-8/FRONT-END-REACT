@@ -14,7 +14,7 @@ const ESTADO_INICIAL_FORM = {
 export default function GerenciarUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Estados de Filtro
   const [filtroTipo, setFiltroTipo] = useState('TODOS');
   const [termoBusca, setTermoBusca] = useState('');
@@ -39,6 +39,19 @@ export default function GerenciarUsuarios() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const abrirModalEditar = (user) => {
+    setUsuarioEditandoId(user.id);
+    setFormNovoUsuario({
+      nome: user.nome,
+      cpf: user.cpf,
+      telefone: user.telefone,
+      email: user.email,
+      senha: '', // Deixe em branco, a menos que vá resetar
+      tipo: user.tipo || 'CLIENTE'
+    });
+    setModalAberto(true);
   };
 
   const deletarUsuario = async (id, tipo) => {
@@ -107,7 +120,7 @@ export default function GerenciarUsuarios() {
     <div className="crud-section">
       <div className="crud-header">
         <h2>Gestão de Usuários</h2>
-        
+
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
           
           <input 
@@ -118,8 +131,8 @@ export default function GerenciarUsuarios() {
             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '250px' }}
           />
 
-          <select 
-            value={filtroTipo} 
+          <select
+            value={filtroTipo}
             onChange={(e) => setFiltroTipo(e.target.value)}
             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
           >
@@ -128,7 +141,7 @@ export default function GerenciarUsuarios() {
             <option value="PROFISSIONAL">Apenas Profissionais</option>
             <option value="ADMIN">Apenas Admins</option>
           </select>
-          
+
           <button className="btn-novo" onClick={() => setModalAberto(true)}>
             + Novo Usuário
           </button>
@@ -157,7 +170,7 @@ export default function GerenciarUsuarios() {
                 </span>
               </td>
               <td>
-                <button className="action-btn" title="Editar">✏️</button>
+                <button className="action-btn" title="Editar" onClick={() => abrirModalEditar(user)}>✏️</button>
                 {user.tipo !== 'ADMIN' && (
                   <button className="action-btn" title="Deletar" onClick={() => deletarUsuario(user.id, user.tipo)}>🗑️</button>
                 )}

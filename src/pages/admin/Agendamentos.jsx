@@ -150,8 +150,8 @@ export default function AgendamentosPage() {
 
   const adicionarAgendamento = async (novo) => {
     if (!novo.data) {
-        alert("Erro: Data não informada.");
-        return;
+      alert("Erro: Data não informada.");
+      return;
     }
     const [ano, mes, dia] = novo.data.split("-");
     const novoFormatado = {
@@ -224,20 +224,22 @@ export default function AgendamentosPage() {
               ⚙️ Especialidades
             </button>
           )}
-          <div className="aba-funcionaria">
+          <div className="aba-funcionaria" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {loading ? (
               <span>Carregando profissionais...</span>
             ) : (
-              FUNCIONARIAS.map((nome) => (
-                <button
-                  key={nome}
-                  type="button"
-                  className={`btn-app btn-funcionarias ${funcionariaAtual === nome ? 'ativo' : ''}`}
-                  onClick={() => setFuncionariaAtual(nome)}
-                >
-                  {nome === localStorage.getItem("userName") ? `⭐ ${nome}` : nome}
-                </button>
-              ))
+              <select
+                className="btn-app"
+                value={funcionariaAtual}
+                onChange={(e) => setFuncionariaAtual(e.target.value)}
+                style={{ padding: '8px 15px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#fff', fontSize: '1rem' }}
+              >
+                {FUNCIONARIAS.map((nome) => (
+                  <option key={nome} value={nome}>
+                    {nome === localStorage.getItem("userName") ? `⭐ ${nome}` : nome}
+                  </option>
+                ))}
+              </select>
             )}
           </div>
         </div>
@@ -252,8 +254,8 @@ export default function AgendamentosPage() {
         />
       </div>
 
-      <div className="display-flex linha layout-principal" style={{ display: 'flex' }}>
-        <div className="layout-principal__calendar">
+      <div className="display-flex linha layout-principal" style={{ display: 'flex', flexDirection: 'row', gap: '20px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div className="layout-principal__calendar" style={{ flex: '0 0 320px', minWidth: '320px' }}>
           <Calendar
             agendamentos={agendamentosDaProfissional}
             selectedDay={diaAtual}
@@ -272,7 +274,7 @@ export default function AgendamentosPage() {
             funcionaria={funcionariaAtual}
           />
         </div>
-        <div className="layout-principal__grid">
+        <div className="layout-principal__grid" style={{ flex: '1 1 0%', minWidth: '300px' }}>
           <AgendamentoGrid
             dia={diaAtual}
             mes={mesAtual}
