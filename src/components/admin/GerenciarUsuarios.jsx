@@ -23,7 +23,6 @@ export default function GerenciarUsuarios() {
   const [modalAberto, setModalAberto] = useState(false);
   const [formNovoUsuario, setFormNovoUsuario] = useState(ESTADO_INICIAL_FORM);
   const [salvando, setSalvando] = useState(false);
-  const [usuarioEditandoId, setUsuarioEditandoId] = useState(null);
 
   useEffect(() => {
     carregarUsuarios();
@@ -97,20 +96,18 @@ export default function GerenciarUsuarios() {
     e.preventDefault();
     try {
       setSalvando(true);
-      const payload = { ...formNovoUsuario, ativo: true };
+      const payload = {
+        ...formNovoUsuario,
+        ativo: true
+      };
 
-      if (usuarioEditandoId) {
-        await api.put(`/usuarios/${usuarioEditandoId}`, payload);
-        alert(`Usuário atualizado com sucesso!`);
-      } else {
-        await api.post('/usuarios', payload);
-        alert(`Usuário cadastrado com sucesso!`);
-      }
-
+      await api.post('/usuarios', payload);
+      
+      alert(`Usuário ${formNovoUsuario.nome} cadastrado com sucesso!`);
       setModalAberto(false);
       setFormNovoUsuario(ESTADO_INICIAL_FORM);
-      setUsuarioEditandoId(null);
-      carregarUsuarios();
+      carregarUsuarios(); // Atualiza a tabela imediatamente
+      
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
       alert(error.response?.data?.message || "Erro ao cadastrar usuário. Verifique os dados.");
@@ -125,10 +122,10 @@ export default function GerenciarUsuarios() {
         <h2>Gestão de Usuários</h2>
 
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-
-          <input
-            type="text"
-            placeholder="Buscar nome ou email..."
+          
+          <input 
+            type="text" 
+            placeholder="Buscar nome ou email..." 
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '250px' }}
@@ -189,21 +186,21 @@ export default function GerenciarUsuarios() {
       {/* MODAL DE CADASTRO */}
       {modalAberto && (
         <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex',
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', 
           justifyContent: 'center', alignItems: 'center', zIndex: 9999
         }}>
           <div style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '450px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ marginTop: 0, borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Cadastrar Novo Usuário</h3>
-
+            
             <form onSubmit={handleSalvarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
-
+              
               <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Tipo de Perfil</label>
-                <select
-                  name="tipo"
-                  value={formNovoUsuario.tipo}
-                  onChange={handleInputChange}
+                <select 
+                  name="tipo" 
+                  value={formNovoUsuario.tipo} 
+                  onChange={handleInputChange} 
                   required
                   style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
                 >
@@ -239,7 +236,7 @@ export default function GerenciarUsuarios() {
                 <input type="password" name="senha" value={formNovoUsuario.senha} onChange={handleInputChange} required style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
                 <small style={{ color: '#666' }}>O usuário usará esta senha no primeiro login.</small>
               </div>
-
+              
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button type="button" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
                   Cancelar

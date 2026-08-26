@@ -93,7 +93,6 @@ export default function App() {
   return (
     <BrowserRouter>
       <VLibras />
-
       <Routes>
         {/* ROTAS PÚBLICAS COM NAVBAR */}
         <Route element={<LayoutNavbar />}>
@@ -122,24 +121,6 @@ export default function App() {
             element={
               <PrivateRoute allowedRoles={["CLIENTE"]}>
                 <AgendamentosUsuário />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="pacotes"
-            element={
-              <PrivateRoute>
-                <VitrinePacotes />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="configuracoes-usuario"
-            element={
-              <PrivateRoute>
-                <ConfiguracoesUsuario visao="usuario" />
               </PrivateRoute>
             }
           />
