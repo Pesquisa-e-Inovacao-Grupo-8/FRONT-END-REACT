@@ -125,6 +125,7 @@ export default function App() {
             }
           />
         </Route>
+       {/* ROTAS ADMINISTRATIVAS / PROFISSIONAIS COM SIDEBAR UNIFICADA */}
         <Route
           path="/admin"
           element={
