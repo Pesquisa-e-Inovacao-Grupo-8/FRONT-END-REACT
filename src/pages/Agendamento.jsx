@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { getServicos, agendarPeloCliente } from "../js/agendamento.js";
 import { getFuncionarias } from "../js/funcionarias.js";
 import "../styles/agendamento-usuario.css";
+import api from '../api.js'
 
 const TIME_SLOTS = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
 const UNAVAILABLE = ["12:00", "16:00"];
