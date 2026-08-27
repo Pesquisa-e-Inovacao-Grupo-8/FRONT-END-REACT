@@ -7,4 +7,7 @@ export default defineConfig({
     host: true,   // expõe na rede local (0.0.0.0)
     port: 8000,
   },
+  define: {
+    global: 'window',
+  },
 });
