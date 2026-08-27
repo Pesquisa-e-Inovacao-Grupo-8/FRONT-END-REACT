@@ -1,0 +1,12 @@
+name: FRONT-END-REACT 
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: Pesquisa-e-Inovacao-Grupo-8/TEMPLATES-PIPELINES/.github/workflows/build-node.yml@main
+    with:
+      GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+      GITHUB_ORGANIZATION: ${{ github.repository_owner }}
+    secrets: inherit
