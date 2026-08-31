@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { getServicos, agendarPeloCliente } from "../js/agendamento.js";
 import { getFuncionarias } from "../js/funcionarias.js";
 import "../styles/agendamento-usuario.css";
+import api from '../api.js'
 
 const TIME_SLOTS = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
 const UNAVAILABLE = ["12:00", "16:00"];
@@ -44,6 +45,21 @@ export default function Agendamento() {
         );
       })
     : profissionaisDb;
+
+    useEffect(() => {
+  const userId = localStorage.getItem("userId");
+  if (userId) {
+    // Busca dados reais se logado
+    api.get(`/usuarios/${userId}`).then(res => {
+      setForm({
+        name: res.data.nome || "",
+        phone: res.data.telefone || "",
+        email: res.data.email || "",
+        notes: ""
+      });
+    }).catch(err => console.log("Usuário não encontrado", err));
+  }
+}, []);
 
   // Efeito para carregar Serviços e Profissionais do Backend ao montar a tela
   useEffect(() => {

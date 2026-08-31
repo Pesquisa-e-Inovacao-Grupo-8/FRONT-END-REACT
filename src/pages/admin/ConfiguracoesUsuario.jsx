@@ -16,28 +16,21 @@ export default function ConfiguracoesUsuario({ visao = "usuario" }) {
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
 
-  useEffect(() => {
-    async function carregarUsuario() {
-      try {
-        setUsuario({
-          nome: "Kauã Thieme",
-          telefone: "(11) 99999-9999",
-          cpf: "123.456.789-00",
-          email: "kaua@email.com",
-          tipo: "ADM",
-          ativo: true,
-          criacao: "2026-01-01",
-        });
-      } catch (erro) {
-        console.error(erro);
-        alert("Erro ao carregar usuário.");
-      } finally {
-        setLoading(false);
-      }
+ useEffect(() => {
+  async function carregarUsuario() {
+    try {
+      const id = localStorage.getItem("userId");
+      const res = await api.get(`/usuarios/${id}`);
+      setUsuario(res.data);
+    } catch (erro) {
+      console.error(erro);
+      alert("Erro ao carregar os dados do seu usuário.");
+    } finally {
+      setLoading(false);
     }
-
-    carregarUsuario();
-  }, []);
+  }
+  carregarUsuario();
+}, []);
 
   function alterarCampo(campo, valor) {
     if (campo === "cpf") return;

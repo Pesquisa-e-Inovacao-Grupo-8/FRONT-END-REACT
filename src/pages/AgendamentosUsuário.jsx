@@ -1,11 +1,12 @@
 //src/pages/AgendamentoUsuario.jsx
 import { useState, useEffect, useRef } from 'react';
 import axios from "axios";
-import { io } from "socket.io-client";
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import { getAgendamentosPorCliente, atualizarStatusAgendamento } from '../js/agendamento.js';
 import '../styles/agendamentos-usuario.css'
 
-const SOCKET_URL = "http://localhost:8088"; // mesmo host do Flask
+const SOCKET_URL = "http://localhost:8088/ws-payment"; //rota do microservico
 
 function formatDate(dateStr) {
   const d = new Date(dateStr.ano, dateStr.mes - 1, dateStr.dia, 12, 0, 0);
@@ -30,50 +31,47 @@ export default function AgendamentosUsuário() {
   const [notification, setNotification] = useState(null); // { message, type }
   const socketRef = useRef(null);
 
-  // ─── WebSocket ───────────────────────────────────────────────────────────────
+  // ─── WebSocket (Stomp) ───────────────────────────────────────────────────────────────
   useEffect(() => {
-    const socket = io(SOCKET_URL, {
-      transports: ["websocket", "polling"],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
+    const client = new Client({
+      // SockJS como fallback de conexão
+      webSocketFactory: () => new SockJS(SOCKET_URL),
+      reconnectDelay: 5000,
+      onConnect: () => {
+        console.log("[STOMP] Conectado ao WebSocket Java");
+        setSocketStatus("connected");
+
+        // se "inscreve" no canal de pagamentos
+        client.subscribe('/topic/pagamentos', (message) => {
+          const data = JSON.parse(message.body);
+          console.log("[STOMP] Pagamento confirmado recebido:", data);
+
+          // Atualiza o estado
+          setBookings(prev =>
+            prev.map(b =>
+              b.id === data.order_nsu
+                ? { ...b, status: data.status ?? "CONFIRMADO" }
+                : b
+            )
+          );
+          showNotification("Pagamento confirmado! Seu agendamento foi atualizado.", "success");
+        });
+      },
+      onDisconnect: () => {
+        console.log("[STOMP] Desconectado");
+        setSocketStatus("disconnected");
+      },
+      onWebSocketError: (err) => {
+        console.warn("[STOMP] Erro de WebSocket:", err);
+        setSocketStatus("disconnected");
+      }
     });
 
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      console.log("[Socket.IO] Conectado:", socket.id);
-      setSocketStatus("connected");
-    });
-
-    socket.on("disconnect", () => {
-      console.log("[Socket.IO] Desconectado");
-      setSocketStatus("disconnected");
-    });
-
-    socket.on("connect_error", (err) => {
-      console.warn("[Socket.IO] Erro de conexão:", err.message);
-      setSocketStatus("disconnected");
-    });
-
-    // Evento emitido pelo backend após confirmação do pagamento via webhook
-    socket.on("pagamento_confirmado", (data) => {
-      console.log("[Socket.IO] pagamento_confirmado recebido:", data);
-
-      // Atualiza o status do agendamento correspondente diretamente no estado,
-      // evitando uma nova requisição ao servidor
-      setBookings(prev =>
-        prev.map(b =>
-          b.id === data.order_nsu
-            ? { ...b, status: data.status ?? "CONFIRMADO" }
-            : b
-        )
-      );
-
-      showNotification("✅ Pagamento confirmado! Seu agendamento foi atualizado.", "success");
-    });
+    client.activate();
+    socketRef.current = client;
 
     return () => {
-      socket.disconnect();
+      client.deactivate();
     };
   }, []);
 
