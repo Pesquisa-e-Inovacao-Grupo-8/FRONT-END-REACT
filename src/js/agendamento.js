@@ -1,7 +1,7 @@
 import axios from 'axios';
 import api from '../api';
 
-const FLASK_URL = 'http://127.0.0.1:5000/flask-infinity-pay';
+const FLASK_URL = 'http://127.0.0.1:8088/flask-infinity-pay';
 
 export function cancelarAgendamento(agendamento) {
     agendamento.status = 'CANCELADO';
