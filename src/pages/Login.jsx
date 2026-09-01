@@ -15,7 +15,7 @@ async function handleSubmit(e) {
 
     try {
       // 1. Faz o login e pega o token
-      const response = await axios.post("http://localhost:8080/auth/login", {
+      const response = await axios.post("http://renatatukotomi.duckdns.org:8080/auth/login", {
         email,
         senha
       });
@@ -23,7 +23,7 @@ async function handleSubmit(e) {
       localStorage.setItem("token", token);
 
       // 2. Busca a lista de usuários para saber quem logou
-      const usersRes = await axios.get("http://localhost:8080/usuarios", {
+      const usersRes = await axios.get("http://renatatukotomi.duckdns.org:8080/usuarios", {
           headers: { Authorization: `Bearer ${token}` }
       });
       
