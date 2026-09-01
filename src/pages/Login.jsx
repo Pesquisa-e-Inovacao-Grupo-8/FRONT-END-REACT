@@ -39,7 +39,7 @@ async function handleSubmit(e) {
     localStorage.setItem("userRole", usuarioLogado.tipo);
 
     // Mostra o modal
-    mostrarConfirmacao("Login realizado com sucesso!", 2800);
+    mostrarConfirmacao("Login realizado com sucesso!", 2000);
 
     // Aguarda o modal terminar antes de navegar
     setTimeout(() => {
