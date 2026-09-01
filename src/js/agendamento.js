@@ -1,5 +1,5 @@
 import axios from 'axios';
-import api from '../api';
+import api, { normalizeArray } from '../api';
 
 const FLASK_URL = 'http://renatatukotomi.duckdns.org:8088/flask-infinity-pay';
 
@@ -61,8 +61,8 @@ export async function getAgendamentos() {
             api.get(`/agendamentoServicos`)
         ]);
 
-        const agendamentosBrutos = agendamentosRes.data;
-        const relacoesServicos = agendamentoServicosRes.data;
+        const agendamentosBrutos = normalizeArray(agendamentosRes.data);
+        const relacoesServicos = normalizeArray(agendamentoServicosRes.data);
 
         return agendamentosBrutos.map(agend => {
             // Extração segura da data
