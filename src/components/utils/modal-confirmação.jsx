@@ -4,23 +4,26 @@ import { createRoot } from 'react-dom/client';
 const MODAL_STYLES = {
   confirmacao: {
     icon: '✓',
-    color: '#16a34a',
-    background: '#dcfce7',
-    border: '#86efac',
+    badge: '#eafaf1',
+    accent: '#2e7d32',
+    border: '#8fe3a6',
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     label: 'Confirmação'
   },
   erro: {
     icon: '!',
-    color: '#b91c1c',
-    background: '#fee2e2',
-    border: '#fca5a5',
+    badge: '#fdecec',
+    accent: '#b42318',
+    border: '#f5a7a7',
+    gradient: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
     label: 'Erro'
   },
   atencao: {
     icon: '⚠',
-    color: '#b45309',
-    background: '#fef3c7',
-    border: '#fcd34d',
+    badge: '#fff7e8',
+    accent: '#b45309',
+    border: '#f7d58d',
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
     label: 'Atenção'
   }
 };
@@ -45,7 +48,7 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(15, 23, 42, 0.38)',
+        background: 'rgba(15, 23, 42, 0.52)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -61,11 +64,12 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
         style={{
           width: '100%',
           maxWidth: '420px',
-          borderRadius: '14px',
-          background: '#fff',
-          border: `2px solid ${config.border}`,
-          boxShadow: '0 18px 45px rgba(15, 23, 42, 0.20)',
-          overflow: 'hidden'
+          borderRadius: '18px',
+          background: '#ffffff',
+          border: `1px solid ${config.border}`,
+          boxShadow: '0 20px 50px rgba(12, 18, 38, 0.24)',
+          overflow: 'hidden',
+          fontFamily: 'Inter, Segoe UI, sans-serif'
         }}
       >
         <div
@@ -73,11 +77,13 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            background: config.background,
-            color: config.color,
-            padding: '14px 18px',
+            background: config.gradient,
+            color: '#ffffff',
+            padding: '16px 18px',
             fontWeight: 700,
-            fontSize: '0.95rem'
+            fontSize: '0.9rem',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase'
           }}
         >
           <span
@@ -85,12 +91,14 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '28px',
-              height: '28px',
+              width: '30px',
+              height: '30px',
               borderRadius: '50%',
-              background: '#fff',
+              background: 'rgba(255,255,255,0.16)',
+              border: '1px solid rgba(255,255,255,0.28)',
               fontSize: '1rem',
-              fontWeight: 800
+              fontWeight: 800,
+              lineHeight: 1
             }}
           >
             {config.icon}
@@ -98,8 +106,29 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
           {config.label}
         </div>
 
-        <div style={{ padding: '22px 20px 20px', fontSize: '1rem', color: '#1f2937', lineHeight: 1.5 }}>
-          {mensagem}
+        <div style={{ padding: '22px 20px 20px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+          <div
+            style={{
+              flex: '0 0 auto',
+              width: '38px',
+              height: '38px',
+              borderRadius: '12px',
+              background: config.badge,
+              border: `1px solid ${config.border}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: config.accent,
+              fontWeight: 800,
+              fontSize: '1.2rem'
+            }}
+          >
+            {config.icon}
+          </div>
+
+          <div style={{ flex: 1, color: '#1f2937', fontSize: '0.98rem', lineHeight: 1.6, paddingTop: '6px' }}>
+            {mensagem}
+          </div>
         </div>
       </div>
     </div>

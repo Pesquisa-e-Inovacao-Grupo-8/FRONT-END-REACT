@@ -25,20 +25,20 @@ async function handleSubmit(e) {
 
       // 2. Busca a lista de usuários para saber quem logou
       const usersRes = await api.get("/usuarios");
-
       const usuarioLogado = usersRes.data.find(u => u.email === email);
 
       if (usuarioLogado) {
+          mostrarConfirmacao("Login realizado com sucesso!", 2200);
           localStorage.setItem("userId", usuarioLogado.id);
           localStorage.setItem("userName", usuarioLogado.nome);
           localStorage.setItem("userRole", usuarioLogado.tipo); // Guarda se é CLIENTE ou PROFISSIONAL
 
-          mostrarConfirmacao("Login realizado com sucesso!", 2200);
 
         if (usuarioLogado.tipo === "ADMIN") {
               navigate("/admin/dashboard");
           } else if (usuarioLogado.tipo === "PROFISSIONAL") {
             navigate("/admin/agendamentos"); 
+            window.location.reload(); // Força o reload para atualizar a navbar
           } else {
             navigate("/"); 
           }
