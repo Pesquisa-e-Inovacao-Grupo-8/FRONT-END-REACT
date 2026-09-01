@@ -15,7 +15,7 @@ export function normalizeArray(value) {
 }
 
 const api = axios.create({
-  baseURL: "/spring"
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://renatatukotomi.duckdns.org:8080"
 });
 
 api.interceptors.request.use((config) => {
