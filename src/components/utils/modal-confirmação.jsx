@@ -4,26 +4,26 @@ import { createRoot } from 'react-dom/client';
 const MODAL_STYLES = {
   confirmacao: {
     icon: '✓',
-    badge: '#eafaf1',
-    accent: '#2e7d32',
-    border: '#8fe3a6',
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    badge: '#f7f1df',
+    accent: '#A8883A',
+    border: '#D4B76A',
+    gradient: 'linear-gradient(135deg, #C9A84C 0%, #A8883A 100%)',
     label: 'Confirmação'
   },
   erro: {
     icon: '!',
-    badge: '#fdecec',
-    accent: '#b42318',
-    border: '#f5a7a7',
-    gradient: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+    badge: '#fceaea',
+    accent: '#8a1f1f',
+    border: '#dcb0b0',
+    gradient: 'linear-gradient(135deg, #b05f5f 0%, #8a1f1f 100%)',
     label: 'Erro'
   },
   atencao: {
     icon: '⚠',
-    badge: '#fff7e8',
-    accent: '#b45309',
-    border: '#f7d58d',
-    gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    badge: '#fdf6e6',
+    accent: '#9a6a0c',
+    border: '#e7c77d',
+    gradient: 'linear-gradient(135deg, #d9b75d 0%, #b8842c 100%)',
     label: 'Atenção'
   }
 };
@@ -67,9 +67,9 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
           borderRadius: '18px',
           background: '#ffffff',
           border: `1px solid ${config.border}`,
-          boxShadow: '0 20px 50px rgba(12, 18, 38, 0.24)',
+          boxShadow: '0 20px 50px rgba(26, 28, 34, 0.18)',
           overflow: 'hidden',
-          fontFamily: 'Inter, Segoe UI, sans-serif'
+          fontFamily: 'Jost, sans-serif'
         }}
       >
         <div
@@ -80,9 +80,9 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
             background: config.gradient,
             color: '#ffffff',
             padding: '16px 18px',
-            fontWeight: 700,
-            fontSize: '0.9rem',
-            letterSpacing: '0.04em',
+            fontWeight: 600,
+            fontSize: '0.8rem',
+            letterSpacing: '0.08em',
             textTransform: 'uppercase'
           }}
         >
@@ -126,7 +126,7 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
             {config.icon}
           </div>
 
-          <div style={{ flex: 1, color: '#1f2937', fontSize: '0.98rem', lineHeight: 1.6, paddingTop: '6px' }}>
+          <div style={{ flex: 1, color: '#3A3A3A', fontSize: '1rem', lineHeight: 1.6, paddingTop: '4px', fontWeight: 400 }}>
             {mensagem}
           </div>
         </div>

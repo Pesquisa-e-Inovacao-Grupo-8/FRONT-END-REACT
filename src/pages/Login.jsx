@@ -35,13 +35,13 @@ async function handleSubmit(e) {
 
 
         if (usuarioLogado.tipo === "ADMIN") {
-              navigate("/admin/dashboard");
-          } else if (usuarioLogado.tipo === "PROFISSIONAL") {
-            navigate("/admin/agendamentos"); 
-            window.location.reload(); // Força o reload para atualizar a navbar
-          } else {
-            navigate("/"); 
-          }
+          navigate("/admin/dashboard");
+        } else if (usuarioLogado.tipo === "PROFISSIONAL") {
+          navigate("/admin/agendamentos"); 
+        } else {
+          navigate("/"); 
+        }
+        window.location.reload(); // Força o reload para atualizar a navbar
       } else {
           navigate("/");
       }
