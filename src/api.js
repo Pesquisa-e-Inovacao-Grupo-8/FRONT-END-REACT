@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://renatatukotomi.duckdns.org:8080"
+  baseURL: "/spring"
 });
 
 api.interceptors.request.use((config) => {

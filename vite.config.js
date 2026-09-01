@@ -3,8 +3,18 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+
   server: {
-    host: true,   // expõe na rede local (0.0.0.0)
+    host: true,
     port: 8000,
+
+    proxy: {
+      '/spring': {
+        target: 'http://renatatukotomi.duckdns.org:8080',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/spring/, ''),
+      },
+    },
   },
 });

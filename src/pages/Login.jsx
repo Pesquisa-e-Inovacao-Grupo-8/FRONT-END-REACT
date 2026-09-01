@@ -1,7 +1,7 @@
 //src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import "../styles/login.css";
 
 export default function Login() {
@@ -15,7 +15,7 @@ async function handleSubmit(e) {
 
     try {
       // 1. Faz o login e pega o token
-      const response = await axios.post("http://renatatukotomi.duckdns.org:8080/auth/login", {
+      const response = await api.post("/auth/login", {
         email,
         senha
       });
@@ -23,12 +23,10 @@ async function handleSubmit(e) {
       localStorage.setItem("token", token);
 
       // 2. Busca a lista de usuários para saber quem logou
-      const usersRes = await axios.get("http://renatatukotomi.duckdns.org:8080/usuarios", {
-          headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const usersRes = await api.get("/usuarios");
+
       const usuarioLogado = usersRes.data.find(u => u.email === email);
-      
+
       if (usuarioLogado) {
           localStorage.setItem("userId", usuarioLogado.id);
           localStorage.setItem("userName", usuarioLogado.nome);
