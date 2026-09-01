@@ -33,6 +33,10 @@ async function handleSubmit(e) {
         localStorage.setItem("userRole", usuarioLogado.tipo); // Guarda se é CLIENTE ou PROFISSIONAL
         
         
+        setTimeout(() => {
+          mostrarConfirmacao("Login realizado com sucesso!", 2200);
+        }, 2300);
+
         if (usuarioLogado.tipo === "ADMIN") {
           navigate("/admin/dashboard");
         } else if (usuarioLogado.tipo === "PROFISSIONAL") {
@@ -40,8 +44,10 @@ async function handleSubmit(e) {
         } else {
           navigate("/"); 
         }
-        window.location.reload(); // Força o reload para atualizar a navbar
-        mostrarConfirmacao("Login realizado com sucesso!", 2200);
+
+        // Atualiza a navbar após o modal permanecer visível por alguns instantes
+        window.location.reload();
+        
       } else {
           navigate("/");
       }
