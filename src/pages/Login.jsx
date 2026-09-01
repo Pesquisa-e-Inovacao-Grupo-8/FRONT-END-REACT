@@ -52,6 +52,10 @@ async function handleSubmit(e) {
       }
     }, 2200);
 
+    setTimeout(() => {
+        window.location.reload();
+    }, 100);
+
   } catch (error) {
     console.error("Erro no login:", error);
 
