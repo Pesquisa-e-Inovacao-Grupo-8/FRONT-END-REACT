@@ -10,3 +10,4 @@ jobs:
       GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
       GITHUB_ORGANIZATION: ${{ github.repository_owner }}
     secrets: inherit
+    

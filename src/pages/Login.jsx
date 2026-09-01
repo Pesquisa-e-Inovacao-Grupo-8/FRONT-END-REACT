@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
+import { mostrarConfirmacao, mostrarErro } from "../components/utils/modal-confirmação";
 import "../styles/login.css";
 
 export default function Login() {
@@ -32,7 +33,7 @@ async function handleSubmit(e) {
           localStorage.setItem("userName", usuarioLogado.nome);
           localStorage.setItem("userRole", usuarioLogado.tipo); // Guarda se é CLIENTE ou PROFISSIONAL
 
-          alert("Login realizado com sucesso!");
+          mostrarConfirmacao("Login realizado com sucesso!", 2200);
 
         if (usuarioLogado.tipo === "ADMIN") {
               navigate("/admin/dashboard");
@@ -47,7 +48,7 @@ async function handleSubmit(e) {
 
     } catch (error) {
       console.error(error);
-      alert("Email ou senha inválidos");
+      mostrarErro("Email ou senha inválidos", 2600);
     }
   }
   return (
