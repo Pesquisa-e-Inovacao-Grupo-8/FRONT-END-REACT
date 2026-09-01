@@ -28,12 +28,11 @@ async function handleSubmit(e) {
       const usuarioLogado = usersRes.data.find(u => u.email === email);
 
       if (usuarioLogado) {
-          mostrarConfirmacao("Login realizado com sucesso!", 2200);
-          localStorage.setItem("userId", usuarioLogado.id);
-          localStorage.setItem("userName", usuarioLogado.nome);
-          localStorage.setItem("userRole", usuarioLogado.tipo); // Guarda se é CLIENTE ou PROFISSIONAL
-
-
+        localStorage.setItem("userId", usuarioLogado.id);
+        localStorage.setItem("userName", usuarioLogado.nome);
+        localStorage.setItem("userRole", usuarioLogado.tipo); // Guarda se é CLIENTE ou PROFISSIONAL
+        
+        
         if (usuarioLogado.tipo === "ADMIN") {
           navigate("/admin/dashboard");
         } else if (usuarioLogado.tipo === "PROFISSIONAL") {
@@ -42,6 +41,7 @@ async function handleSubmit(e) {
           navigate("/"); 
         }
         window.location.reload(); // Força o reload para atualizar a navbar
+        mostrarConfirmacao("Login realizado com sucesso!", 2200);
       } else {
           navigate("/");
       }
