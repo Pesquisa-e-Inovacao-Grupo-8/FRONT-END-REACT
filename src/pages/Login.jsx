@@ -39,7 +39,7 @@ async function handleSubmit(e) {
     localStorage.setItem("userRole", usuarioLogado.tipo);
 
     // Mostra o modal
-    mostrarConfirmacao("Login realizado com sucesso!", 2000);
+    mostrarConfirmacao("Login realizado com sucesso!", 2500);
 
     // Aguarda o modal terminar antes de navegar
     setTimeout(() => {
@@ -50,11 +50,13 @@ async function handleSubmit(e) {
       } else {
         navigate("/");
       }
+
+      setTimeout(() => {
+          window.location.reload();
+      }, 100);
+
     }, 2200);
 
-    setTimeout(() => {
-        window.location.reload();
-    }, 100);
 
   } catch (error) {
     console.error("Erro no login:", error);
