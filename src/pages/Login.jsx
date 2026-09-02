@@ -53,9 +53,9 @@ async function handleSubmit(e) {
         navigate("/");
       }
 
-      setTimeout(() => {
-          window.location.reload();
-      }, 100);
+      // setTimeout(() => {
+      //     window.location.reload();
+      // }, 100);
 
     }, 2200);
 
