@@ -24,6 +24,7 @@ async function handleSubmit(e) {
     localStorage.setItem("token", token);
 
     const usersRes = await api.get("/usuarios");
+    console.log("Usuários recebidos do backend:", usersRes.data);
 
     const usuarioLogado = usersRes.data.find(
       (u) => u.email?.toLowerCase() === email.toLowerCase()
@@ -35,6 +36,7 @@ async function handleSubmit(e) {
     }
 
     localStorage.setItem("userId", usuarioLogado.id);
+    localStorage.setItem("clientId", usuarioLogado.cliente_id);
     localStorage.setItem("userName", usuarioLogado.nome);
     localStorage.setItem("userRole", usuarioLogado.tipo);
 
