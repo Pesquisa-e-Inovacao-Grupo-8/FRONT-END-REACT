@@ -14,7 +14,7 @@ export default defineConfig({
 
     proxy: {
       '/spring': {
-        target: 'http://renatatukotomi.duckdns.org:8080',
+        target: 'http://renatahtokutomi.com/:8080',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/spring/, ''),

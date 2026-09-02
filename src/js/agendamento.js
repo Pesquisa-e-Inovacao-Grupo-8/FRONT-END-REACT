@@ -1,7 +1,7 @@
 import axios from 'axios';
 import api, { normalizeArray } from '../api';
 
-const FLASK_URL = 'http://renatatukotomi.duckdns.org:8088/flask-infinity-pay';
+const FLASK_URL = 'http://renatahtokutomi.com/:8088/flask-infinity-pay';
 
 export function cancelarAgendamento(agendamento) {
     agendamento.status = 'CANCELADO';
