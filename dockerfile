@@ -29,7 +29,7 @@ COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expõe a porta HTTP
-EXPOSE 80
+EXPOSE 443
 
 # Inicia o Nginx
 CMD ["nginx", "-g", "daemon off;"]
