@@ -14,8 +14,15 @@ export function normalizeArray(value) {
   return [];
 }
 
+if ( import.meta.env.ENV == "DEV") {
+    VITE_API_BASE_URL = "https://127.0.0.1:8080";
+}
+else if ( import.meta.env.ENV == "PRD") {
+    VITE_API_BASE_URL = "https://spring.renatahtokutomi.com";
+}
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "https://spring.renatahtokutomi.com"
+    baseURL: VITE_API_BASE_URL || "https://spring.renatahtokutomi.com",
 });
 
 api.interceptors.request.use((config) => {

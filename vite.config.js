@@ -14,7 +14,7 @@ export default defineConfig({
 
     proxy: {
       '/spring': {
-        target: 'https://spring.renatahtokutomi.com/:8080',
+        target: 'https://spring.renatahtokutomi.com',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/spring/, ''),
