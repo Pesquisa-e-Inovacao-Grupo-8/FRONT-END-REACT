@@ -20,7 +20,7 @@ body {
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
   padding: 40px;
-  height: 600px;
+  height: 735px;
   width: 100%;
   max-width: 30%;
   box-shadow: 5px 7px 15px #706f6f;
@@ -28,7 +28,7 @@ body {
 }
 
 .container-foto{
-  height: 600px;
+  height: 735px;
   width: 50%;
   background-image: url('../assets/login-img-01.jpg');
   border-top-left-radius: 12px;

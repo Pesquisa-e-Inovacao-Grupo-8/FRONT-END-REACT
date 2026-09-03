@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../api';
+import api, { normalizeArray } from '../../api';
 
 export default function CardServico() {
 const [servicos, setServicos] = useState([]);
@@ -9,7 +9,7 @@ const [servicos, setServicos] = useState([]);
   useEffect(() => {
     api.get('/servicos')
       .then((response) => {
-        setServicos(response.data);
+        setServicos(normalizeArray(response.data));
         setLoading(false);
       })
       .catch((error) => {
@@ -27,7 +27,7 @@ const [servicos, setServicos] = useState([]);
         <div className="category-section">
         <h2 className="category-title">Todos os Serviços</h2>
         <div className="services-grid">
-          {servicos.map((svc) => (
+          {Array.isArray(servicos) && servicos.length > 0 ? servicos.map((svc) => (
             <div className="service-card" key={svc.id}>
               <div className="card-top">
                 <div className="card-icon">✨</div>
@@ -45,7 +45,9 @@ const [servicos, setServicos] = useState([]);
               <div className="card-desc">{svc.descricao}</div>
               <button className="card-btn">Agendar</button>
             </div>
-          ))}
+          )) : (
+            <div style={{ color: '#666', padding: '1rem 0' }}>Nenhum serviço disponível no momento.</div>
+          )}
         </div>
       </div>
       </main>

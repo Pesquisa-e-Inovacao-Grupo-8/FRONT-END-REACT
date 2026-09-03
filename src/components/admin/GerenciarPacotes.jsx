@@ -1,6 +1,6 @@
 //src/components/admin/GerenciarPacotes.jsx
 import { useState, useEffect } from 'react';
-import api from '../../api';
+import api, { normalizeArray } from '../../api';
 
 export default function GerenciarPacotes() {
   const [pacotes, setPacotes] = useState([]);
@@ -26,8 +26,8 @@ export default function GerenciarPacotes() {
         api.get('/pacotes'),
         api.get('/servicos')
       ]);
-      setPacotes(resPacotes.data);
-      setServicosDisponiveis(resServicos.data);
+      setPacotes(normalizeArray(resPacotes.data));
+      setServicosDisponiveis(normalizeArray(resServicos.data));
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     } finally {
