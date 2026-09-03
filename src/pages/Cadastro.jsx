@@ -1,7 +1,7 @@
 //src/pages/Cadastro.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 import "../styles/cadastro.css";
 
 export default function Cadastro() {
@@ -46,7 +46,7 @@ export default function Cadastro() {
         ativo: true
       };
 
-      await axios.post("http://localhost:8080/usuarios", payload);
+      await api.post("/usuarios", payload);
 
       alert("Conta criada com sucesso! Faça login para entrar no seu painel.");
       navigate("/login");

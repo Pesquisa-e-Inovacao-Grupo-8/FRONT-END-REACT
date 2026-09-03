@@ -1,6 +1,6 @@
 // src/pages/VitrinePacotes.jsx
 import { useState, useEffect } from "react";
-import api from "../api";
+import api, { normalizeArray } from "../api";
 import "../styles/agendamentos-usuario.css"; 
 
 export default function VitrinePacotes() {
@@ -10,7 +10,7 @@ export default function VitrinePacotes() {
 
   useEffect(() => {
     api.get('/pacotes')
-      .then(res => setPacotes(res.data))
+      .then(res => setPacotes(normalizeArray(res.data)))
       .catch(err => console.error("Erro ao buscar pacotes", err))
       .finally(() => setLoading(false));
   }, []);

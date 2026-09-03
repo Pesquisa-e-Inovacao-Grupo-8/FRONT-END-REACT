@@ -1,0 +1,14 @@
+name: Aula - Pieplines
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Echo - Aula
+    runs-on: ubuntu-latest
+    run: |
+      echo "Aula - Pipelines"
+
+
+
