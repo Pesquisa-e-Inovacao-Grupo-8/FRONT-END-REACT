@@ -15,7 +15,7 @@ export function normalizeArray(value) {
 }
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "https://renatahtokutomi.com/:8080"
+    baseURL: import.meta.env.VITE_API_BASE_URL || "https://spring.renatahtokutomi.com"
 });
 
 api.interceptors.request.use((config) => {
