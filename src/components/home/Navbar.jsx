@@ -8,6 +8,7 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -29,8 +30,11 @@ export default function Navbar() {
 
     setIsLoggedIn(false);
     setUserRole("");
+    setMenuOpen(false);
     navigate("/login");
   };
+
+  const closeMenu = () => setMenuOpen(false);
 
   let navLinks = [{ to: "/", label: "Início" }];
 
@@ -51,16 +55,29 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <NavLink to="/" className="navbar-logo">
+      <NavLink to="/" className="navbar-logo" onClick={closeMenu}>
         Tukotomi
       </NavLink>
 
-      <ul className="navbar-links">
+      <button
+        type="button"
+        className="navbar-toggle"
+        aria-label="Abrir menu"
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen((prev) => !prev)}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      <ul className={`navbar-links ${menuOpen ? "open" : ""}`}>
         {navLinks.map((link) => (
           <li key={link.to}>
             <NavLink
               to={link.to}
               className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={closeMenu}
             >
               {link.label}
             </NavLink>
@@ -68,29 +85,12 @@ export default function Navbar() {
         ))}
 
         {isLoggedIn ? (
-          <li
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginLeft: "15px",
-              gap: "15px",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: "bold",
-                color: "#b8960c",
-                display: "flex",
-                alignItems: "center",
-                height: "48px",
-              }}
-            >
-              Olá, {userName}
-            </span>
+          <li className="navbar-user-area">
+            <span className="navbar-user-name">Olá, {userName}</span>
 
             <button
               onClick={handleLogout}
-              className="btn-cadastrar"
+              className="btn-cadastrar navbar-logout-btn"
               style={{
                 cursor: "pointer",
                 border: "none",
@@ -113,15 +113,17 @@ export default function Navbar() {
               <NavLink
                 to="/login"
                 className={({ isActive }) => (isActive ? "active" : "")}
+                onClick={closeMenu}
               >
                 Login
               </NavLink>
             </li>
 
             <li>
-              <NavLink 
-                to="/cadastrar" 
-                className={({ isActive }) => isActive ? "btn-cadastrar" : "btn-cadastrar"}
+              <NavLink
+                to="/cadastrar"
+                className={({ isActive }) => (isActive ? "btn-cadastrar active" : "btn-cadastrar")}
+                onClick={closeMenu}
               >
                 Cadastrar
               </NavLink>
