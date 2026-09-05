@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getEnv } from './env';
 
 export function normalizeArray(value) {
   if (Array.isArray(value)) return value;
@@ -14,8 +15,8 @@ export function normalizeArray(value) {
   return [];
 }
 
-const envName = (import.meta.env.VITE_ENV || import.meta.env.MODE || "PRD").toLowerCase();
-const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
+const envName = (getEnv('VITE_ENV') || import.meta.env.MODE || 'PRD').toLowerCase();
+const configuredBaseUrl = getEnv('VITE_API_BASE_URL') || import.meta.env.VITE_API_BASE_URL;
 
 const apiBaseUrl = configuredBaseUrl || {
   dev: "http://127.0.0.1:8080",
