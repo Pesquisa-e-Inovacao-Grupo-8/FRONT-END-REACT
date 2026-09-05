@@ -1,6 +1,8 @@
 //src/components/admin/GerenciarPacotes.jsx
 import { useState, useEffect } from 'react';
 import api, { normalizeArray } from '../../api';
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../utils/mensagem';
+import mostrarConfirmacaoAssincrona, { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
 
 export default function GerenciarPacotes() {
   const [pacotes, setPacotes] = useState([]);
@@ -45,7 +47,7 @@ export default function GerenciarPacotes() {
 
   const handleSalvarPacote = async () => {
     if (!novoPacote.nome || !novoPacote.precoTotal) {
-      alert("Preencha o nome e o preço do pacote!");
+      await mostrarAvisoObrigatorio("Preencha o nome e o preço do pacote!");
       return;
     }
 
@@ -70,7 +72,7 @@ export default function GerenciarPacotes() {
         });
       }
 
-      alert("Pacote criado com sucesso!");
+      mostrarSucessoMensagem("Pacote criado com sucesso!");
       setModalAberto(false);
       setNovoPacote({ nome: '', descricao: '', precoTotal: '' });
       setServicosSelecionados([]);
@@ -78,20 +80,20 @@ export default function GerenciarPacotes() {
 
     } catch (error) {
       console.error("Erro ao salvar pacote", error);
-      alert("Erro ao criar pacote.");
+      await mostrarAvisoObrigatorio("Erro ao criar pacote. Contate o suporte.");
     } finally {
       setSalvando(false);
     }
   };
 
   const deletarPacote = async (id) => {
-    if (window.confirm("Certeza que deseja remover este pacote?")) {
-      try {
-        await api.delete(`/pacotes/${id}`);
-        setPacotes(pacotes.filter(p => p.id !== id));
-      } catch (error) {
-        alert("Erro ao deletar pacote.");
-      }
+    const confirmar = await mostrarConfirmacaoAssincrona("Certeza que deseja remover este pacote?");
+    if (!confirmar) return;
+    try {
+      await api.delete(`/pacotes/${id}`);
+      setPacotes(pacotes.filter(p => p.id !== id));
+    } catch (error) {
+      await mostrarAvisoObrigatorio("Erro ao deletar pacote. Contate o suporte.");
     }
   };
 
@@ -139,7 +141,7 @@ export default function GerenciarPacotes() {
           backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', 
           justifyContent: 'center', alignItems: 'center', zIndex: 9999
         }}>
-          <div style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="admin-modal-panel" style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3>Criar Novo Pacote</h3>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "15px" }}>
@@ -173,9 +175,9 @@ export default function GerenciarPacotes() {
               </div>
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-              <button onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '8px 15px', cursor: 'pointer' }}>Cancelar</button>
-              <button onClick={handleSalvarPacote} disabled={salvando} style={{ padding: '8px 15px', background: '#b8960c', color: '#fff', border: 'none', cursor: 'pointer' }}>
+            <div className="pacote-modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+              <button className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '8px 15px', cursor: 'pointer' }}>Cancelar</button>
+              <button className="btn-salvar-pacote" onClick={handleSalvarPacote} disabled={salvando} style={{ padding: '8px 15px', background: '#b8960c', color: '#fff', border: 'none', cursor: 'pointer' }}>
                 {salvando ? "Salvando..." : "Salvar Pacote"}
               </button>
             </div>

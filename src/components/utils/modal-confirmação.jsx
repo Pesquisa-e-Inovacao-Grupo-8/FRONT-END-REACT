@@ -1,5 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const MODAL_STYLES = {
   confirmacao: {
@@ -27,6 +29,26 @@ const MODAL_STYLES = {
     label: 'Atenção'
   }
 };
+
+function isMobile() {
+  if (typeof window !== 'undefined') {
+    try {
+      const vw = (window.visualViewport && window.visualViewport.width) || window.innerWidth || document.documentElement.clientWidth;
+      if (typeof vw === 'number' && vw <= 768) return true;
+
+      if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return true;
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  if (typeof navigator !== 'undefined') {
+    const ua = navigator.userAgent || '';
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) return true;
+  }
+
+  return false;
+}
 
 export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo = 2500, onClose }) {
   const config = useMemo(() => MODAL_STYLES[tipo] || MODAL_STYLES.confirmacao, [tipo]);
@@ -170,13 +192,36 @@ export function mostrarModal({ mensagem, tipo = 'confirmacao', tempo = 2500, onC
   return close;
 }
 
+// Mapeia cada tipo de modal para o toast equivalente
+const TOAST_FN = {
+  confirmacao: (mensagem, tempo) => {
+    const id = toast.success(mensagem, { autoClose: tempo });
+    return () => toast.dismiss(id);
+  },
+  erro: (mensagem, tempo) => {
+    const id = toast.error(mensagem, { autoClose: tempo });
+    return () => toast.dismiss(id);
+  },
+  atencao: (mensagem, tempo) => {
+    const id = toast.warn(mensagem, { autoClose: tempo });
+    return () => toast.dismiss(id);
+  }
+};
+
+function mostrarConfirmacaoOuToast(tipo, mensagem, tempo) {
+  if (isMobile()) {
+    return TOAST_FN[tipo](mensagem, tempo);
+  }
+  return mostrarModal({ mensagem, tipo, tempo });
+}
+
 export const mostrarConfirmacao = (mensagem, tempo = 2500) =>
-  mostrarModal({ mensagem, tipo: 'confirmacao', tempo });
+  mostrarConfirmacaoOuToast('confirmacao', mensagem, tempo);
 
 export const mostrarErro = (mensagem, tempo = 3000) =>
-  mostrarModal({ mensagem, tipo: 'erro', tempo });
+  mostrarConfirmacaoOuToast('erro', mensagem, tempo);
 
 export const mostrarAtencao = (mensagem, tempo = 3500) =>
-  mostrarModal({ mensagem, tipo: 'atencao', tempo });
+  mostrarConfirmacaoOuToast('atencao', mensagem, tempo);
 
 export default ModalConfirmacao;

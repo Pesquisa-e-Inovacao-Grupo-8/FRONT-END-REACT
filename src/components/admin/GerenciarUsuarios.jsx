@@ -1,6 +1,8 @@
 //src/components/admin/GerenciarUsuarios.jsx
 import { useState, useEffect } from 'react';
 import api from '../../api';
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../utils/mensagem';
+import mostrarConfirmacaoAssincrona, { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
 
 const ESTADO_INICIAL_FORM = {
   nome: '',
@@ -35,7 +37,7 @@ export default function GerenciarUsuarios() {
       setUsuarios(response.data);
     } catch (error) {
       console.error("Erro ao buscar usuários:", error);
-      alert("Erro ao carregar a lista de usuários.");
+      await mostrarAvisoObrigatorio("Erro ao carregar a lista de usuários. Contate o suporte.");
     } finally {
       setLoading(false);
     }
@@ -56,18 +58,19 @@ export default function GerenciarUsuarios() {
 
   const deletarUsuario = async (id, tipo) => {
     if (tipo === 'ADMIN') {
-      alert("Você não pode deletar um Administrador por aqui!");
+      await mostrarAvisoObrigatorio("Você não pode deletar um Administrador por aqui!");
       return;
     }
 
-    if (window.confirm("Atenção: Deletar este usuário apagará também a ficha dele. Deseja continuar?")) {
-      try {
-        await api.delete(`/usuarios/${id}`);
-        setUsuarios(usuarios.filter(u => u.id !== id));
-      } catch (error) {
-        console.error("Erro ao deletar:", error);
-        alert("Não foi possível deletar o usuário.");
-      }
+    const confirmar = await mostrarConfirmacaoAssincrona("Atenção: Deletar este usuário apagará também a ficha dele. Deseja continuar?");
+    if (!confirmar) return;
+
+    try {
+      await api.delete(`/usuarios/${id}`);
+      setUsuarios(usuarios.filter(u => u.id !== id));
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+      await mostrarAvisoObrigatorio("Não foi possível deletar o usuário. Contate o suporte.");
     }
   };
 
@@ -103,14 +106,15 @@ export default function GerenciarUsuarios() {
 
       await api.post('/usuarios', payload);
       
-      alert(`Usuário ${formNovoUsuario.nome} cadastrado com sucesso!`);
+      mostrarSucessoMensagem(`Usuário ${formNovoUsuario.nome} cadastrado com sucesso!`);
       setModalAberto(false);
       setFormNovoUsuario(ESTADO_INICIAL_FORM);
       carregarUsuarios(); // Atualiza a tabela imediatamente
       
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
-      alert(error.response?.data?.message || "Erro ao cadastrar usuário. Verifique os dados.");
+      const msg = error.response?.data?.message || "Erro ao cadastrar usuário. Verifique os dados.";
+      await mostrarAvisoObrigatorio(`${msg} Contate o suporte.`);
     } finally {
       setSalvando(false);
     }
@@ -190,7 +194,7 @@ export default function GerenciarUsuarios() {
           backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', 
           justifyContent: 'center', alignItems: 'center', zIndex: 9999
         }}>
-          <div style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '450px', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="admin-modal-panel" style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '450px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ marginTop: 0, borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Cadastrar Novo Usuário</h3>
             
             <form onSubmit={handleSalvarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
@@ -238,10 +242,10 @@ export default function GerenciarUsuarios() {
               </div>
               
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button type="button" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
+                <button type="button" className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
                   Cancelar
                 </button>
-                <button type="submit" disabled={salvando} style={{ padding: '10px 15px', background: salvando ? '#ccc' : '#1a1a2e', color: '#fff', border: 'none', borderRadius: '4px', cursor: salvando ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>
+                <button type="submit" className="btn-salvar-modal" disabled={salvando} style={{ padding: '10px 15px', background: salvando ? '#ccc' : '#1a1a2e', color: '#fff', border: 'none', borderRadius: '4px', cursor: salvando ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>
                   {salvando ? 'Salvando...' : 'Salvar Usuário'}
                 </button>
               </div>

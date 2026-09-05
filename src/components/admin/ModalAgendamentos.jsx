@@ -4,6 +4,8 @@ import { cancelarAgendamento , finalizarAgendamento , gerarLinkPagamento } from 
 import api from "../../api";
 import "../../styles/agendamento-grid.css";
 import "../../styles/app.css";
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from "../utils/mensagem";
+import mostrarConfirmacaoAssincrona from "../utils/confirm-dialog";
 
 export default function ModalAgendamento({ agendamento, onClose, onAtualizar, onFinalizar, onCancelar }) {
   const [checkoutUrl, setCheckoutUrl] = useState(agendamento.link_pagamento || "");
@@ -27,33 +29,34 @@ export default function ModalAgendamento({ agendamento, onClose, onAtualizar, on
       if (url) {
         setCheckoutUrl(url);
       } else {
-        alert('Não foi possível obter o link de pagamento.');
+        mostrarErroMensagem('Não foi possível obter o link de pagamento.');
       }
     } catch (error) {
       console.error(error);
-      alert('Erro ao gerar link de pagamento.');
+      mostrarErroMensagem('Erro ao gerar link de pagamento.');
     } finally {
       setGerandoLink(false);
     }
   };
 
   const handleDarBaixa = async () => {
-    if (window.confirm("Confirmar o recebimento deste valor por fora (Dinheiro/Pix Direto)? O status será alterado para PAGO.")) {
-      try {
-        setDandoBaixa(true);
-        await api.patch(`/agendamentos/${agendamento.id}/pagamento`, { status: "PAGO" });
-        
-        alert("Baixa realizada com sucesso!");
-        
-        if (onAtualizar) onAtualizar();
-        onClose();
-        
-      } catch (error) {
-        console.error("Erro ao dar baixa:", error);
-        alert("Não foi possível processar a baixa. Verifique a API.");
-      } finally {
-        setDandoBaixa(false);
-      }
+    try {
+      const confirmar = await mostrarConfirmacaoAssincrona("Confirmar o recebimento deste valor por fora (Dinheiro/Pix Direto)? O status será alterado para PAGO.");
+      if (!confirmar) return;
+
+      setDandoBaixa(true);
+      await api.patch(`/agendamentos/${agendamento.id}/pagamento`, { status: "PAGO" });
+
+      mostrarSucessoMensagem("Baixa realizada com sucesso!");
+
+      if (onAtualizar) onAtualizar();
+      onClose();
+
+    } catch (error) {
+      console.error("Erro ao dar baixa:", error);
+      mostrarErroMensagem("Não foi possível processar a baixa. Verifique a API.");
+    } finally {
+      setDandoBaixa(false);
     }
   };
 

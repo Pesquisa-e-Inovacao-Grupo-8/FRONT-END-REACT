@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../../api";
+import mostrarConfirmacaoAssincrona from '../utils/confirm-dialog';
 import "../../styles/app.css";
 
 const INITIAL_STATE = {
@@ -147,23 +148,26 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
     setAberto(false);
   };
 
-  const fecharModal = () => {
-    if (temAlteracoes(formData, funcionaria) && !window.confirm('Existem alterações não salvas. Deseja fechar mesmo assim?')) return;
+  const fecharModal = async () => {
+    if (temAlteracoes(formData, funcionaria)) {
+      const confirmar = await mostrarConfirmacaoAssincrona('Existem alterações não salvas. Deseja fechar mesmo assim?');
+      if (!confirmar) return;
+    }
     setAberto(false);
   };
 
   return (
     <div className="container novo-agendamento-container">
       <div className="header">
-        <h2>Agendamentos</h2>
-        <button className="btn-app" onClick={() => setAberto(true)} type="button" style={{ backgroundColor: "#1a1a2e", color: "white", padding: "10px 20px", borderRadius: "5px", border: "none", cursor: "pointer", fontWeight: "bold" }}>
+        <h2 className="agenda-header-title">Agendamentos</h2>
+        <button className="btn-app agenda-new-button" onClick={() => setAberto(true)} type="button" style={{ backgroundColor: "#1a1a2e", color: "white", padding: "10px 20px", borderRadius: "5px", border: "none", cursor: "pointer", fontWeight: "bold" }}>
           + {tituloModal}
         </button>
       </div>
 
       {aberto && (
         <div className="novo-agendamento-modal-overlay" onClick={fecharModal} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", justifyContent: "center", alignItems: "center" }}>
-          <div className="novo-agendamento-modal" onClick={(e) => e.stopPropagation()} style={{ backgroundColor: "#fff", padding: "30px", borderRadius: "10px", width: "100%", maxWidth: "600px", maxHeight: "90vh", overflowY: "auto" }}>
+          <div className="novo-agendamento-modal admin-modal-panel" onClick={(e) => e.stopPropagation()} style={{ backgroundColor: "#fff", padding: "30px", borderRadius: "10px", width: "100%", maxWidth: "600px", maxHeight: "90vh", overflowY: "auto" }}>
 
             <div className="novo-agendamento-modal__header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>
               <h3 style={{ margin: 0, color: "#1a1a2e" }}>{tituloModal}</h3>
@@ -306,7 +310,7 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
               </div>
 
               <div className="botoes" style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                <button type="button" className="btn-app btn-cancelar" onClick={fecharModal} style={{ padding: "10px 20px", backgroundColor: "#eee", color: "#333", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Cancelar</button>
+                <button type="button" className="btn-app btn-cancelar btn-cancelar-modal" onClick={fecharModal} style={{ padding: "10px 20px", backgroundColor: "#eee", color: "#333", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Cancelar</button>
                 <button type="submit" className="btn-app btn-salvar" style={{ padding: "10px 20px", backgroundColor: "#b8960c", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Salvar Agendamento</button>
               </div>
             </form>

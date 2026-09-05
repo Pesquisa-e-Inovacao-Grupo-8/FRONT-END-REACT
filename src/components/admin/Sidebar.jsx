@@ -1,6 +1,7 @@
 // src/components/admin/Sidebar.jsx
 import { NavLink } from "react-router-dom";
 import "../../styles/sidebar.css";
+import "../../styles/admin-master.css";
 
 export default function Sidebar({ open, onClose }) {
   const role = localStorage.getItem("userRole"); // "ADMIN" ou "PROFISSIONAL"

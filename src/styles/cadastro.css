@@ -5,6 +5,44 @@ body {
   background-color: #f6f6e5;
 }
 
+.Toastify__toast-container.cadastro-toast-container {
+  width: min(360px, calc(100vw - 32px));
+  padding: 0;
+  top: 20px;
+  right: 20px;
+}
+
+.Toastify__toast.cadastro-toast {
+  min-height: 58px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(92, 77, 41, 0.2);
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  backdrop-filter: blur(8px);
+}
+
+.Toastify__toast.cadastro-toast.Toastify__toast--success {
+  background: linear-gradient(135deg, #b58d3d 0%, #c9a84c 52%, #d9bd73 100%);
+}
+
+.Toastify__toast.cadastro-toast.Toastify__toast--error {
+  background: linear-gradient(135deg, #9d4b4b 0%, #b96767 52%, #d18b78 100%);
+}
+
+.Toastify__toast.cadastro-toast .Toastify__close-button {
+  color: #fff;
+  opacity: 0.8;
+}
+
+.Toastify__toast.cadastro-toast .Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.75);
+}
+
 .container-principal-cadastro {
   max-width: 1100px;
   width: min(100% - 32px, 1100px);
@@ -50,7 +88,7 @@ body {
 img {
   height: 90%;
   width: 100%;
-  border-radius: 10px;
+  border-radius: 50px;
   box-shadow: 1px 1px 10px #706f6f;
 }
 
@@ -71,7 +109,7 @@ form {
 
 .container-cadastro input {
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 14px;
   border: 1px solid #ddd;
   width: 100%;
   font-size: 0.9rem;
@@ -128,16 +166,26 @@ form {
   margin-top: 15px;
   padding: 12px;
   border: none;
-  border-radius: 10px;
-  background-color: #caa42d;
+  border-radius: 14px;
+  background: var(--gold-gradient);
   color: white;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s ease;
 }
 
 .container-cadastro button:hover {
-  background-color: #b78d21;
+  background: var(--gold-gradient-hover);
+  transform: translateY(-1px);
+}
+
+.container-cadastro button:active {
+  background: var(--gold-gradient-hover);
+  transform: translateY(0) scale(0.99);
+}
+
+.container-cadastro button:focus-visible {
+  background: var(--gold-gradient-hover);
   transform: translateY(-1px);
 }
 
@@ -179,6 +227,19 @@ form {
 }
 
 @media (max-width: 540px) {
+  .Toastify__toast-container.cadastro-toast-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .Toastify__toast.cadastro-toast {
+    width: 100%;
+    margin-bottom: 8px;
+    border-radius: 12px;
+  }
+
   .container-principal-cadastro {
     width: min(100% - 16px, 640px);
     margin-top: 16px;
@@ -196,4 +257,10 @@ form {
   .container-cadastro input {
     font-size: 1rem;
   }
+}
+
+/* Input error state applied by JS helper */
+.input-error {
+  border-color: #e53935 !important;
+  box-shadow: 0 0 0 3px rgba(229,57,53,0.08) !important;
 }
