@@ -5,6 +5,8 @@
   --gold: #C9A84C;
   --gold-dark: #A8883A;
   --gold-light: #D4B76A;
+  --gold-gradient: linear-gradient(90deg, #B58D3D 0%, #C19C4D 50%, #D0AF5C 100%);
+  --gold-gradient-hover: linear-gradient(90deg, #BE984A 0%, #C9A84C 50%, #D9BD73 100%);
   --cream: #faf8f3;
   --dark: #1A1C22;
   --text: #3A3A3A;
@@ -39,6 +41,18 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
   font-style: italic;
   color: var(--gold);
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.navbar-logo-image {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  background: transparent;
+  box-shadow: none;
 }
 
 .navbar-links {
@@ -96,7 +110,7 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
 }
 
 .btn-cadastrar {
-  background: var(--gold);
+  background: var(--gold-gradient);
   color: #1a1c22;
   padding: 0.55rem 1.6rem;
   border-radius: 50px;
@@ -107,7 +121,7 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
 }
 
 .btn-cadastrar:hover {
-  background: var(--gold-dark);
+  background: var(--gold-gradient-hover);
   transform: translateY(-1px);
 }
 
@@ -177,14 +191,22 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
 }
 
 .btn-primary {
-  background: var(--gold);
+  background: var(--gold-gradient);
   color: white;
 }
 
 .btn-primary:hover {
-  background: var(--gold-dark);
+  background: var(--gold-gradient-hover);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(201, 168, 76, 0.35);
+}
+
+.btn-primary:active,
+.btn-primary:focus-visible,
+.btn-primary.button-pressing {
+  background: var(--gold-gradient-hover);
+  transform: translateY(-2px) scale(0.98);
+  box-shadow: 0 6px 18px rgba(201, 168, 76, 0.3);
 }
 
 .btn-outline {
@@ -194,21 +216,32 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
 }
 
 .btn-outline:hover {
-  background: var(--gold);
+  background: var(--gold-gradient);
   color: white;
   transform: translateY(-2px);
 }
 
-.hero-image { flex: 1; max-width: 680px; }
+.btn-outline:active,
+.btn-outline:focus-visible,
+.btn-outline.button-pressing {
+  background: var(--gold-gradient-hover);
+  color: white;
+  transform: translateY(-2px) scale(0.98);
+}
+
+.hero-image {
+  flex: 1;
+  max-width: 680px;
+  transform: translateX(-2rem);
+}
 
 .hero-image-placeholder {
   width: 100%;
   height: 600px;
-  border-radius: 20px;
+  border-radius: 8px;
   background-image: url('../assets/Renata2.jpeg'); 
   background-size: cover; 
-  background-position: center; 
-  border-radius: 20px; 
+  background-position: center -18px;
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.18);
   position: relative;
   overflow: hidden;
@@ -268,7 +301,7 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--gold-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -288,29 +321,34 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
   margin: 0 auto;
 }
 
-.service-card {
+.services .service-card {
   position: relative;
-  border-radius: 20px;
+  display: block;
+  padding: 0;
+  background: transparent;
+  border-radius: 6px;
   overflow: hidden;
   aspect-ratio: 3/4;
   cursor: pointer;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform 0.45s ease, box-shadow 0.45s ease;
 }
 
-.service-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+.services .service-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.16);
 }
 
-.service-card img {
+.services .service-card img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s;
+  border-radius: inherit;
+  transition: transform 0.6s ease;
 }
 
-.service-card:hover img { transform: scale(1.05); }
+.services .service-card:hover img { transform: scale(1.02); }
 
 .service-card-placeholder {
   width: 120%;
@@ -339,7 +377,7 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
 
 /* CTA */
 .cta {
-  background: var(--gold);
+  background: var(--gold-gradient);
   padding: 6rem 3rem;
   text-align: center;
 }
@@ -485,14 +523,38 @@ body { font-family: var(--font-body); color: var(--text); background: var(--whit
   }
 
   .hero { flex-direction: column; padding: 3rem 1.5rem; }
-  .hero-image { max-width: 100%; width: 100%; }
+  .hero-image {
+    max-width: 100%;
+    width: 100%;
+    transform: none;
+  }
   .features-grid { grid-template-columns: repeat(2, 1fr); }
   .services-grid { grid-template-columns: 1fr; }
   .footer-top { grid-template-columns: 1fr; gap: 2rem; }
   .features, .services, .cta, .footer { padding: 4rem 1.5rem; }
 }
 
+@media (min-width: 901px) and (max-height: 850px) {
+  .hero {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .hero-image-placeholder {
+    height: 520px;
+  }
+}
+
 @media (max-width: 600px) {
+  .hero-image {
+    width: 92%;
+    max-width: 92%;
+  }
+
+  .hero-image-placeholder {
+    height: 420px;
+  }
+
   .features-grid { grid-template-columns: 1fr 1fr; }
   .navbar-links { gap: 1rem; }
   .navbar-logo { font-size: 1.5rem; }

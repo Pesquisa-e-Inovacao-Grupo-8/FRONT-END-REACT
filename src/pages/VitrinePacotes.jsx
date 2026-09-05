@@ -77,13 +77,13 @@ export default function VitrinePacotes() {
                   style={{
                     marginTop: "20px",
                     padding: "12px",
-                    backgroundColor: "#1a1a2e",
                     color: "white",
                     border: "none",
                     borderRadius: "5px",
                     fontWeight: "bold",
                     cursor: comprandoId === pacote.id ? "not-allowed" : "pointer"
                   }}
+                  className="package-buy-button"
                 >
                   {comprandoId === pacote.id ? "Processando..." : "Adquirir Pacote"}
                 </button>

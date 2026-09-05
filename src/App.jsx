@@ -1,6 +1,8 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { useState } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import Navbar from "./components/home/Navbar";
 import Sidebar from "./components/admin/Sidebar";
@@ -37,18 +39,24 @@ const setupDevMockAuth = () => {
       userId: "mock-client-id",
       userName: "Cliente Mock",
       userRole: "CLIENTE",
+      email: "cliente.mock@tokutomi.com",
+      senha: "Cliente123!"
     },
     PROFISSIONAL: {
       token: "mock-profissional-token",
       userId: "mock-profissional-id",
       userName: "Profissional Mock",
       userRole: "PROFISSIONAL",
+      email: "profissional.mock@tokutomi.com",
+      senha: "Profissional123!"
     },
     ADMIN: {
       token: "mock-admin-token",
       userId: "mock-admin-id",
       userName: "Admin Mock",
       userRole: "ADMIN",
+      email: "admin.mock@tokutomi.com",
+      senha: "Admin123!",
     },
   };
 
@@ -87,15 +95,13 @@ const LayoutNavbar = () => (
   </>
 );
 
-// PrivateRoute atualizado com RBAC (Role-Based Access Control)
 const PrivateRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("userRole"); // Ex: "CLIENTE", "PROFISSIONAL", "ADMIN"
+  const role = localStorage.getItem("userRole");
 
   if (!token) return <Navigate to="/login" replace />;
 
   if (allowedRoles && !allowedRoles.includes(role)) {
-    // Redireciona o usuário para a tela principal dele se tentar acessar rota proibida
     if (role === "CLIENTE") return <Navigate to="/agendamentos" replace />;
     if (role === "PROFISSIONAL") return <Navigate to="/admin/agendamentos" replace />;
     if (role === "ADMIN") return <Navigate to="/admin/dashboard" replace />;
@@ -150,20 +156,16 @@ export default function App() {
   return (
     <BrowserRouter>
       <VLibras />
+      <ToastContainer position="top-right" newestOnTop closeOnClick />
       <Routes>
-        {/* ROTAS PÚBLICAS COM NAVBAR */}
         <Route element={<LayoutNavbar />}>
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
           <Route path="cadastrar" element={<Cadastro />} />
           <Route path="servicos" element={<Serviços />} />
-          
-          {/* PACOTES: Você tinha colocado no PrivateRoute, movi para público caso seja apenas visualização. 
-              Se precisar de login, basta voltar para o bloco abaixo. */}
           <Route path="pacotes" element={<VitrinePacotes />} />
         </Route>
 
-        {/* ROTAS PRIVADAS DO CLIENTE COM NAVBAR */}
         <Route element={<LayoutNavbar />}>
           <Route
             path="agendamento"
@@ -181,8 +183,16 @@ export default function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="configuracoes-usuario"
+            element={
+              <PrivateRoute allowedRoles={["CLIENTE"]}>
+                <ConfiguracoesUsuario />
+              </PrivateRoute>
+            }
+          />
         </Route>
-       {/* ROTAS ADMINISTRATIVAS / PROFISSIONAIS COM SIDEBAR UNIFICADA */}
+
         <Route
           path="/admin"
           element={
@@ -191,36 +201,38 @@ export default function App() {
             </PrivateRoute>
           }
         >
-          {/* ROTAS EXCLUSIVAS DE ADMIN */}
-          <Route 
-            path="dashboard" 
-            element={<PrivateRoute allowedRoles={["ADMIN"]}><Dashboard /></PrivateRoute>} 
+          <Route
+            path="dashboard"
+            element={<PrivateRoute allowedRoles={["ADMIN"]}><Dashboard /></PrivateRoute>}
           />
-          <Route 
-            path="usuarios" 
-            element={<PrivateRoute allowedRoles={["ADMIN"]}><GerenciarUsuarios /></PrivateRoute>} 
+          <Route
+            path="usuarios"
+            element={<PrivateRoute allowedRoles={["ADMIN"]}><GerenciarUsuarios /></PrivateRoute>}
           />
-          <Route 
-            path="servicos" 
-            element={<PrivateRoute allowedRoles={["ADMIN"]}><GerenciarServicos /></PrivateRoute>} 
+          <Route
+            path="servicos"
+            element={<PrivateRoute allowedRoles={["ADMIN"]}><GerenciarServicos /></PrivateRoute>}
           />
-          <Route 
-            path="pacotes-gestao" // Nome diferente da rota pública para não dar conflito
-            element={<PrivateRoute allowedRoles={["ADMIN"]}><GerenciarPacotes /></PrivateRoute>} 
+          <Route
+            path="pacotes-gestao"
+            element={<PrivateRoute allowedRoles={["ADMIN"]}><GerenciarPacotes /></PrivateRoute>}
           />
-          <Route 
-            path="financeiro" 
-            element={<PrivateRoute allowedRoles={["ADMIN"]}><Financeiro /></PrivateRoute>} 
+          <Route
+            path="financeiro"
+            element={<PrivateRoute allowedRoles={["ADMIN"]}><Financeiro /></PrivateRoute>}
           />
 
-          {/* ROTAS COMPARTILHADAS (ADMIN e PROFISSIONAL) */}
-          <Route 
-            path="agendamentos" 
-            element={<PrivateRoute allowedRoles={["ADMIN", "PROFISSIONAL"]}><AgendamentosPage /></PrivateRoute>} 
+          <Route
+            path="agendamentos"
+            element={<PrivateRoute allowedRoles={["ADMIN", "PROFISSIONAL"]}><AgendamentosPage /></PrivateRoute>}
           />
-          <Route 
-            path="configuracoes" 
-            element={<PrivateRoute allowedRoles={["ADMIN", "PROFISSIONAL"]}><ConfiguracoesProfissional /></PrivateRoute>} 
+          <Route
+            path="configuracoes"
+            element={
+              <PrivateRoute allowedRoles={["ADMIN", "PROFISSIONAL"]}>
+                <ConfiguracoesProfissional />
+              </PrivateRoute>
+            }
           />
         </Route>
       </Routes>

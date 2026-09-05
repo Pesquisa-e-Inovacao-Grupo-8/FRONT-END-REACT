@@ -1,6 +1,8 @@
 // src/components/admin/GerenciarServicos.jsx
 import { useState, useEffect } from 'react';
 import api from '../../api';
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../utils/mensagem';
+import mostrarConfirmacaoAssincrona, { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
 
 const ESTADO_INICIAL_FORM = {
   nome: '',
@@ -45,7 +47,7 @@ export default function GerenciarServicos() {
       setProdutos(resProdutos.data);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
-      alert("Erro ao carregar os dados. Verifique a API.");
+      await mostrarAvisoObrigatorio("Erro ao carregar os dados. Contate o suporte.");
     } finally {
       setLoading(false);
     }
@@ -121,7 +123,7 @@ export default function GerenciarServicos() {
 
   const handleSalvarProdutoRapido = async () => {
     if (!formProduto.nome || !formProduto.custoUnitario) {
-      alert("Preencha o nome e o custo do produto!");
+      await mostrarAvisoObrigatorio("Preencha o nome e o custo do produto!");
       return;
     }
     
@@ -149,7 +151,7 @@ export default function GerenciarServicos() {
       
     } catch (error) {
       console.error("Erro ao criar produto expresso:", error);
-      alert("Erro ao cadastrar produto. Verifique a API.");
+      await mostrarAvisoObrigatorio("Erro ao cadastrar produto. Contate o suporte.");
     } finally {
       setSalvandoProduto(false);
     }
@@ -192,7 +194,7 @@ export default function GerenciarServicos() {
         const promessasDeletar = linksParaDeletar.map(link => api.delete(`/servico-produtos/${link.id}`));
 
         await Promise.all([...promessasAdicionar, ...promessasDeletar]);
-        alert("Serviço atualizado com sucesso!");
+        mostrarSucessoMensagem("Serviço atualizado com sucesso!");
 
       } else {
         // === MODO CRIAÇÃO ===
@@ -209,7 +211,7 @@ export default function GerenciarServicos() {
           });
           await Promise.all(promessasVinculo);
         }
-        alert("Serviço cadastrado com sucesso!");
+        mostrarSucessoMensagem("Serviço cadastrado com sucesso!");
       }
       
       setModalAberto(false);
@@ -217,7 +219,8 @@ export default function GerenciarServicos() {
       
     } catch (error) {
       console.error("Erro ao salvar serviço:", error);
-      alert(error.response?.data?.message || "Erro ao salvar serviço.");
+      const msg = error.response?.data?.message || "Erro ao salvar serviço.";
+      await mostrarAvisoObrigatorio(`${msg} Contate o suporte.`);
     } finally {
       setSalvando(false);
     }
@@ -236,7 +239,7 @@ export default function GerenciarServicos() {
             onChange={(e) => setTermoBusca(e.target.value)}
             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '250px' }}
           />
-          <button onClick={abrirModalNovo} style={{ padding: '8px 15px', background: '#1a1a2e', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+          <button onClick={abrirModalNovo} style={{ padding: '8px 15px', background: '#b8960c', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
             + Novo Serviço
           </button>
         </div>
@@ -282,7 +285,7 @@ export default function GerenciarServicos() {
       {/* === MODAL DE CADASTRO/EDIÇÃO === */}
       {modalAberto && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
-          <div style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '550px', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="admin-modal-panel" style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '550px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ marginTop: 0, borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
               {servicoEditandoId ? '✏️ Editar Serviço' : '✨ Cadastrar Novo Serviço'}
             </h3>
@@ -318,6 +321,7 @@ export default function GerenciarServicos() {
                   </label>
                   <button 
                     type="button" 
+                    className={mostrandoNovoProduto ? 'btn-cancelar-modal' : ''}
                     onClick={() => setMostrandoNovoProduto(!mostrandoNovoProduto)}
                     style={{ background: '#b8960c', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '0.8rem', cursor: 'pointer' }}
                   >
@@ -358,10 +362,10 @@ export default function GerenciarServicos() {
               
               {/* BOTÕES FINAIS */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '15px' }}>
-                <button type="button" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
+                <button type="button" className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
                   Cancelar
                 </button>
-                <button type="submit" disabled={salvando} style={{ padding: '10px 15px', background: salvando ? '#ccc' : '#1a1a2e', color: '#fff', border: 'none', borderRadius: '4px', cursor: salvando ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>
+                <button type="submit" className="btn-salvar-modal" disabled={salvando} style={{ padding: '10px 15px', background: salvando ? '#ccc' : '#b8960c', color: '#fff', border: 'none', borderRadius: '4px', cursor: salvando ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>
                   {salvando ? 'Salvando...' : 'Salvar Serviço'}
                 </button>
               </div>

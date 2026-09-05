@@ -96,14 +96,14 @@ export default function Financeiro() {
   // Tela de Loading enquanto busca do Backend
   if (loading) {
     return (
-      <div className="crud-section" style={{ padding: "40px", textAlign: "center", maxWidth: "1200px", margin: "0 auto" }}>
+      <div className="crud-section financeiro-page" style={{ padding: "40px", textAlign: "center", maxWidth: "1200px", margin: "0 auto" }}>
         <h2 style={{ color: "#b8960c" }}>Calculando finanças e carregando dados...</h2>
       </div>
     );
   }
 
   return (
-    <div className="crud-section" style={{ padding: "30px", maxWidth: "1200px", margin: "0 auto" }}>
+    <div className="crud-section financeiro-page" style={{ padding: "30px", maxWidth: "1200px", margin: "0 auto" }}>
       
       {/* CABEÇALHO */}
       <div className="crud-header" style={{ borderBottom: "none", paddingBottom: 0, marginBottom: "20px" }}>
@@ -115,7 +115,7 @@ export default function Financeiro() {
       {/* ========================================== */}
       {/* KPIS FIXOS NO TOPO */}
       {/* ========================================== */}
-      <div style={{ display: "flex", gap: "20px", marginBottom: "30px", flexWrap: "wrap" }}>
+      <div className="financeiro-kpis" style={{ display: "flex", gap: "20px", marginBottom: "30px", flexWrap: "wrap" }}>
         <div className="kpi-card" style={styles.kpiCard}>
           <h4 style={styles.kpiTitle}>Total Recebidos</h4>
           <h2 style={{ ...styles.kpiValue, color: "#2e7d32" }}>
@@ -139,7 +139,7 @@ export default function Financeiro() {
       {/* ========================================== */}
       {/* MENU DE ABAS */}
       {/* ========================================== */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>
+      <div className="financeiro-tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>
         <button 
           onClick={() => setAbaAtiva("transacoes")}
           style={abaAtiva === "transacoes" ? styles.tabActive : styles.tabInactive}

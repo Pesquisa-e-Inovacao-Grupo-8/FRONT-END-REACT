@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import "../../styles/agendamentos-usuario.css"; // Reaproveitando estilos
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../../components/utils/mensagem';
+import { mostrarAvisoObrigatorio } from '../../components/utils/confirm-dialog';
 
 export default function ConfiguracoesProfissional() {
     const navigate = useNavigate();
@@ -32,6 +34,7 @@ useEffect(() => {
 
       } catch (error) {
         console.error("Erro ao carregar serviços:", error);
+        await mostrarAvisoObrigatorio("Erro ao carregar serviços. Contate o suporte.");
       } finally {
         setLoading(false);
       }
@@ -58,20 +61,20 @@ const salvarEspecialidades = async () => {
       // Envia a lista de IDs (meusServicos) para o Java
       await api.post(`/profissionais/vincular-servicos/${meuId}`, meusServicos);
       
-      alert("Suas especialidades foram salvas com sucesso no banco de dados!");
+      mostrarSucessoMensagem("Suas especialidades foram salvas com sucesso no banco de dados!");
       
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar configurações no servidor.");
+      await mostrarAvisoObrigatorio("Erro ao salvar configurações no servidor. Contate o suporte.");
     } finally {
       setSalvando(false);
     }
   };
 
-  if (loading) return <div className="page" style={{ padding: "40px" }}>Carregando serviços disponíveis...</div>;
+  if (loading) return <div className="page profile-page" style={{ padding: "40px" }}>Carregando serviços disponíveis...</div>;
 
   return (
-    <div className="page" style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
+    <div className="page profile-page" style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
       <div className="page-hero">
         <h1>Meu <em>Perfil Profissional</em></h1>
         <p>Selecione quais serviços você está habilitado a realizar no salão</p>
