@@ -8,6 +8,8 @@ import { usePagamentoStatusCheck } from '../../js/pagamento-status-check';
 import { getFuncionarias } from '../../js/funcionarias';
 import { getAgendamentos, salvarAgendamento } from '../../js/agendamento';
 import api from '../../api';
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../../components/utils/mensagem';
+import { mostrarAvisoObrigatorio } from '../../components/utils/confirm-dialog';
 
 const toMinutes = (hora = '00:00') => {
   const [h, m] = String(hora).split(':').map(Number);
@@ -150,7 +152,7 @@ export default function AgendamentosPage() {
 
   const adicionarAgendamento = async (novo) => {
     if (!novo.data) {
-      alert("Erro: Data não informada.");
+      await mostrarAvisoObrigatorio("Erro: Data não informada. Contate o suporte.");
       return;
     }
     const [ano, mes, dia] = novo.data.split("-");
@@ -163,7 +165,7 @@ export default function AgendamentosPage() {
     };
 
     if (temConflitoHorario(novoFormatado, agendamentos, funcionariaAtual)) {
-      alert('Conflito de horário: já existe um agendamento nesse período para essa profissional.');
+      await mostrarAvisoObrigatorio('Conflito de horário: já existe um agendamento nesse período para essa profissional.');
       return;
     }
 
@@ -180,7 +182,7 @@ export default function AgendamentosPage() {
       await carregarAgendamentos();
     } catch (error) {
       console.error('[AgendamentosPage] Falha ao salvar agendamento:', error);
-      alert('Erro ao salvar agendamento no backend.');
+      await mostrarAvisoObrigatorio('Erro ao salvar agendamento no backend. Contate o suporte.');
       return;
     }
 

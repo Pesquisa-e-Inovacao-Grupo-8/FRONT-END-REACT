@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../../api";
 import "../../styles/agendamentos-usuario.css";
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../../components/utils/mensagem';
+import { mostrarAvisoObrigatorio } from '../../components/utils/confirm-dialog';
 
 export default function ConfiguracoesUsuario({ visao = "usuario" }) {
   const [usuario, setUsuario] = useState({
@@ -24,7 +26,7 @@ export default function ConfiguracoesUsuario({ visao = "usuario" }) {
       setUsuario(res.data);
     } catch (erro) {
       console.error(erro);
-      alert("Erro ao carregar os dados do seu usuário.");
+      await mostrarAvisoObrigatorio("Erro ao carregar os dados do seu usuário. Contate o suporte.");
     } finally {
       setLoading(false);
     }
@@ -54,10 +56,10 @@ export default function ConfiguracoesUsuario({ visao = "usuario" }) {
 
       await api.put(`/usuarios/${id}`, dadosAtualizados);
 
-      alert("Usuário atualizado com sucesso!");
+      mostrarSucessoMensagem("Usuário atualizado com sucesso!");
     } catch (erro) {
       console.error(erro);
-      alert("Erro ao salvar usuário.");
+      await mostrarAvisoObrigatorio("Erro ao salvar usuário. Contate o suporte.");
     } finally {
       setSalvando(false);
     }

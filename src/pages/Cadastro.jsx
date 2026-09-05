@@ -1,7 +1,9 @@
 //src/pages/Cadastro.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from "../components/utils/mensagem";
+import { markFieldError, clearFieldError } from "../components/utils/field-error";
 import api from "../api";
 import "../styles/cadastro.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -52,6 +54,39 @@ export default function Cadastro() {
 
   const [loading, setLoading] = useState(false);
 
+  const formatCpf = (value) => {
+    const nums = value.replace(/\D/g, '').slice(0, 11);
+    let formatted = nums;
+    formatted = formatted.replace(/^(\d{3})(\d)/, '$1.$2');
+    formatted = formatted.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+    formatted = formatted.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+    return formatted;
+  };
+
+  const formatTelefone = (value) => {
+    const nums = value.replace(/\D/g, '').slice(0, 11);
+    if (nums.length === 0) return '';
+    if (nums.length <= 2) return `(${nums}`;
+    const ddd = nums.slice(0, 2);
+    const rest = nums.slice(2);
+    if (rest.length <= 4) return `(${ddd}) ${rest}`;
+    if (rest.length <= 8) {
+      return `(${ddd}) ${rest.slice(0, 4)}-${rest.slice(4)}`;
+    }
+    // 9+ digits (mobile)
+    return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5)}`;
+  };
+
+  const handleCpfChange = (e) => {
+    const formatted = formatCpf(e.target.value);
+    setForm({ ...form, cpf: formatted });
+  };
+
+  const handleTelefoneChange = (e) => {
+    const formatted = formatTelefone(e.target.value);
+    setForm({ ...form, telefone: formatted });
+  };
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -60,27 +95,33 @@ export default function Cadastro() {
     e.preventDefault();
 
     if (!validarEmail(form.email)) {
-      toast.error("Informe um e-mail válido.");
+      markFieldError('input[name="email"]');
+      mostrarMensagem('Informe um e-mail válido.', 'error');
       return;
     }
 
     if (!validarCpf(form.cpf)) {
-      toast.error("Informe um CPF válido.");
+      markFieldError('input[name="cpf"]');
+      mostrarMensagem('Informe um CPF válido.', 'error');
       return;
     }
 
     if (!validarTelefone(form.telefone)) {
-      toast.error("Informe um telefone válido com DDD.");
+      markFieldError('input[name="telefone"]');
+      mostrarMensagem('Informe um telefone válido com DDD.', 'error');
       return;
     }
 
     if (form.senha.length < 8) {
-      toast.error("A senha deve ter pelo menos 8 caracteres.");
+      markFieldError('input[name="senha"]');
+      mostrarMensagem('A senha deve ter pelo menos 8 caracteres.', 'error');
       return;
     }
 
     if (form.senha !== form.confirmarSenha) {
-      toast.error("As senhas não coincidem.");
+      markFieldError('input[name="senha"]');
+      markFieldError('input[name="confirmarSenha"]');
+      mostrarMensagem('As senhas não coincidem.', 'error');
       return;
     }
 
@@ -99,12 +140,12 @@ export default function Cadastro() {
 
       await api.post("/usuarios", payload);
 
-      toast.success("Conta criada com sucesso! Redirecionando para o login.");
+      mostrarMensagem('Conta criada com sucesso! Redirecionando para o login.', 'success');
       setTimeout(() => navigate("/login"), 1500);
 
     } catch (error) {
       console.error("Erro no cadastro:", error);
-      toast.error(error.response?.data?.message || "Erro ao criar conta. Verifique os dados.");
+      mostrarMensagem(error.response?.data?.message || "Erro ao criar conta. Verifique os dados.", 'error');
     } finally {
       setLoading(false);
     }
@@ -137,13 +178,13 @@ export default function Cadastro() {
               <div>
                 <label>CPF</label>
                 <div>
-                  <input type="text" name="cpf" placeholder="000.000.000-00" value={form.cpf} onChange={handleChange} required />
+                  <input type="text" name="cpf" placeholder="000.000.000-00" value={form.cpf} onChange={handleCpfChange} required />
                 </div>
               </div>
               <div>
                 <label>Telefone</label>
                 <div>
-                  <input type="text" name="telefone" placeholder="(11) 9999-9999" value={form.telefone} onChange={handleChange} required />
+                  <input type="text" name="telefone" placeholder="(11) 9999-9999" value={form.telefone} onChange={handleTelefoneChange} required />
                 </div>
               </div>
             </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../../api";
+import mostrarConfirmacaoAssincrona from '../utils/confirm-dialog';
 import "../../styles/app.css";
 
 const INITIAL_STATE = {
@@ -147,8 +148,11 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
     setAberto(false);
   };
 
-  const fecharModal = () => {
-    if (temAlteracoes(formData, funcionaria) && !window.confirm('Existem alterações não salvas. Deseja fechar mesmo assim?')) return;
+  const fecharModal = async () => {
+    if (temAlteracoes(formData, funcionaria)) {
+      const confirmar = await mostrarConfirmacaoAssincrona('Existem alterações não salvas. Deseja fechar mesmo assim?');
+      if (!confirmar) return;
+    }
     setAberto(false);
   };
 

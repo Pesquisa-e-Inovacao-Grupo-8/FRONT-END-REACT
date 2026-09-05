@@ -1,6 +1,8 @@
 //src/components/admin/GerenciarUsuarios.jsx
 import { useState, useEffect } from 'react';
 import api from '../../api';
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../utils/mensagem';
+import mostrarConfirmacaoAssincrona, { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
 
 const ESTADO_INICIAL_FORM = {
   nome: '',
@@ -35,7 +37,7 @@ export default function GerenciarUsuarios() {
       setUsuarios(response.data);
     } catch (error) {
       console.error("Erro ao buscar usuários:", error);
-      alert("Erro ao carregar a lista de usuários.");
+      await mostrarAvisoObrigatorio("Erro ao carregar a lista de usuários. Contate o suporte.");
     } finally {
       setLoading(false);
     }
@@ -56,18 +58,19 @@ export default function GerenciarUsuarios() {
 
   const deletarUsuario = async (id, tipo) => {
     if (tipo === 'ADMIN') {
-      alert("Você não pode deletar um Administrador por aqui!");
+      await mostrarAvisoObrigatorio("Você não pode deletar um Administrador por aqui!");
       return;
     }
 
-    if (window.confirm("Atenção: Deletar este usuário apagará também a ficha dele. Deseja continuar?")) {
-      try {
-        await api.delete(`/usuarios/${id}`);
-        setUsuarios(usuarios.filter(u => u.id !== id));
-      } catch (error) {
-        console.error("Erro ao deletar:", error);
-        alert("Não foi possível deletar o usuário.");
-      }
+    const confirmar = await mostrarConfirmacaoAssincrona("Atenção: Deletar este usuário apagará também a ficha dele. Deseja continuar?");
+    if (!confirmar) return;
+
+    try {
+      await api.delete(`/usuarios/${id}`);
+      setUsuarios(usuarios.filter(u => u.id !== id));
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+      await mostrarAvisoObrigatorio("Não foi possível deletar o usuário. Contate o suporte.");
     }
   };
 
@@ -103,14 +106,15 @@ export default function GerenciarUsuarios() {
 
       await api.post('/usuarios', payload);
       
-      alert(`Usuário ${formNovoUsuario.nome} cadastrado com sucesso!`);
+      mostrarSucessoMensagem(`Usuário ${formNovoUsuario.nome} cadastrado com sucesso!`);
       setModalAberto(false);
       setFormNovoUsuario(ESTADO_INICIAL_FORM);
       carregarUsuarios(); // Atualiza a tabela imediatamente
       
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
-      alert(error.response?.data?.message || "Erro ao cadastrar usuário. Verifique os dados.");
+      const msg = error.response?.data?.message || "Erro ao cadastrar usuário. Verifique os dados.";
+      await mostrarAvisoObrigatorio(`${msg} Contate o suporte.`);
     } finally {
       setSalvando(false);
     }

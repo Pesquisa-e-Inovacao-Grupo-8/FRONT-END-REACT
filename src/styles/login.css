@@ -277,3 +277,9 @@ button[type="submit"]:disabled {
     font-size: 0.98rem;
   }
 }
+
+/* Input error state used across forms */
+.input-error {
+  border-color: #e53935 !important;
+  box-shadow: 0 0 0 3px rgba(229,57,53,0.08) !important;
+}

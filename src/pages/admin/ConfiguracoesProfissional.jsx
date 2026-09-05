@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import "../../styles/agendamentos-usuario.css"; // Reaproveitando estilos
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../../components/utils/mensagem';
+import { mostrarAvisoObrigatorio } from '../../components/utils/confirm-dialog';
 
 export default function ConfiguracoesProfissional() {
     const navigate = useNavigate();
@@ -32,6 +34,7 @@ useEffect(() => {
 
       } catch (error) {
         console.error("Erro ao carregar serviços:", error);
+        await mostrarAvisoObrigatorio("Erro ao carregar serviços. Contate o suporte.");
       } finally {
         setLoading(false);
       }
@@ -58,11 +61,11 @@ const salvarEspecialidades = async () => {
       // Envia a lista de IDs (meusServicos) para o Java
       await api.post(`/profissionais/vincular-servicos/${meuId}`, meusServicos);
       
-      alert("Suas especialidades foram salvas com sucesso no banco de dados!");
+      mostrarSucessoMensagem("Suas especialidades foram salvas com sucesso no banco de dados!");
       
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar configurações no servidor.");
+      await mostrarAvisoObrigatorio("Erro ao salvar configurações no servidor. Contate o suporte.");
     } finally {
       setSalvando(false);
     }

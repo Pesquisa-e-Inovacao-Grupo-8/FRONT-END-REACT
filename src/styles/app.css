@@ -86,7 +86,6 @@ body,
 
 .agenda-page .agendamentos-topbar,
 .agenda-page .layout-principal {
-  width: min(100%, 1080px);
   margin-left: auto;
   margin-right: auto;
 }

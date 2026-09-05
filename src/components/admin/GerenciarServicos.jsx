@@ -1,6 +1,8 @@
 // src/components/admin/GerenciarServicos.jsx
 import { useState, useEffect } from 'react';
 import api from '../../api';
+import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../utils/mensagem';
+import mostrarConfirmacaoAssincrona, { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
 
 const ESTADO_INICIAL_FORM = {
   nome: '',
@@ -45,7 +47,7 @@ export default function GerenciarServicos() {
       setProdutos(resProdutos.data);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
-      alert("Erro ao carregar os dados. Verifique a API.");
+      await mostrarAvisoObrigatorio("Erro ao carregar os dados. Contate o suporte.");
     } finally {
       setLoading(false);
     }
@@ -121,7 +123,7 @@ export default function GerenciarServicos() {
 
   const handleSalvarProdutoRapido = async () => {
     if (!formProduto.nome || !formProduto.custoUnitario) {
-      alert("Preencha o nome e o custo do produto!");
+      await mostrarAvisoObrigatorio("Preencha o nome e o custo do produto!");
       return;
     }
     
@@ -149,7 +151,7 @@ export default function GerenciarServicos() {
       
     } catch (error) {
       console.error("Erro ao criar produto expresso:", error);
-      alert("Erro ao cadastrar produto. Verifique a API.");
+      await mostrarAvisoObrigatorio("Erro ao cadastrar produto. Contate o suporte.");
     } finally {
       setSalvandoProduto(false);
     }
@@ -192,7 +194,7 @@ export default function GerenciarServicos() {
         const promessasDeletar = linksParaDeletar.map(link => api.delete(`/servico-produtos/${link.id}`));
 
         await Promise.all([...promessasAdicionar, ...promessasDeletar]);
-        alert("Serviço atualizado com sucesso!");
+        mostrarSucessoMensagem("Serviço atualizado com sucesso!");
 
       } else {
         // === MODO CRIAÇÃO ===
@@ -209,7 +211,7 @@ export default function GerenciarServicos() {
           });
           await Promise.all(promessasVinculo);
         }
-        alert("Serviço cadastrado com sucesso!");
+        mostrarSucessoMensagem("Serviço cadastrado com sucesso!");
       }
       
       setModalAberto(false);
@@ -217,7 +219,8 @@ export default function GerenciarServicos() {
       
     } catch (error) {
       console.error("Erro ao salvar serviço:", error);
-      alert(error.response?.data?.message || "Erro ao salvar serviço.");
+      const msg = error.response?.data?.message || "Erro ao salvar serviço.";
+      await mostrarAvisoObrigatorio(`${msg} Contate o suporte.`);
     } finally {
       setSalvando(false);
     }
