@@ -4,48 +4,42 @@ body {
   font-family: sans-serif;
 }
 
-.container-principal{
-  height: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+.container-principal {
+  max-width: 1100px;
+  width: min(100% - 32px, 1100px);
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: stretch;
   justify-content: center;
-  margin-top: 50px;
-  margin-bottom: 50px;
+  margin: 40px auto 50px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 45px rgba(92, 77, 41, 0.15);
 }
-
 
 .container-login {
   background: #fff;
-  border-top-right-radius: 12px;
-  border-bottom-right-radius: 12px;
-  padding: 40px;
-  height: 735px;
+  padding: 40px 36px;
   width: 100%;
-  max-width: 30%;
-  box-shadow: 5px 7px 15px #706f6f;
-  
+  min-height: 680px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.container-foto{
-  height: 735px;
-  width: 50%;
+.container-foto {
+  min-height: 680px;
   background-image: url('../assets/login-img-01.jpg');
-  border-top-left-radius: 12px;
-  border-bottom-left-radius: 12px;
-  border-left: 1px solid #ddd;
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: right;
-  box-shadow: 5px 7px 15px #706f6f;
+  background-position: center;
 }
 
-
 .titulo h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1a1a1a; 
-  margin-bottom: 4px;
+  font-size: clamp(1.8rem, 2vw, 2.4rem);
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 8px;
 }
 
 .titulo p {
@@ -54,7 +48,15 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.credenciais { margin-bottom: 1rem; }
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.credenciais {
+  margin-bottom: 1rem;
+}
 
 .credenciais label {
   display: block;
@@ -66,19 +68,28 @@ body {
 
 .credenciais input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.875rem;
   color: #333;
   outline: none;
-  transition: border 0.2s;
+  transition: border 0.2s, box-shadow 0.2s;
 }
 
-.credenciais input:focus { border-color: #b89a30; }
+.credenciais input:focus {
+  border-color: #b89a30;
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.12);
+}
 
-.senha-wrapper { position: relative; }
-.senha-wrapper input { padding-right: 40px; }
+.senha-wrapper {
+  position: relative;
+}
+
+.senha-wrapper input {
+  padding-right: 40px;
+}
+
 .senha-wrapper .toggle-senha {
   position: absolute;
   right: 12px;
@@ -123,15 +134,18 @@ button[type="submit"] {
   padding: 12px;
   background: #c9a227;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s;
 }
 
-button[type="submit"]:hover { background: #b89a30; }
+button[type="submit"]:hover {
+  background: #b89a30;
+  transform: translateY(-1px);
+}
 
 .links {
   text-align: center;
@@ -140,7 +154,11 @@ button[type="submit"]:hover { background: #b89a30; }
   color: #555;
 }
 
-.links a { color: #c9a227; text-decoration: none; font-weight: 500; }
+.links a {
+  color: #c9a227;
+  text-decoration: none;
+  font-weight: 500;
+}
 
 .separador {
   border: none;
@@ -155,4 +173,49 @@ button[type="submit"]:hover { background: #b89a30; }
   line-height: 1.5;
 }
 
-.rodape a { color: #c9a227; text-decoration: none; }
+.rodape a {
+  color: #c9a227;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .container-principal {
+    grid-template-columns: 1fr;
+    width: min(100% - 24px, 620px);
+    margin-top: 24px;
+  }
+
+  .container-foto {
+    min-height: 220px;
+    background-position: center;
+  }
+
+  .container-login {
+    min-height: auto;
+    padding: 28px 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container-principal {
+    width: min(100% - 16px, 620px);
+    margin-top: 16px;
+    margin-bottom: 32px;
+  }
+
+  .container-login {
+    padding: 22px 18px;
+  }
+
+  .titulo h2 {
+    font-size: 1.6rem;
+  }
+
+  .credenciais input {
+    font-size: 1rem;
+  }
+
+  button[type="submit"] {
+    font-size: 0.98rem;
+  }
+}

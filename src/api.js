@@ -14,14 +14,19 @@ export function normalizeArray(value) {
   return [];
 }
 
-const env = import.meta.env.MODE || "PRD";
-const VITE_API_BASE_URL =
-  env === "DEV"
-    ? import.meta.env.VITE_API_BASE_URL_DEV || "https://127.0.0.1:8080"
-    : import.meta.env.VITE_API_BASE_URL_PRD || "https://spring.renatahtokutomi.com";
+const envName = (import.meta.env.ENV || import.meta.env.MODE || "PRD").toLowerCase();
+const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+const apiBaseUrl = configuredBaseUrl || {
+  dev: "http://127.0.0.1:8080",
+  development: "http://127.0.0.1:8080",
+  qa: "http://qa.spring.renatahtokutomi.com",
+  prd: "https://spring.renatahtokutomi.com",
+  production: "https://spring.renatahtokutomi.com",
+}[envName] || "https://spring.renatahtokutomi.com";
 
 const api = axios.create({
-    baseURL: VITE_API_BASE_URL,
+  baseURL: apiBaseUrl,
 });
 
 api.interceptors.request.use((config) => {

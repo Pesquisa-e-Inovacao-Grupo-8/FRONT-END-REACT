@@ -1,5 +1,5 @@
 //src/pages/Agendamento.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { getServicos, agendarPeloCliente } from "../js/agendamento.js";
 import { getFuncionarias } from "../js/funcionarias.js";
 import "../styles/agendamento-usuario.css";
@@ -172,23 +172,25 @@ export default function Agendamento() {
 
         <div className="stepper-container">
           {!done && (
-            <div className="stepper">
+            <div className="stepper" aria-label="Progresso do agendamento">
               {STEP_LABELS.map((label, i) => {
                 const num = i + 1;
                 const isActive = step === num;
                 const isDone = step > num;
+
                 return (
-                  <div key={label} style={{ display: "flex", alignItems: "center", flex: 1 }}>
-                    <div className="step-item" style={{ flex: "none" }}>
+                  <Fragment key={label}>
+                    <div className="step-item">
                       <div className={`step-circle ${isActive ? "active" : isDone ? "done" : "inactive"}`}>
                         {isDone ? "✓" : num}
                       </div>
                       <div className={`step-label ${isActive ? "active" : ""}`}>{label}</div>
                     </div>
+
                     {i < STEP_LABELS.length - 1 && (
-                      <div className={`step-line ${isDone ? "done" : ""}`} style={{ flex: 1, margin: "0 4px", marginTop: "-28px" }} />
+                      <div className={`step-line ${isDone ? "done" : ""}`} aria-hidden="true" />
                     )}
-                  </div>
+                  </Fragment>
                 );
               })}
             </div>
