@@ -20,7 +20,7 @@ const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
 const apiBaseUrl = configuredBaseUrl || {
   dev: "http://127.0.0.1:8080",
   development: "http://127.0.0.1:8080",
-  qa: "https://qa.spring.renatahtokutomi.com",
+  qa: "http://qa.spring.renatahtokutomi.com",
   prd: "https://spring.renatahtokutomi.com",
   production: "https://spring.renatahtokutomi.com",
 }[envName] || "https://spring.renatahtokutomi.com";
