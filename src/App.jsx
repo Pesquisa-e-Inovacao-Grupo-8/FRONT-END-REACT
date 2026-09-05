@@ -23,6 +23,63 @@ import GerenciarUsuarios from "./components/admin/GerenciarUsuarios";
 import GerenciarServicos from "./components/admin/GerenciarServicos";
 import GerenciarPacotes from "./components/admin/GerenciarPacotes";
 
+const isDevEnvironment = () => {
+  const mode = (import.meta.env.MODE || "production").toLowerCase();
+  return mode === "development" || mode === "dev";
+};
+
+const setupDevMockAuth = () => {
+  if (!isDevEnvironment()) return;
+
+  const mockUsers = {
+    CLIENTE: {
+      token: "mock-client-token",
+      userId: "mock-client-id",
+      userName: "Cliente Mock",
+      userRole: "CLIENTE",
+    },
+    PROFISSIONAL: {
+      token: "mock-profissional-token",
+      userId: "mock-profissional-id",
+      userName: "Profissional Mock",
+      userRole: "PROFISSIONAL",
+    },
+    ADMIN: {
+      token: "mock-admin-token",
+      userId: "mock-admin-id",
+      userName: "Admin Mock",
+      userRole: "ADMIN",
+    },
+  };
+
+  window.__mockAuthUsers = mockUsers;
+
+  window.loginMock = (role = "CLIENTE") => {
+    const user = mockUsers[role] || mockUsers.CLIENTE;
+    localStorage.setItem("token", user.token);
+    localStorage.setItem("userId", user.userId);
+    localStorage.setItem("userName", user.userName);
+    localStorage.setItem("userRole", user.userRole);
+    window.location.reload();
+  };
+
+  window.logoutMock = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
+    window.location.reload();
+  };
+
+  window.loginMockCliente = () => window.loginMock("CLIENTE");
+  window.loginMockProfissional = () => window.loginMock("PROFISSIONAL");
+  window.loginMockAdmin = () => window.loginMock("ADMIN");
+};
+
+if (typeof window !== "undefined") {
+  setupDevMockAuth();
+}
+
 const LayoutNavbar = () => (
   <>
     <Navbar />
