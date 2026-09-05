@@ -56,29 +56,40 @@ export async function criarAgendamento(payload) {
 
 export async function getAgendamentos() {
    try {
-        const [agendamentosRes, agendamentoServicosRes] = await Promise.all([
+        const [agendamentosRes, agendamentoServicosRes, servicosRes] = await Promise.all([
             api.get(`/agendamentos`),
-            api.get(`/agendamentoServicos`)
+            api.get(`/agendamentoServicos`),
+            api.get(`/servicos`)
         ]);
 
         const agendamentosBrutos = normalizeArray(agendamentosRes.data);
         const relacoesServicos = normalizeArray(agendamentoServicosRes.data);
+        const servicos = normalizeArray(servicosRes.data);
 
         return agendamentosBrutos.map(agend => {
             // Extração segura da data
             const [ano, mes, dia] = (agend.data || "2000-01-01").toString().split("-").map(Number);
             
-            const relacao = relacoesServicos.find(rel => rel.agendamento && rel.agendamento.id === agend.id);
-            const nomeServico = relacao && relacao.servico ? relacao.servico.nome : 'Serviço Padrão';
+            const relacao = relacoesServicos.find(rel =>
+                rel.agendamento?.id === agend.id || rel.agendamentoId === agend.id || rel.fk_agendamento === agend.id
+            );
+            const nomeServico = relacao?.servico?.nome ||
+                relacao?.servico?.nomeServico ||
+                (relacao?.servicoId ? servicos.find(servico => servico.id === relacao.servicoId)?.nome : null) ||
+                (agend.servicoId ? servicos.find(servico => servico.id === agend.servicoId)?.nome : null) ||
+                'Serviço Padrão';
             
-            const horaInicio = agend.horaInicio ? agend.horaInicio.toString().substring(0, 5) : "00:00";
-            const horaFim = agend.horaFim ? agend.horaFim.toString().substring(0, 5) : "00:00";
+            const horaInicio = (agend.horaInicio || agend.hora_inicio) ?
+                (agend.horaInicio || agend.hora_inicio).toString().substring(0, 5) : "00:00";
+            const horaFim = (agend.horaFim || agend.hora_fim) ?
+                (agend.horaFim || agend.hora_fim).toString().substring(0, 5) : "00:00";
 
             return {
                 id: agend.id,
                 dia, mes, ano,
                 hora: horaInicio,
                 cliente: agend.cliente?.usuario?.nome || agend.nomeClienteAvulso || 'Avulso',
+                clienteId: agend.clienteId || agend.cliente?.id || agend.fk_cliente,
                 funcionaria: agend.profissional?.usuario?.nome || 'Profissional Não Informado',
                 servico: nomeServico,
                 status: agend.status,
@@ -149,7 +160,10 @@ export async function getAgendamentosPorCliente(clienteId) {
         const meuNome = localStorage.getItem("userName");
         const todosAgendamentos = await getAgendamentos(); 
         
-        return todosAgendamentos.filter(a => a.cliente === meuNome);
+        return todosAgendamentos.filter(a =>
+            (clienteId && a.clienteId === clienteId) ||
+            (meuNome && a.cliente === meuNome)
+        );
     } catch (error) {
         console.error("Erro ao filtrar meus agendamentos:", error);
         return [];
