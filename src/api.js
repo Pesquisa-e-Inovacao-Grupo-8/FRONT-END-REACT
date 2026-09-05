@@ -25,6 +25,8 @@ const apiBaseUrl = configuredBaseUrl || {
   production: "https://spring.renatahtokutomi.com",
 }[envName] || "https://spring.renatahtokutomi.com";
 
+console.log("API Base URL= ", apiBaseUrl);
+
 const api = axios.create({
   baseURL: apiBaseUrl,
 });
