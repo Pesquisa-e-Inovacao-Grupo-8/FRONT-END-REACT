@@ -14,16 +14,18 @@ export function normalizeArray(value) {
   return [];
 }
 
-const envName = (import.meta.env.ENV || import.meta.env.MODE || "PRD").toLowerCase();
+const envName = (import.meta.env.VITE_ENV || import.meta.env.MODE || "PRD").toLowerCase();
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 const apiBaseUrl = configuredBaseUrl || {
   dev: "http://127.0.0.1:8080",
   development: "http://127.0.0.1:8080",
-  qa: "http://qa.spring.renatahtokutomi.com",
+  qa: "https://qa.spring.renatahtokutomi.com",
   prd: "https://spring.renatahtokutomi.com",
   production: "https://spring.renatahtokutomi.com",
 }[envName] || "https://spring.renatahtokutomi.com";
+
+console.log("API Base URL= ", apiBaseUrl);
 
 const api = axios.create({
   baseURL: apiBaseUrl,
