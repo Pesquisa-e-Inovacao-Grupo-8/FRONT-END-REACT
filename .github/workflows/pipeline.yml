@@ -1,4 +1,4 @@
-name: FRONT-END-REACT - DEPLOY PRD
+name: FRONT-END-REACT - DEPLOY 
 
 on:
   workflow_dispatch:
