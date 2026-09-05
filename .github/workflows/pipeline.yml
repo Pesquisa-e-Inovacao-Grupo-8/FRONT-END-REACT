@@ -1,4 +1,4 @@
-name: FRONT-END-REACT 
+name: FRONT-END-REACT - DEPLOY QA & PRD
 
 on:
   workflow_dispatch:
