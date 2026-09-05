@@ -54,7 +54,7 @@ body {
 }
 
 .nav-btn {
-  background: #b8960c;
+  background: var(--gold-gradient);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -68,7 +68,7 @@ body {
 }
 
 .nav-btn:hover {
-  background: #d4a800;
+  background: var(--gold-gradient-hover);
 }
 
 /* PAGE */
@@ -315,7 +315,7 @@ body {
 }
 
 .btn-reschedule:hover {
-  background: #b8960c;
+  background: var(--gold-gradient);
   color: #fff;
 }
 
@@ -364,7 +364,7 @@ body {
 .btn-rebook {
   flex: 1;
   border: none;
-  background: #b8960c;
+  background: var(--gold-gradient);
   color: #fff;
   border-radius: 7px;
   padding: 11px 0;
@@ -378,7 +378,7 @@ body {
 }
 
 .btn-rebook:hover {
-  background: #d4a800;
+  background: var(--gold-gradient-hover);
 }
 
 /* MODAL OVERLAY */
@@ -540,15 +540,15 @@ body {
 }
 
 .time-slot-sm.selected {
-  background: #b8960c;
-  border-color: #b8960c;
+  background: var(--gold-gradient);
+  border-color: var(--gold);
   color: #fff;
   font-weight: 500;
 }
 
 .btn-modal-save {
   border: none;
-  background: #b8960c;
+  background: var(--gold-gradient);
   color: #fff;
   border-radius: 6px;
   padding: 9px 22px;
@@ -560,12 +560,22 @@ body {
 }
 
 .btn-modal-save:hover {
-  background: #d4a800;
+  background: var(--gold-gradient-hover);
 }
 
 .btn-modal-save:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.package-buy-button {
+  background: var(--gold-gradient);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.package-buy-button:hover:not(:disabled) {
+  background: var(--gold-gradient-hover);
+  transform: translateY(-1px);
 }
 
 /* ── WEBSOCKET: Indicador de conexão ─────────────────────────────────────── */

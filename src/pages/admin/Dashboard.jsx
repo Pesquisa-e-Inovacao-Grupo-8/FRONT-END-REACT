@@ -170,7 +170,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="crud-section" style={{ padding: "30px", maxWidth: "1200px", margin: "0 auto", backgroundColor: "#f9f9fb", minHeight: "100vh" }}>
+    <div className="crud-section dashboard-page" style={{ padding: "30px", maxWidth: "1200px", margin: "0 auto", backgroundColor: "#f9f9fb", minHeight: "100vh" }}>
       
       {/* CABEÇALHO */}
       <div style={{ marginBottom: "30px" }}>
@@ -181,7 +181,7 @@ export default function Dashboard() {
       </div>
 
       {/* GRADE DE KPIS */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px", marginBottom: "30px" }}>
+      <div className="dashboard-kpi-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px", marginBottom: "30px" }}>
         
         {/* KPI 1 */}
         <div style={styles.kpiCard}>
@@ -230,13 +230,13 @@ export default function Dashboard() {
       </div>
 
       {/* SESSÃO INFERIOR (GRÁFICO + TABELA) */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "20px" }}>
+      <div className="dashboard-lower-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "20px" }}>
         
         {/* GRÁFICO */}
         <div style={styles.card}>
           <h3 style={{ marginBottom: "20px", color: "#333", fontSize: "1.1rem" }}>Receita Mensal · Últimos 6 meses</h3>
           <div style={{ marginLeft: "-15px" }}> 
-            <Chart options={chartOptions} series={graficoSeries} type="area" height={300} />
+            <Chart options={chartOptions} series={graficoSeries} type="area" height={260} />
           </div>
         </div>
 

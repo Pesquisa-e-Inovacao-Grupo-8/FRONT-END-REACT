@@ -139,7 +139,7 @@ export default function GerenciarPacotes() {
           backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', 
           justifyContent: 'center', alignItems: 'center', zIndex: 9999
         }}>
-          <div style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="admin-modal-panel" style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3>Criar Novo Pacote</h3>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "15px" }}>
@@ -173,9 +173,9 @@ export default function GerenciarPacotes() {
               </div>
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-              <button onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '8px 15px', cursor: 'pointer' }}>Cancelar</button>
-              <button onClick={handleSalvarPacote} disabled={salvando} style={{ padding: '8px 15px', background: '#b8960c', color: '#fff', border: 'none', cursor: 'pointer' }}>
+            <div className="pacote-modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+              <button className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '8px 15px', cursor: 'pointer' }}>Cancelar</button>
+              <button className="btn-salvar-pacote" onClick={handleSalvarPacote} disabled={salvando} style={{ padding: '8px 15px', background: '#b8960c', color: '#fff', border: 'none', cursor: 'pointer' }}>
                 {salvando ? "Salvando..." : "Salvar Pacote"}
               </button>
             </div>

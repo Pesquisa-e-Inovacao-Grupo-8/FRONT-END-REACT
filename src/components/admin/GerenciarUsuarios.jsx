@@ -190,7 +190,7 @@ export default function GerenciarUsuarios() {
           backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', 
           justifyContent: 'center', alignItems: 'center', zIndex: 9999
         }}>
-          <div style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '450px', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="admin-modal-panel" style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '450px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ marginTop: 0, borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Cadastrar Novo Usuário</h3>
             
             <form onSubmit={handleSalvarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
@@ -238,10 +238,10 @@ export default function GerenciarUsuarios() {
               </div>
               
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button type="button" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
+                <button type="button" className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
                   Cancelar
                 </button>
-                <button type="submit" disabled={salvando} style={{ padding: '10px 15px', background: salvando ? '#ccc' : '#1a1a2e', color: '#fff', border: 'none', borderRadius: '4px', cursor: salvando ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>
+                <button type="submit" className="btn-salvar-modal" disabled={salvando} style={{ padding: '10px 15px', background: salvando ? '#ccc' : '#1a1a2e', color: '#fff', border: 'none', borderRadius: '4px', cursor: salvando ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>
                   {salvando ? 'Salvando...' : 'Salvar Usuário'}
                 </button>
               </div>

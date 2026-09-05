@@ -37,18 +37,24 @@ const setupDevMockAuth = () => {
       userId: "mock-client-id",
       userName: "Cliente Mock",
       userRole: "CLIENTE",
+      email: "cliente.mock@tokutomi.com",
+      senha: "Cliente123!"
     },
     PROFISSIONAL: {
       token: "mock-profissional-token",
       userId: "mock-profissional-id",
       userName: "Profissional Mock",
       userRole: "PROFISSIONAL",
+      email: "profissional.mock@tokutomi.com",
+      senha: "Profissional123!"
     },
     ADMIN: {
       token: "mock-admin-token",
       userId: "mock-admin-id",
       userName: "Admin Mock",
       userRole: "ADMIN",
+      email: "admin.mock@tokutomi.com",
+      senha: "Admin123!",
     },
   };
 
@@ -180,7 +186,15 @@ export default function App() {
                 <AgendamentosUsuário />
               </PrivateRoute>
             }
-          />
+            />
+            <Route
+            path="configuracoes-usuario"
+            element={
+              <PrivateRoute allowedRoles={["CLIENTE"]}>
+                <ConfiguracoesUsuario />
+              </PrivateRoute>
+            }
+            />
         </Route>
        {/* ROTAS ADMINISTRATIVAS / PROFISSIONAIS COM SIDEBAR UNIFICADA */}
         <Route
@@ -220,7 +234,10 @@ export default function App() {
           />
           <Route 
             path="configuracoes" 
-            element={<PrivateRoute allowedRoles={["ADMIN", "PROFISSIONAL"]}><ConfiguracoesProfissional /></PrivateRoute>} 
+            element={
+            <PrivateRoute allowedRoles={["ADMIN", "PROFISSIONAL"]}>
+              <ConfiguracoesProfissional />
+              </PrivateRoute>} 
           />
         </Route>
       </Routes>

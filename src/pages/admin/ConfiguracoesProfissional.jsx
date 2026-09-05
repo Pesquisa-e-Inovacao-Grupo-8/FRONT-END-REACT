@@ -68,10 +68,10 @@ const salvarEspecialidades = async () => {
     }
   };
 
-  if (loading) return <div className="page" style={{ padding: "40px" }}>Carregando serviços disponíveis...</div>;
+  if (loading) return <div className="page profile-page" style={{ padding: "40px" }}>Carregando serviços disponíveis...</div>;
 
   return (
-    <div className="page" style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
+    <div className="page profile-page" style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
       <div className="page-hero">
         <h1>Meu <em>Perfil Profissional</em></h1>
         <p>Selecione quais serviços você está habilitado a realizar no salão</p>

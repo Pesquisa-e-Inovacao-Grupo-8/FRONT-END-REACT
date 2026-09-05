@@ -1,6 +1,7 @@
 // src/components/home/Navbar.jsx
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import logoImage from "../../assets/renatah.png";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -56,6 +57,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <NavLink to="/" className="navbar-logo" onClick={closeMenu}>
+        <img src={logoImage} alt="" className="navbar-logo-image" />
         Tokutomi
       </NavLink>
 

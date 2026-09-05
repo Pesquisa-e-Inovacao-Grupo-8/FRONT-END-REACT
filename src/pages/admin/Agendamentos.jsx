@@ -194,7 +194,7 @@ export default function AgendamentosPage() {
   const filtrados = agendamentosDaProfissional.filter(a => a.dia === diaAtual && a.mes === mesAtual && a.ano === anoAtual);
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="agenda-page" style={{ padding: '20px' }}>
       {erroApi && (
         <div style={{ marginBottom: '10px', color: '#b91c1c', fontWeight: 600 }}>
           {erroApi}

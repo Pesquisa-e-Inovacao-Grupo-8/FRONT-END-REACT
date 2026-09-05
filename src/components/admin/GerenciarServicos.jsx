@@ -236,7 +236,7 @@ export default function GerenciarServicos() {
             onChange={(e) => setTermoBusca(e.target.value)}
             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '250px' }}
           />
-          <button onClick={abrirModalNovo} style={{ padding: '8px 15px', background: '#1a1a2e', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+          <button onClick={abrirModalNovo} style={{ padding: '8px 15px', background: '#b8960c', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
             + Novo Serviço
           </button>
         </div>
@@ -282,7 +282,7 @@ export default function GerenciarServicos() {
       {/* === MODAL DE CADASTRO/EDIÇÃO === */}
       {modalAberto && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
-          <div style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '550px', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="admin-modal-panel" style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '550px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ marginTop: 0, borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
               {servicoEditandoId ? '✏️ Editar Serviço' : '✨ Cadastrar Novo Serviço'}
             </h3>
@@ -318,6 +318,7 @@ export default function GerenciarServicos() {
                   </label>
                   <button 
                     type="button" 
+                    className={mostrandoNovoProduto ? 'btn-cancelar-modal' : ''}
                     onClick={() => setMostrandoNovoProduto(!mostrandoNovoProduto)}
                     style={{ background: '#b8960c', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '0.8rem', cursor: 'pointer' }}
                   >
@@ -358,10 +359,10 @@ export default function GerenciarServicos() {
               
               {/* BOTÕES FINAIS */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '15px' }}>
-                <button type="button" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
+                <button type="button" className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
                   Cancelar
                 </button>
-                <button type="submit" disabled={salvando} style={{ padding: '10px 15px', background: salvando ? '#ccc' : '#1a1a2e', color: '#fff', border: 'none', borderRadius: '4px', cursor: salvando ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>
+                <button type="submit" className="btn-salvar-modal" disabled={salvando} style={{ padding: '10px 15px', background: salvando ? '#ccc' : '#b8960c', color: '#fff', border: 'none', borderRadius: '4px', cursor: salvando ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>
                   {salvando ? 'Salvando...' : 'Salvar Serviço'}
                 </button>
               </div>

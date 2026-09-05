@@ -8,6 +8,7 @@ import "../styles/login.css";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -15,6 +16,20 @@ async function handleSubmit(e) {
   e.preventDefault();
 
   try {
+    const mockAdmin = import.meta.env.DEV ? window.__mockAuthUsers?.ADMIN : null;
+
+    if (mockAdmin && email.trim().toLowerCase() === mockAdmin.email && senha === mockAdmin.senha) {
+      localStorage.setItem("token", mockAdmin.token);
+      localStorage.setItem("userId", mockAdmin.userId);
+      localStorage.setItem("userName", mockAdmin.userName);
+      localStorage.setItem("userRole", mockAdmin.userRole);
+
+      mostrarConfirmacao("Login mock admin realizado!", 1800);
+      setIsRedirecting(true);
+      setTimeout(() => navigate("/admin/dashboard"), 1500);
+      return;
+    }
+
     const response = await api.post("/auth/login", {
       email,
       senha
@@ -42,6 +57,7 @@ async function handleSubmit(e) {
 
     // Mostra o modal
     mostrarConfirmacao("Login realizado com sucesso!", 2500);
+    setIsRedirecting(true);
 
     // Aguarda o modal terminar antes de navegar
     setTimeout(() => {
@@ -75,6 +91,14 @@ async function handleSubmit(e) {
 
   return (
     <div className="container-principal">
+      {isRedirecting && (
+        <div className="login-loading-overlay" role="status" aria-live="polite" aria-label="Carregando próxima página">
+          <div className="login-loader" aria-hidden="true">
+            {Array.from({ length: 8 }, (_, index) => <span key={index} />)}
+          </div>
+        </div>
+      )}
+
       <div className="container-foto"></div>
 
       <div className="container-login">
@@ -104,7 +128,7 @@ async function handleSubmit(e) {
             />
           </div>
 
-          <button type="submit">Entrar</button>
+          <button type="submit" disabled={isRedirecting}>Entrar</button>
         </form>
       </div>
     </div>
