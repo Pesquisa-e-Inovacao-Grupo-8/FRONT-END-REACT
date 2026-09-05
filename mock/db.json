@@ -1,143 +1,359 @@
 {
-  "funcionarias": [
+  "usuarios": [
     {
-      "id": 1,
-      "nome": "Ana",
+      "id": "00000000-0000-0000-0000-000000000001",
+      "nome": "Cliente Exemplo",
+      "telefone": "5511999999999",
+      "cpf": "12345678901",
+      "senha": "$2b$10$examplehash",
+      "email": "cliente@example.com",
+      "tipo": "CLIENTE",
+      "status": "ATIVO",
+      "criacao": "2026-04-01T10:00:00Z",
+      "ativo": 1
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "nome": "Profissional Exemplo",
+      "telefone": "5511988888888",
+      "cpf": "10987654321",
+      "senha": "$2b$10$examplehash",
+      "email": "profissional@example.com",
+      "tipo": "PROFISSIONAL",
+      "status": "ATIVO",
+      "criacao": "2026-04-02T11:00:00Z",
+      "ativo": 1
+    },
+    {
+      "id": "mock-client-id",
+      "nome": "Cliente Mock",
+      "telefone": "5511999999999",
+      "cpf": "00000000000",
+      "senha": "Cliente123!",
+      "email": "cliente.mock@tokutomi.com",
+      "tipo": "CLIENTE",
+      "status": "ATIVO",
+      "criacao": "2026-04-01T10:00:00Z",
+      "ativo": 1
+    },
+    {
+      "id": "mock-profissional-id",
+      "nome": "Profissional Mock",
+      "telefone": "5511988888888",
+      "cpf": "11111111111",
+      "senha": "Profissional123!",
+      "email": "profissional.mock@tokutomi.com",
+      "tipo": "PROFISSIONAL",
+      "status": "ATIVO",
+      "criacao": "2026-04-02T11:00:00Z",
+      "ativo": 1
+    },
+    {
+      "id": "mock-admin-id",
+      "nome": "Admin Mock",
+      "telefone": "5511977777777",
+      "cpf": "22222222222",
+      "senha": "Admin123!",
+      "email": "admin.mock@tokutomi.com",
+      "tipo": "ADMIN",
+      "status": "ATIVO",
+      "criacao": "2026-04-03T12:00:00Z",
+      "ativo": 1
+    }
+  ],
+  "clientes": [
+    {
+      "id": "c0000000-0000-0000-0000-000000000001",
+      "observacoes": "Cliente VIP",
+      "fk_usuario": "00000000-0000-0000-0000-000000000001"
+    }
+  ],
+  "profissionais": [
+    {
+      "id": "pr000000-0000-0000-0000-000000000001",
       "especialidade": "Cabelo",
+      "descricao": "Cortes e coloração",
+      "foto": null,
+      "fk_usuario": "00000000-0000-0000-0000-000000000002",
+      "usuario": {
+        "id": "00000000-0000-0000-0000-000000000002",
+        "nome": "Profissional Exemplo"
+      },
       "servicos": [
-        "Corte Feminino",
-        "Escova",
-        "Hidratação",
-        "Coloração"
-      ],
-      "ativo": true
+        "srv-0001",
+        "srv-0002",
+        "srv-0003"
+      ]
     },
     {
-      "id": 2,
-      "nome": "Beatriz",
+      "id": "pr000000-0000-0000-0000-000000000002",
       "especialidade": "Unhas",
+      "descricao": "Manicure e pedicure",
+      "foto": null,
+      "fk_usuario": null,
+      "usuario": {
+        "id": "mock-profissional-id",
+        "nome": "Profissional Mock"
+      },
       "servicos": [
-        "Manicure",
-        "Pedicure",
-        "Spa dos Pés",
-        "Alongamento de Unhas"
-      ],
+        "srv-0002",
+        "srv-0004"
+      ]
+    }
+  ],
+  "servicos": [
+    {
+      "id": "srv-0001",
+      "nome": "Corte Feminino",
+      "duracaoMinutos": 45,
+      "descricao": "Corte com acabamento",
+      "preco": 80,
+      "status": "ATIVO",
       "ativo": true
     },
     {
-      "id": 3,
-      "nome": "Camila",
-      "especialidade": "Estética",
-      "servicos": [
-        "Design de Sobrancelha",
-        "Depilação",
-        "Limpeza de Pele",
-        "Maquiagem"
-      ],
+      "id": "srv-0002",
+      "nome": "Manicure",
+      "duracaoMinutos": 40,
+      "descricao": "Manicure tradicional",
+      "preco": 40,
+      "status": "ATIVO",
       "ativo": true
+    },
+    {
+      "id": "srv-0003",
+      "nome": "Coloração Completa",
+      "duracaoMinutos": 120,
+      "descricao": "Coloração com tratamento e finalização",
+      "preco": 180,
+      "status": "ATIVO",
+      "ativo": true
+    },
+    {
+      "id": "srv-0004",
+      "nome": "Pedicure",
+      "duracaoMinutos": 50,
+      "descricao": "Pedicure tradicional com esmaltação",
+      "preco": 55,
+      "status": "ATIVO",
+      "ativo": true
+    },
+    {
+      "id": "srv-0005",
+      "nome": "Escova Modelada",
+      "duracaoMinutos": 60,
+      "descricao": "Escova com modelagem e acabamento",
+      "preco": 70,
+      "status": "ATIVO",
+      "ativo": true
+    }
+  ],
+  "produtos": [
+    {
+      "id": "prd-0001",
+      "nome": "Shampoo Profissional",
+      "unidadeMedida": "un",
+      "custoUnitario": 10.5
+    },
+    {
+      "id": "prd-0002",
+      "nome": "Tintura Profissional",
+      "unidadeMedida": "un",
+      "custoUnitario": 42
+    },
+    {
+      "id": "prd-0003",
+      "nome": "Esmalte Premium",
+      "unidadeMedida": "un",
+      "custoUnitario": 6.5
+    },
+    {
+      "id": "prd-0004",
+      "nome": "Máscara Hidratante",
+      "unidadeMedida": "ml",
+      "custoUnitario": 0.18
+    }
+  ],
+  "pacotes": [
+    {
+      "id": "pkt-0001",
+      "nome": "Pacote Beleza",
+      "descricao": "Cabelo + Manicure",
+      "precoTotal": 110
     }
   ],
   "agendamentos": [
     {
-      "id": 1,
-      "dia": 10,
-      "mes": 4,
-      "ano": 2026,
-      "data": "10/04/2026",
-      "servico": "Cabelo + Unha",
-      "preco": 100,
-      "cliente": "João Silva",
-      "email": "joao@gmail.com",
-      "telefone": "5511983536784",
-      "hora": "10:00",
-      "status": true,
-      "pagamento": "CONFIRMADO",
-      "funcionaria": "Ana",
-      "ordem_agendamento": "46b5d26b-e627-4c24-a0b9-dc6240975f3e-JoaoSilva"
+      "id": "agd-0001",
+      "data": "2026-04-10",
+      "hora_inicio": "10:00:00",
+      "hora_fim": "11:00:00",
+      "status": "CONFIRMADO",
+      "ordem_pedido": "ord-001",
+      "fk_cliente": "c0000000-0000-0000-0000-000000000001",
+      "fk_profissional": "pr000000-0000-0000-0000-000000000001",
+      "fk_cliente_pacote": null,
+      "nome_cliente_avulso": null,
+      "telefone_cliente_avulso": null,
+      "valor_total": 80,
+      "fk_servico": "srv-0001"
     },
     {
-      "id": 2,
-      "dia": 15,
-      "mes": 3,
-      "ano": 2026,
-      "data": "15/03/2026",
-      "servico": "Cabelo + Unha",
-      "preco": 100,
-      "cliente": "Maria Souza",
-      "email": "maria@gmail.com",
-      "telefone": "5511983536784",
-      "hora": "14:00",
-      "status": true,
-      "pagamento": "PENDENTE",
-      "funcionaria": "Beatriz",
-      "ordem_agendamento": "a1b2c3d4-e111-2222-3333-444455556666-MariaSouza"
-    },
-    {
-      "id": 3,
-      "dia": 18,
-      "mes": 3,
-      "ano": 2026,
-      "data": "18/03/2026",
-      "servico": "Cabelo + Unha",
-      "preco": 1000,
-      "cliente": "Carlos Pereira",
-      "email": "carlos@gmail.com",
-      "telefone": "5511983536784",
-      "hora": "09:00",
-      "status": true,
-      "pagamento": "PENDENTE",
-      "funcionaria": "Camila",
-      "orderm_agendamento": "f9e8d7c6-b555-6666-7777-888899990000-CarlosPereira"
-    },
-    {
-      "id": 4,
-      "dia": 2,
-      "mes": 4,
-      "ano": 2026,
-      "data": "02/04/2026",
-      "servico": "Manicure",
-      "preco": 60,
-      "cliente": "Fernanda Lima",
-      "email": "fernanda@gmail.com",
-      "telefone": "5511912345678",
-      "hora": "11:00",
-      "status": false,
-      "pagamento": "PENDENTE",
-      "funcionaria": "Ana",
-      "orderm_agendamento": "bb001122-ccdd-eeff-0011-223344556677-FernandaLima"
-    },
-    {
-      "id": 5,
-      "dia": 5,
-      "mes": 4,
-      "ano": 2026,
-      "data": "10/04/2026",
-      "servico": "Coloração",
-      "preco": 250,
-      "cliente": "Roberto Alves",
-      "email": "roberto@gmail.com",
-      "telefone": "5511987654321",
-      "hora": "15:30",
-      "status": true,
-      "pagamento": "PAGO",
-      "funcionaria": "Beatriz",
-      "orderm_agendamento": "dd99ee88-ff77-0066-1155-224433667788-RobertoAlves"
-    },
-    {
-      "cliente": "José",
-      "servico": "Corte Feminino",
-      "data": "07/04/2026",
-      "hora": "14:40",
-      "duracaoMinutos": 30,
-      "pagamentoAdiantado": false,
-      "funcionaria": "Ana",
-      "dia": 7,
-      "pagamentoStatus": "PENDENTE",
-      "mes": 4,
-      "ano": 2026,
+      "data": "2026-09-11",
+      "horaInicio": "11:00:00",
+      "horaFim": "11:45:00",
       "status": "PENDENTE",
-      "pagamento": "PENDENTE",
-      "id": 6
+      "ordemPedido": "WEB-1788646028871",
+      "clienteId": "00000000-0000-0000-0000-000000000001",
+      "profissionalId": "pr000000-0000-0000-0000-000000000001",
+      "servicoId": "srv-0001",
+      "id": "Efj-qee"
+    }
+  ],
+  "clientePacotes": [
+    {
+      "id": "cp-0001",
+      "fk_cliente": "c0000000-0000-0000-0000-000000000001",
+      "fk_pacote": "pkt-0001",
+      "status": "ATIVO",
+      "data_compra": "2026-04-01T10:00:00Z",
+      "expiracao": null,
+      "ativo": 1,
+      "dt_expiracao": "2026-10-01T00:00:00Z"
+    }
+  ],
+  "pagamento": [
+    {
+      "id": "pay-0001",
+      "valor": 80,
+      "metodo": "CARTAO",
+      "status": "CONFIRMADO",
+      "data": "2026-04-10T10:05:00Z",
+      "fk_agendamento": "agd-0001"
+    }
+  ],
+  "comprovante": [
+    {
+      "id": "cmp-0001",
+      "url": "https://example.com/comprovante/pay-0001.pdf",
+      "fk_pagamento": "pay-0001"
+    }
+  ],
+  "pacoteServicos": [
+    {
+      "id": "ps-0001",
+      "fk_pacote": "pkt-0001",
+      "fk_servico": "srv-0001"
+    }
+  ],
+  "cliente_pacote_servico": [
+    {
+      "id": "cps-0001",
+      "fk_cliente_pacote": "cp-0001",
+      "fk_servico": "srv-0001",
+      "quantidade_disponivel": 3
+    }
+  ],
+  "agendamentoServicos": [
+    {
+      "id": "ags-0001",
+      "fk_agendamento": "agd-0001",
+      "fk_servico": "srv-0001",
+      "fk_cliente_pacote_servico": null
+    },
+    {
+      "agendamentoId": "Efj-qee",
+      "servicoId": "srv-0001",
+      "id": "ikw0Ibr"
+    }
+  ],
+  "servicoProdutos": [
+    {
+      "id": "sp-0001",
+      "fk_servico": "srv-0001",
+      "fk_produto": "prd-0001",
+      "quantidadeUsada": 1,
+      "servico": {
+        "id": "srv-0001",
+        "nome": "Corte Feminino",
+        "preco": 80
+      },
+      "produto": {
+        "id": "prd-0001",
+        "nome": "Shampoo Profissional",
+        "custoUnitario": 10.5
+      }
+    },
+    {
+      "id": "sp-0002",
+      "fk_servico": "srv-0003",
+      "fk_produto": "prd-0002",
+      "quantidadeUsada": 1,
+      "servico": {
+        "id": "srv-0003",
+        "nome": "Coloração Completa",
+        "preco": 180
+      },
+      "produto": {
+        "id": "prd-0002",
+        "nome": "Tintura Profissional",
+        "custoUnitario": 42
+      }
+    },
+    {
+      "id": "sp-0003",
+      "fk_servico": "srv-0003",
+      "fk_produto": "prd-0004",
+      "quantidadeUsada": 120,
+      "servico": {
+        "id": "srv-0003",
+        "nome": "Coloração Completa",
+        "preco": 180
+      },
+      "produto": {
+        "id": "prd-0004",
+        "nome": "Máscara Hidratante",
+        "custoUnitario": 0.18
+      }
+    },
+    {
+      "id": "sp-0004",
+      "fk_servico": "srv-0002",
+      "fk_produto": "prd-0003",
+      "quantidadeUsada": 1,
+      "servico": {
+        "id": "srv-0002",
+        "nome": "Manicure",
+        "preco": 40
+      },
+      "produto": {
+        "id": "prd-0003",
+        "nome": "Esmalte Premium",
+        "custoUnitario": 6.5
+      }
+    }
+  ],
+  "servicoProfissionais": [
+    {
+      "id": "sprof-0001",
+      "fk_servico": "srv-0001",
+      "fk_profissional": "pr000000-0000-0000-0000-000000000001"
+    }
+  ],
+  "profissionalServicos": [
+    {
+      "profissional_id": "pr000000-0000-0000-0000-000000000001",
+      "servico_id": "srv-0001"
+    }
+  ],
+  "pagamentos": [
+    {
+      "id": "pay-0001",
+      "valor": 80,
+      "metodo": "CARTAO",
+      "status": "CONFIRMADO",
+      "data": "2026-04-10T10:05:00Z",
+      "fk_agendamento": "agd-0001"
     }
   ]
 }
