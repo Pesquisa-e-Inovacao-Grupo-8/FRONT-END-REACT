@@ -8,7 +8,7 @@ const FEATURES = [
 export default function Features() {
   return (
     <section className="features">
-      <h2 className="section-title">Por que escolher o Tukotomi</h2>
+      <h2 className="section-title">Por que escolher o Tokutomi</h2>
       <p className="section-subtitle">Dedicação, expertise e elegância em cada detalhe</p>
       <div className="features-grid">
         {FEATURES.map((f, i) => (

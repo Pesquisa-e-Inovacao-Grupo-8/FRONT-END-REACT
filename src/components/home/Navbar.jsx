@@ -56,7 +56,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <NavLink to="/" className="navbar-logo" onClick={closeMenu}>
-        Tukotomi
+        Tokutomi
       </NavLink>
 
       <button

@@ -7,7 +7,7 @@ export default function Sidebar({ open, onClose }) {
 
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>
-      <div className="sidebar-logo">Tukotomi</div>
+      <div className="sidebar-logo">Tokutomi</div>
 
       <nav className="sidebar-menu">
         

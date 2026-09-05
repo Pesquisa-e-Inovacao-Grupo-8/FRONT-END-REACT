@@ -6,7 +6,7 @@ const FOOTER_DATA = {
   ],
   contact: [
     "Tel: (11) 9999-9999",
-    "Email: contato@tukotomi.com.br",
+    "Email: contato@tokutomi.com.br",
     "Endereço: Av. Elegância, 1000"
   ]
 };
@@ -16,7 +16,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-top">
         <div className="footer-brand">
-          <a href="#" className="navbar-logo">Tukotomi</a>
+          <a href="#" className="navbar-logo">Tokutomi</a>
           <p>Elegância e sofisticação em cada detalhe</p>
         </div>
 
@@ -36,7 +36,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>© 2026 Tukotomi. Todos os direitos reservados.</p>
+        <p>© 2026 Tokutomi. Todos os direitos reservados.</p>
       </div>
     </footer>
   );

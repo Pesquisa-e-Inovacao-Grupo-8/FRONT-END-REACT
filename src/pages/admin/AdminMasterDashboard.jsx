@@ -27,7 +27,7 @@ export default function AdminMasterDashboard() {
       
       <div className="header-painel-master" style={{ marginBottom: '20px' }}>
         <h2 style={{ margin: '0 0 5px 0', color: '#1a1a2e' }}>🛠️ Painel Master</h2>
-        <p style={{ margin: 0, color: '#666' }}>Gerencie os dados centrais do sistema Tukotomi.</p>
+        <p style={{ margin: 0, color: '#666' }}>Gerencie os dados centrais do sistema Tokutomi.</p>
       </div>
 
       {/* NAVEGAÇÃO EM ABAS */}

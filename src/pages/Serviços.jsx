@@ -56,7 +56,7 @@ export default function Serviços() {
 
       <footer className="footer">
         <div>
-          <div className="footer-logo">Tukotomi</div>
+          <div className="footer-logo">Tokutomi</div>
           <div className="footer-tagline">Elegância e sofisticação em cada detalhe</div>
         </div>
         <div>
@@ -71,7 +71,7 @@ export default function Serviços() {
           <h4>Contato</h4>
           <address>
             Tel: (11) 9999-9999<br />
-            Email: <a href="mailto:contato@tukotomi.com.br">contato@tukotomi.com.br</a><br />
+            Email: <a href="mailto:contato@tokutomi.com.br">contato@tokutomi.com.br</a><br />
             Endereço: Av. Elegância, 1000
           </address>
         </div>
