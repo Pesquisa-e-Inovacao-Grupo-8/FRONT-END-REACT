@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -30,7 +30,7 @@ const MODAL_STYLES = {
   }
 };
 
-function isMobile() {
+export function isMobile() {
   if (typeof window !== 'undefined') {
     try {
       const vw = (window.visualViewport && window.visualViewport.width) || window.innerWidth || document.documentElement.clientWidth;
@@ -52,15 +52,29 @@ function isMobile() {
 
 export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo = 2500, onClose }) {
   const config = useMemo(() => MODAL_STYLES[tipo] || MODAL_STYLES.confirmacao, [tipo]);
+  const dialogRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen) return undefined;
+
+    const elementoAnterior = document.activeElement;
+    dialogRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onClose?.();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
 
     const timer = setTimeout(() => {
       if (onClose) onClose();
     }, tempo);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('keydown', handleKeyDown);
+      elementoAnterior?.focus?.();
+    };
   }, [isOpen, tempo, onClose]);
 
   if (!isOpen) return null;
@@ -81,6 +95,10 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
     >
       <div
         role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-confirmacao-titulo"
+        tabIndex={-1}
+        ref={dialogRef}
         aria-live="polite"
         onClick={(event) => event.stopPropagation()}
         style={{
@@ -125,7 +143,7 @@ export function ModalConfirmacao({ isOpen, mensagem, tipo = 'confirmacao', tempo
           >
             {config.icon}
           </span>
-          {config.label}
+          <span id="modal-confirmacao-titulo">{config.label}</span>
         </div>
 
         <div style={{ padding: '22px 20px 20px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>

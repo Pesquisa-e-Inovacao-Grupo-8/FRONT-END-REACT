@@ -126,11 +126,11 @@ const salvarEspecialidades = async () => {
             marginTop: "30px",
             width: "100%",
             padding: "15px",
-            backgroundColor: salvando || meusServicos.length === 0 ? "#ccc" : "#1a1a2e",
+            backgroundColor: salvando || meusServicos.length === 0 ? "#ccc" : 'linear-gradient(to right, #1a1a2e, #21315c)',
             color: "white",
             border: "none",
             borderRadius: "5px",
-            fontSize: "1.1rem",
+            fontSize: "0.95rem",
             fontWeight: "bold",
             cursor: salvando || meusServicos.length === 0 ? "not-allowed" : "pointer"
           }}

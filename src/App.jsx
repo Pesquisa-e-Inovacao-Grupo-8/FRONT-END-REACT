@@ -27,7 +27,7 @@ import GerenciarPacotes from "./components/admin/GerenciarPacotes";
 
 const isDevEnvironment = () => {
   const mode = (import.meta.env.MODE || "production").toLowerCase();
-  return mode === "development" || mode === "dev";
+  return mode === "development" || mode === "DEV";
 };
 
 const setupDevMockAuth = () => {

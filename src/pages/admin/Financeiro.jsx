@@ -141,12 +141,14 @@ export default function Financeiro() {
       {/* ========================================== */}
       <div className="financeiro-tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>
         <button 
+          className={`financeiro-tab ${abaAtiva === "transacoes" ? "is-active" : ""}`}
           onClick={() => setAbaAtiva("transacoes")}
           style={abaAtiva === "transacoes" ? styles.tabActive : styles.tabInactive}
         >
           💰 Histórico de Transações
         </button>
         <button 
+          className={`financeiro-tab ${abaAtiva === "analise" ? "is-active" : ""}`}
           onClick={() => setAbaAtiva("analise")}
           style={abaAtiva === "analise" ? styles.tabActive : styles.tabInactive}
         >

@@ -159,7 +159,7 @@ export default function ConfiguracoesUsuario({ visao = "usuario" }) {
             color: "#fff",
             border: "none",
             borderRadius: "5px",
-            fontSize: "1.1rem",
+            fontSize: "1.0 rem",
             fontWeight: "bold",
             cursor: salvando ? "not-allowed" : "pointer",
           }}

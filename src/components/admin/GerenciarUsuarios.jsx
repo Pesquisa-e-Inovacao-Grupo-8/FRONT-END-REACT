@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import api from '../../api';
 import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../utils/mensagem';
 import mostrarConfirmacaoAssincrona, { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
+import { apenasDigitos, cpfValido, senhaValida, telefoneValido, textoObrigatorio } from '../utils/validacao';
 
 const ESTADO_INICIAL_FORM = {
   nome: '',
@@ -25,6 +26,7 @@ export default function GerenciarUsuarios() {
   const [modalAberto, setModalAberto] = useState(false);
   const [formNovoUsuario, setFormNovoUsuario] = useState(ESTADO_INICIAL_FORM);
   const [salvando, setSalvando] = useState(false);
+  const [usuarioEditandoId, setUsuarioEditandoId] = useState(null);
 
   useEffect(() => {
     carregarUsuarios();
@@ -56,6 +58,12 @@ export default function GerenciarUsuarios() {
     setModalAberto(true);
   };
 
+  const abrirModalNovo = () => {
+    setUsuarioEditandoId(null);
+    setFormNovoUsuario(ESTADO_INICIAL_FORM);
+    setModalAberto(true);
+  };
+
   const deletarUsuario = async (id, tipo) => {
     if (tipo === 'ADMIN') {
       await mostrarAvisoObrigatorio("Você não pode deletar um Administrador por aqui!");
@@ -67,7 +75,7 @@ export default function GerenciarUsuarios() {
 
     try {
       await api.delete(`/usuarios/${id}`);
-      setUsuarios(usuarios.filter(u => u.id !== id));
+      setUsuarios(prev => prev.filter(u => u.id !== id));
     } catch (error) {
       console.error("Erro ao deletar:", error);
       await mostrarAvisoObrigatorio("Não foi possível deletar o usuário. Contate o suporte.");
@@ -97,18 +105,52 @@ export default function GerenciarUsuarios() {
 
   const handleSalvarUsuario = async (e) => {
     e.preventDefault();
+
+    if (!textoObrigatorio(formNovoUsuario.nome) || !textoObrigatorio(formNovoUsuario.email)) {
+      await mostrarAvisoObrigatorio("Preencha o nome e o e-mail do usuário.");
+      return;
+    }
+
+    if (!cpfValido(formNovoUsuario.cpf)) {
+      await mostrarAvisoObrigatorio("Informe um CPF válido.");
+      return;
+    }
+
+    if (!telefoneValido(formNovoUsuario.telefone)) {
+      await mostrarAvisoObrigatorio("Informe um telefone válido.");
+      return;
+    }
+
+    if (!usuarioEditandoId && !senhaValida(formNovoUsuario.senha)) {
+      await mostrarAvisoObrigatorio("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
+    if (usuarioEditandoId && formNovoUsuario.senha && !senhaValida(formNovoUsuario.senha)) {
+      await mostrarAvisoObrigatorio("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
     try {
       setSalvando(true);
       const payload = {
         ...formNovoUsuario,
+        cpf: apenasDigitos(formNovoUsuario.cpf),
+        telefone: apenasDigitos(formNovoUsuario.telefone),
         ativo: true
       };
 
-      await api.post('/usuarios', payload);
+      if (!usuarioEditandoId) {
+        await api.post('/usuarios', payload);
+      } else {
+        if (!payload.senha) delete payload.senha;
+        await api.put(`/usuarios/${usuarioEditandoId}`, payload);
+      }
       
-      mostrarSucessoMensagem(`Usuário ${formNovoUsuario.nome} cadastrado com sucesso!`);
+      mostrarSucessoMensagem(`Usuário ${formNovoUsuario.nome} ${usuarioEditandoId ? 'atualizado' : 'cadastrado'} com sucesso!`);
       setModalAberto(false);
       setFormNovoUsuario(ESTADO_INICIAL_FORM);
+      setUsuarioEditandoId(null);
       carregarUsuarios(); // Atualiza a tabela imediatamente
       
     } catch (error) {
@@ -146,7 +188,7 @@ export default function GerenciarUsuarios() {
             <option value="ADMIN">Apenas Admins</option>
           </select>
 
-          <button className="btn-novo" onClick={() => setModalAberto(true)}>
+          <button className="btn-novo" onClick={abrirModalNovo}>
             + Novo Usuário
           </button>
         </div>
@@ -195,7 +237,7 @@ export default function GerenciarUsuarios() {
           justifyContent: 'center', alignItems: 'center', zIndex: 9999
         }}>
           <div className="admin-modal-panel" style={{ background: '#fff', padding: '30px', borderRadius: '8px', width: '450px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h3 style={{ marginTop: 0, borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Cadastrar Novo Usuário</h3>
+            <h3 style={{ marginTop: 0, borderBottom: '1px solid #eee', paddingBottom: '10px' }}>{usuarioEditandoId ? 'Editar Usuário' : 'Cadastrar Novo Usuário'}</h3>
             
             <form onSubmit={handleSalvarUsuario} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
               
@@ -216,17 +258,17 @@ export default function GerenciarUsuarios() {
 
               <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Nome Completo</label>
-                <input type="text" name="nome" value={formNovoUsuario.nome} onChange={handleInputChange} required style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                <input type="text" name="nome" value={formNovoUsuario.nome} onChange={handleInputChange} required minLength="2" style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
               </div>
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>CPF</label>
-                  <input type="text" name="cpf" placeholder="000.000.000-00" value={formNovoUsuario.cpf} onChange={handleInputChange} required style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                  <input type="text" name="cpf" placeholder="000.000.000-00" value={formNovoUsuario.cpf} onChange={handleInputChange} required inputMode="numeric" pattern="[0-9.\\-]{11,14}" title="Informe um CPF válido" style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Telefone</label>
-                  <input type="text" name="telefone" placeholder="(11) 9999-9999" value={formNovoUsuario.telefone} onChange={handleInputChange} required style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                  <input type="text" name="telefone" placeholder="(11) 9999-9999" value={formNovoUsuario.telefone} onChange={handleInputChange} required inputMode="tel" pattern="[0-9()\\s+\\-]{10,20}" title="Informe um telefone válido" style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
                 </div>
               </div>
 
@@ -237,11 +279,11 @@ export default function GerenciarUsuarios() {
 
               <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Senha Temporária</label>
-                <input type="password" name="senha" value={formNovoUsuario.senha} onChange={handleInputChange} required style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
-                <small style={{ color: '#666' }}>O usuário usará esta senha no primeiro login.</small>
+                <input type="password" name="senha" value={formNovoUsuario.senha} onChange={handleInputChange} required={!usuarioEditandoId} minLength="6" placeholder={usuarioEditandoId ? 'Deixe vazio para manter a senha' : ''} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                <small style={{ color: '#666' }}>{usuarioEditandoId ? 'Preencha apenas se quiser redefinir a senha.' : 'O usuário usará esta senha no primeiro login.'}</small>
               </div>
               
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+              <div className="modal-actions-mobile" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button type="button" className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
                   Cancelar
                 </button>
