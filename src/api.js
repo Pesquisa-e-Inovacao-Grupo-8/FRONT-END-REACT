@@ -14,7 +14,7 @@ export function normalizeArray(value) {
   return [];
 }
 
-const envName = (import.meta.env.VITE_ENV || import.meta.env.MODE || "PRD").toLowerCase();
+const envName = (import.meta.env.ENV || import.meta.env.MODE || "PRD").toLowerCase();
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 const apiBaseUrl = configuredBaseUrl || {
