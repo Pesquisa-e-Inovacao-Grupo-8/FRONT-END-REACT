@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import api, { normalizeArray } from '../../api';
 import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../utils/mensagem';
 import mostrarConfirmacaoAssincrona, { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
+import { decimalNormalizado, moeda, textoObrigatorio } from '../utils/validacao';
 
 export default function GerenciarPacotes() {
   const [pacotes, setPacotes] = useState([]);
@@ -39,15 +40,31 @@ export default function GerenciarPacotes() {
 
   const toggleServico = (idServico) => {
     if (servicosSelecionados.includes(idServico)) {
-      setServicosSelecionados(servicosSelecionados.filter(id => id !== idServico));
+      setServicosSelecionados(prev => prev.filter(id => id !== idServico));
     } else {
-      setServicosSelecionados([...servicosSelecionados, idServico]);
+      setServicosSelecionados(prev => [...prev, idServico]);
     }
   };
 
+  const abrirModalNovo = () => {
+    setNovoPacote({ nome: '', descricao: '', precoTotal: '' });
+    setServicosSelecionados([]);
+    setModalAberto(true);
+  };
+
   const handleSalvarPacote = async () => {
-    if (!novoPacote.nome || !novoPacote.precoTotal) {
-      await mostrarAvisoObrigatorio("Preencha o nome e o preço do pacote!");
+    if (!textoObrigatorio(novoPacote.nome)) {
+      await mostrarAvisoObrigatorio("Preencha o nome do pacote!");
+      return;
+    }
+
+    if (!moeda(novoPacote.precoTotal, { minimo: 0, incluirMinimo: false })) {
+      await mostrarAvisoObrigatorio("Informe um preço válido e maior que zero.");
+      return;
+    }
+
+    if (servicosSelecionados.length === 0) {
+      await mostrarAvisoObrigatorio("Selecione pelo menos um serviço para o pacote.");
       return;
     }
 
@@ -58,7 +75,7 @@ export default function GerenciarPacotes() {
       const payloadPacote = {
         nome: novoPacote.nome,
         descricao: novoPacote.descricao,
-        precoTotal: parseFloat(novoPacote.precoTotal)
+        precoTotal: decimalNormalizado(novoPacote.precoTotal)
       };
       
       const res = await api.post('/pacotes', payloadPacote);
@@ -91,7 +108,7 @@ export default function GerenciarPacotes() {
     if (!confirmar) return;
     try {
       await api.delete(`/pacotes/${id}`);
-      setPacotes(pacotes.filter(p => p.id !== id));
+      setPacotes(prev => prev.filter(p => p.id !== id));
     } catch (error) {
       await mostrarAvisoObrigatorio("Erro ao deletar pacote. Contate o suporte.");
     }
@@ -103,7 +120,7 @@ export default function GerenciarPacotes() {
     <div className="crud-section">
       <div className="crud-header">
         <h2>Gestão de Pacotes Promocionais</h2>
-        <button className="btn-novo" onClick={() => setModalAberto(true)}>+ Novo Pacote</button>
+        <button className="btn-novo" onClick={abrirModalNovo}>+ Novo Pacote</button>
       </div>
 
       <table className="crud-table">
@@ -147,12 +164,12 @@ export default function GerenciarPacotes() {
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "15px" }}>
               <label>
                 Nome do Pacote
-                <input type="text" value={novoPacote.nome} onChange={e => setNovoPacote({...novoPacote, nome: e.target.value})} style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+                <input type="text" value={novoPacote.nome} onChange={e => setNovoPacote({...novoPacote, nome: e.target.value})} style={{ width: '100%', padding: '10px', marginTop: '5px' }} />
               </label>
 
               <label>
                 Descrição
-                <textarea value={novoPacote.descricao} onChange={e => setNovoPacote({...novoPacote, descricao: e.target.value})} style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+                <textarea value={novoPacote.descricao} onChange={e => setNovoPacote({...novoPacote, descricao: e.target.value})} style={{ width: '100%', padding: '10px', marginTop: '5px' }} />
               </label>
 
               <label>
@@ -175,9 +192,9 @@ export default function GerenciarPacotes() {
               </div>
             </div>
             
-            <div className="pacote-modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
-              <button className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '8px 15px', cursor: 'pointer' }}>Cancelar</button>
-              <button className="btn-salvar-pacote" onClick={handleSalvarPacote} disabled={salvando} style={{ padding: '8px 15px', background: '#b8960c', color: '#fff', border: 'none', cursor: 'pointer' }}>
+            <div className="pacote-modal-actions modal-actions-mobile" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+              <button className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer' }}>Cancelar</button>
+              <button className="btn-salvar-pacote" onClick={handleSalvarPacote} disabled={salvando} style={{ padding: '10px 15px', background: 'linear-gradient(135deg, #a17f00 0%, #c9a33c 100%)', color: '#fff', border: 'none', cursor: 'pointer' }}>
                 {salvando ? "Salvando..." : "Salvar Pacote"}
               </button>
             </div>

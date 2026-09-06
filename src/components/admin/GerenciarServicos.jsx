@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import api from '../../api';
 import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../utils/mensagem';
 import mostrarConfirmacaoAssincrona, { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
+import { decimalNormalizado, duracaoPositiva, moeda, textoObrigatorio } from '../utils/validacao';
 
 const ESTADO_INICIAL_FORM = {
   nome: '',
@@ -54,14 +55,15 @@ export default function GerenciarServicos() {
   };
 
   const deletarServico = async (id) => {
-    if (window.confirm("Deseja realmente excluir este serviço?")) {
-      try {
-        await api.delete(`/servicos/${id}`);
-        setServicos(servicos.filter(s => s.id !== id));
-      } catch (error) {
-        console.error("Erro ao deletar:", error);
-        alert("Não foi possível deletar o serviço. Ele pode estar vinculado a um agendamento.");
-      }
+    const confirmar = await mostrarConfirmacaoAssincrona("Deseja realmente excluir este serviço?");
+    if (!confirmar) return;
+
+    try {
+      await api.delete(`/servicos/${id}`);
+      setServicos(prev => prev.filter(s => s.id !== id));
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+      await mostrarAvisoObrigatorio("Não foi possível deletar o serviço. Ele pode estar vinculado a um agendamento.");
     }
   };
 
@@ -122,8 +124,13 @@ export default function GerenciarServicos() {
   };
 
   const handleSalvarProdutoRapido = async () => {
-    if (!formProduto.nome || !formProduto.custoUnitario) {
-      await mostrarAvisoObrigatorio("Preencha o nome e o custo do produto!");
+    if (!textoObrigatorio(formProduto.nome) || !textoObrigatorio(formProduto.unidadeMedida)) {
+      await mostrarAvisoObrigatorio("Preencha o nome e a unidade do produto!");
+      return;
+    }
+
+    if (!moeda(formProduto.custoUnitario)) {
+      await mostrarAvisoObrigatorio("Informe um custo válido para o produto.");
       return;
     }
     
@@ -134,14 +141,14 @@ export default function GerenciarServicos() {
       const payload = {
         nome: formProduto.nome,
         unidadeMedida: formProduto.unidadeMedida,
-        custoUnitario: parseFloat(formProduto.custoUnitario.replace(',', '.'))
+        custoUnitario: decimalNormalizado(formProduto.custoUnitario)
       };
 
       const res = await api.post('/produtos', payload);
       const novoProduto = res.data;
 
       // Adiciona na lista geral da tela
-      setProdutos([...produtos, novoProduto]);
+      setProdutos(prev => [...prev, novoProduto]);
       // Já deixa ele marcado (checkbox ticado) para o serviço atual!
       setFormNovoServico(prev => ({ ...prev, produtosIds: [...prev.produtosIds, novoProduto.id] }));
       
@@ -160,6 +167,22 @@ export default function GerenciarServicos() {
   // --- FUNÇÃO DE SALVAR O SERVIÇO (CRIAR OU EDITAR) ---
   const handleSalvarServico = async (e) => {
     e.preventDefault();
+
+    if (!textoObrigatorio(formNovoServico.nome) || !textoObrigatorio(formNovoServico.descricao)) {
+      await mostrarAvisoObrigatorio("Preencha o nome e a descrição do serviço.");
+      return;
+    }
+
+    if (!duracaoPositiva(formNovoServico.duracaoMinutos)) {
+      await mostrarAvisoObrigatorio("Informe uma duração inteira maior que zero.");
+      return;
+    }
+
+    if (!moeda(formNovoServico.preco)) {
+      await mostrarAvisoObrigatorio("Informe um preço válido para o serviço.");
+      return;
+    }
+
     try {
       setSalvando(true);
       
@@ -167,7 +190,7 @@ export default function GerenciarServicos() {
         nome: formNovoServico.nome,
         descricao: formNovoServico.descricao,
         duracaoMinutos: parseInt(formNovoServico.duracaoMinutos),
-        preco: parseFloat(formNovoServico.preco.toString().replace(',', '.')),
+        preco: decimalNormalizado(formNovoServico.preco),
         ativo: true
       };
 
@@ -239,7 +262,7 @@ export default function GerenciarServicos() {
             onChange={(e) => setTermoBusca(e.target.value)}
             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '250px' }}
           />
-          <button onClick={abrirModalNovo} style={{ padding: '8px 15px', background: '#b8960c', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+          <button onClick={abrirModalNovo} style={{ padding: '10px 20px', background: 'linear-gradient(to right, #1a1a2e, #21315c)', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
             + Novo Serviço
           </button>
         </div>
@@ -294,18 +317,18 @@ export default function GerenciarServicos() {
               
               <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Nome do Serviço</label>
-                <input type="text" name="nome" value={formNovoServico.nome} onChange={handleInputChange} required placeholder="Ex: Corte Feminino" style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                <input type="text" name="nome" value={formNovoServico.nome} onChange={handleInputChange} required minLength="2" placeholder="Ex: Corte Feminino" style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
               </div>
 
               <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Descrição</label>
-                <textarea name="descricao" value={formNovoServico.descricao} onChange={handleInputChange} required placeholder="Detalhes do serviço..." style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', minHeight: '60px' }} />
+                <textarea name="descricao" value={formNovoServico.descricao} onChange={handleInputChange} required minLength="2" placeholder="Detalhes do serviço..." style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', minHeight: '60px' }} />
               </div>
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Duração (Minutos)</label>
-                  <input type="number" name="duracaoMinutos" placeholder="Ex: 60" value={formNovoServico.duracaoMinutos} onChange={handleInputChange} required min="1" style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                  <input type="number" name="duracaoMinutos" placeholder="Ex: 60" value={formNovoServico.duracaoMinutos} onChange={handleInputChange} required min="1" step="1" style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Preço (R$)</label>
@@ -314,16 +337,16 @@ export default function GerenciarServicos() {
               </div>
 
               {/* === SESSÃO DE PRODUTOS === */}
-              <div style={{ marginTop: '10px', background: '#f9f9f9', padding: '15px', borderRadius: '8px', border: '1px solid #eee' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <div className="produto-section" style={{ marginTop: '10px', background: '#f9f9f9', padding: '15px', borderRadius: '8px', border: '1px solid #eee' }}>
+                <div className="produto-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <label style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#1a1a2e', margin: 0 }}>
                     🧴 Produtos Utilizados
                   </label>
                   <button 
                     type="button" 
-                    className={mostrandoNovoProduto ? 'btn-cancelar-modal' : ''}
+                    className={mostrandoNovoProduto ? 'btn-cancelar-modal produto-cancel-button' : 'produto-cancel-button'}
                     onClick={() => setMostrandoNovoProduto(!mostrandoNovoProduto)}
-                    style={{ background: '#b8960c', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '0.8rem', cursor: 'pointer' }}
+                    style={{ background: 'linear-gradient(135deg, #a17f00 0%, #c9a33c 100%)', color: '#fff', border: 'none', borderRadius: '5px', padding: '4px 8px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 'bold' }}
                   >
                     {mostrandoNovoProduto ? 'Cancelar' : '+ Cadastrar Novo'}
                   </button>
@@ -331,14 +354,13 @@ export default function GerenciarServicos() {
 
                 {/* FORMULÁRIO EXPRESS DE PRODUTO (Escondido por padrão) */}
                 {mostrandoNovoProduto && (
-                  <div style={{ display: 'flex', gap: '5px', marginBottom: '15px', background: '#fff', padding: '10px', borderRadius: '4px', border: '1px dashed #ccc' }}>
-                    <input type="text" placeholder="Nome do Produto" value={formProduto.nome} onChange={(e) => setFormProduto({...formProduto, nome: e.target.value})} style={{ flex: 2, padding: '6px', fontSize: '0.8rem' }} />
-                    <input type="text" placeholder="UN (ex: ml, g)" value={formProduto.unidadeMedida} onChange={(e) => setFormProduto({...formProduto, unidadeMedida: e.target.value})} style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} />
-                    <input type="number" placeholder="Custo (R$)" value={formProduto.custoUnitario} onChange={(e) => setFormProduto({...formProduto, custoUnitario: e.target.value})} style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} />
+                  <div className="produto-form-inline" style={{ display: 'flex', gap: '5px', marginBottom: '15px', background: '#fff', padding: '10px', borderRadius: '4px', border: '1px dashed #ccc' }}>
+                    <input type="text" placeholder="Nome do Produto" value={formProduto.nome} onChange={(e) => setFormProduto({...formProduto, nome: e.target.value})} required minLength="2" style={{ flex: 2, padding: '6px', fontSize: '0.8rem' }} />
+                    <input type="text" placeholder="UN (ex: ml, g)" value={formProduto.unidadeMedida} onChange={(e) => setFormProduto({...formProduto, unidadeMedida: e.target.value})} required style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} />
+                    <input type="number" placeholder="Custo (R$)" value={formProduto.custoUnitario} onChange={(e) => setFormProduto({...formProduto, custoUnitario: e.target.value})} required min="0" step="0.01" style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }} />
                     <button type="button" onClick={handleSalvarProdutoRapido} disabled={salvandoProduto} style={{ background: '#28a745', color: '#fff', border: 'none', padding: '0 10px', borderRadius: '4px', cursor: 'pointer' }}>
                       ✓
-                    </button>
-                  </div>
+                    </button>                  </div>
                 )}
                 
                 {/* LISTA DE CHECKBOXES */}
@@ -361,7 +383,7 @@ export default function GerenciarServicos() {
               </div>
               
               {/* BOTÕES FINAIS */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '15px' }}>
+              <div className="produto-modal-actions modal-actions-mobile" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '15px' }}>
                 <button type="button" className="btn-cancelar-modal" onClick={() => setModalAberto(false)} disabled={salvando} style={{ padding: '10px 15px', cursor: 'pointer', background: '#eee', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}>
                   Cancelar
                 </button>
