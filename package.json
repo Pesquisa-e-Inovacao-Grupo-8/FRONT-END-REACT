@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:mock": "sh -c \"npm run mock & npm run dev\"",
     "build": "vite build",
     "preview": "vite preview",
     "mock": "node mock/server.js"

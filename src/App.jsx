@@ -26,7 +26,7 @@ import GerenciarServicos from "./components/admin/GerenciarServicos";
 import GerenciarPacotes from "./components/admin/GerenciarPacotes";
 
 const isDevEnvironment = () => {
-  const mode = (import.meta.env.MODE || "production").toLowerCase();
+  const mode = (window._env_?.VITE_ENV || "production").toLowerCase();
   return mode === "development" || mode === "DEV";
 };
 
@@ -39,7 +39,7 @@ const setupDevMockAuth = () => {
       userId: "mock-client-id",
       userName: "Cliente Mock",
       userRole: "CLIENTE",
-      email: "cliente.mock@tokutomi.com",
+      email: "cliente.mock@tokutomi.com", 
       senha: "Cliente123!"
     },
     PROFISSIONAL: {

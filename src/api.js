@@ -15,18 +15,22 @@ export function normalizeArray(value) {
   return [];
 }
 
+
 const envName = (getEnv('VITE_ENV') || import.meta.env.MODE || 'PRD').toLowerCase();
 const configuredBaseUrl = getEnv('VITE_API_BASE_URL') || import.meta.env.VITE_API_BASE_URL;
 
-const apiBaseUrl = configuredBaseUrl || {
+const isDev = envName === 'development' || envName === 'dev';
+
+// Em ambiente de desenvolvimento usamos o json-server rodando em 3001
+const apiBaseUrl = configuredBaseUrl || (isDev ? 'http://127.0.0.1:3001' : {
   dev: "http://127.0.0.1:8080",
   development: "http://127.0.0.1:8080",
   qa: "https://qa-spring.renatahtokutomi.com",
   prd: "https://spring.renatahtokutomi.com",
   production: "https://spring.renatahtokutomi.com",
-}[envName] || "https://spring.renatahtokutomi.com";
+}[envName]) || "https://spring.renatahtokutomi.com";
 
-console.log("API Base URL= ", apiBaseUrl);
+console.log("API Base URL= ", apiBaseUrl, "(env:", envName, ")");
 
 const api = axios.create({
   baseURL: apiBaseUrl,
