@@ -1,32 +1,6 @@
-import { mostrarConfirmacao, mostrarErro, mostrarAtencao } from './modal-confirmação';
+import { isMobile, mostrarConfirmacao, mostrarErro, mostrarAtencao } from './modal-confirmação';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-function isMobile() {
-  if (typeof window === 'undefined') return false;
-
-  try {
-    const vw =
-      (window.visualViewport && window.visualViewport.width) ||
-      window.innerWidth ||
-      document.documentElement.clientWidth;
-
-    if (typeof vw === 'number' && vw <= 768) return true;
-
-    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
-      return true;
-    }
-  } catch (e) {
-    // ignore
-  }
-
-  if (typeof navigator !== 'undefined') {
-    const ua = navigator.userAgent || '';
-    if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) return true;
-  }
-
-  return false;
-}
 
 export function mostrarMensagem(texto, tipo = 'info') {
   if (isMobile()) {

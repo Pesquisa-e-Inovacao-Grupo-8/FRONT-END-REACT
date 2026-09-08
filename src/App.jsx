@@ -1,6 +1,7 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -19,15 +20,19 @@ import ConfiguracoesProfissional from "./pages/admin/ConfiguracoesProfissional";
 import ConfiguracoesUsuario from "./pages/admin/ConfiguracoesUsuario";
 import AdminMasterDashboard from "./pages/admin/AdminMasterDashboard";
 import VitrinePacotes from "./pages/VitrinePacotes";
+import MeusPacotes from "./pages/MeusPacotes";
 import Financeiro from "./pages/admin/Financeiro";
 import Dashboard from "./pages/admin/Dashboard";
+import ProfissionalDashboard from "./pages/admin/ProfissionalDashboard";
+import AcessoNegado from "./pages/AcessoNegado";
+import { getUsuarioLogado, normalizarRole, validarAcessoNoBackend } from "./validate-access";
 import GerenciarUsuarios from "./components/admin/GerenciarUsuarios";
 import GerenciarServicos from "./components/admin/GerenciarServicos";
 import GerenciarPacotes from "./components/admin/GerenciarPacotes";
 
 const isDevEnvironment = () => {
-  const mode = (import.meta.env.MODE || "production").toLowerCase();
-  return mode === "development" || mode === "dev";
+  const mode = (window._env_?.VITE_ENV || "production").toLowerCase();
+  return mode === "development" || mode === "DEV";
 };
 
 const setupDevMockAuth = () => {
@@ -39,7 +44,7 @@ const setupDevMockAuth = () => {
       userId: "mock-client-id",
       userName: "Cliente Mock",
       userRole: "CLIENTE",
-      email: "cliente.mock@tokutomi.com",
+      email: "cliente.mock@tokutomi.com", 
       senha: "Cliente123!"
     },
     PROFISSIONAL: {
@@ -95,20 +100,74 @@ const LayoutNavbar = () => (
   </>
 );
 
+const getSessionRole = (token) => {
+  try {
+    const decoded = jwtDecode(token);
+    const tokenRole = normalizarRole(decoded.tipo || decoded.role);
+    if (tokenRole) return tokenRole;
+  } catch {
+    // Mocks locais não são JWTs; nesses casos usamos o valor salvo.
+  }
+
+  return normalizarRole(localStorage.getItem("userRole"));
+};
+
 const PrivateRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("userRole");
+  const [estado, setEstado] = useState("validando");
+  const [role, setRole] = useState("");
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function validarSessao() {
+      const usuarioLocal = getUsuarioLogado();
+
+      if (!usuarioLocal) {
+        if (ativo) setEstado("login");
+        return;
+      }
+
+      const acesso = await validarAcessoNoBackend();
+      if (!ativo) return;
+
+      if (!acesso.valido) {
+        clearSession();
+        setEstado("login");
+        return;
+      }
+
+      setRole(normalizarRole(acesso.tipo || usuarioLocal.tipo));
+      setEstado("autorizado");
+    }
+
+    validarSessao();
+    return () => { ativo = false; };
+  }, [token]);
 
   if (!token) return <Navigate to="/login" replace />;
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
-    if (role === "CLIENTE") return <Navigate to="/agendamentos" replace />;
-    if (role === "PROFISSIONAL") return <Navigate to="/admin/agendamentos" replace />;
-    if (role === "ADMIN") return <Navigate to="/admin/dashboard" replace />;
-    return <Navigate to="/" replace />;
+  if (estado === "validando") return <div style={{ padding: "40px", textAlign: "center" }}>Validando acesso...</div>;
+  if (estado === "login") return <Navigate to="/login" replace />;
+
+  if (allowedRoles && !allowedRoles.map(normalizarRole).includes(role)) {
+    return <Navigate to="/acesso-negado" replace />;
   }
 
   return children;
+};
+
+const isTokenUsable = (token) => {
+  try {
+    const { exp } = jwtDecode(token);
+    return !exp || exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+};
+
+const clearSession = () => {
+  ["token", "userId", "userName", "userRole"].forEach((key) => localStorage.removeItem(key));
 };
 
 const LayoutSidebar = () => {
@@ -152,6 +211,11 @@ const LayoutSidebar = () => {
   );
 };
 
+const AdminHomeRedirect = () => {
+  const role = getSessionRole(localStorage.getItem("token"));
+  return <Navigate to={role === "PROFISSIONAL" ? "/admin/inicio-profissional" : "/admin/dashboard"} replace />;
+};
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -184,6 +248,14 @@ export default function App() {
             }
           />
           <Route
+            path="meus-pacotes"
+            element={
+              <PrivateRoute allowedRoles={["CLIENTE"]}>
+                <MeusPacotes />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="configuracoes-usuario"
             element={
               <PrivateRoute allowedRoles={["CLIENTE"]}>
@@ -204,6 +276,11 @@ export default function App() {
           <Route
             path="dashboard"
             element={<PrivateRoute allowedRoles={["ADMIN"]}><Dashboard /></PrivateRoute>}
+          />
+          <Route index element={<AdminHomeRedirect />} />
+          <Route
+            path="inicio-profissional"
+            element={<PrivateRoute allowedRoles={["PROFISSIONAL"]}><ProfissionalDashboard /></PrivateRoute>}
           />
           <Route
             path="usuarios"
@@ -229,12 +306,15 @@ export default function App() {
           <Route
             path="configuracoes"
             element={
-              <PrivateRoute allowedRoles={["ADMIN", "PROFISSIONAL"]}>
+              <PrivateRoute allowedRoles={["PROFISSIONAL"]}>
                 <ConfiguracoesProfissional />
               </PrivateRoute>
             }
           />
+          <Route path="acesso-negado" element={<AcessoNegado />} />
         </Route>
+
+        <Route path="/acesso-negado" element={<AcessoNegado />} />
       </Routes>
     </BrowserRouter>
   );

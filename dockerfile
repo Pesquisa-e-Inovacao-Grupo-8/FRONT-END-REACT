@@ -28,8 +28,12 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Configuração para React Router
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Copia entrypoint e usa-o para injetar variáveis em runtime
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expõe a porta HTTP
 EXPOSE 80
 
-# Inicia o Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Usa entrypoint que escreve env-config.js a partir de variáveis de ambiente
+ENTRYPOINT ["/entrypoint.sh"]

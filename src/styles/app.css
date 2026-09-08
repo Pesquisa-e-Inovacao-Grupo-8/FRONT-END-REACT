@@ -630,19 +630,74 @@ body,
     text-align: center;
   }
 
+  .financeiro-page .crud-header h1 {
+    width: 100%;
+    text-align: center;
+  }
+
   .financeiro-kpis {
-    justify-content: center;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px !important;
+    width: 100%;
+    margin-bottom: 24px !important;
   }
 
   .financeiro-kpis .kpi-card {
-    flex: 1 1 100% !important;
-    max-width: 360px;
+    width: 100%;
+    max-width: none;
+    min-height: 108px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .financeiro-kpis .kpi-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .financeiro-kpis .kpi-card:last-child h4 {
+    text-align: center;
   }
 
   .financeiro-tabs {
-    justify-content: center;
-    flex-wrap: wrap;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+  }
+
+  .financeiro-tabs button {
+    width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 8px;
+    padding: 10px 12px !important;
+  }
+
+  .financeiro-tabs button[style*="b8960c"] {
+    border-color: #b8960c !important;
+  }
+
+  .financeiro-tabs .financeiro-tab.is-active {
+    border: 1px solid #b8960c !important;
+    color: #1a1a2e !important;
+    box-shadow: 0 0 0 1px rgba(184, 150, 12, 0.18);
+  }
+
+  .financeiro-page .kpi-card h4 {
+    font-size: 0.68rem !important;
+    text-align: center;
+    align-self: stretch;
+  }
+
+  .financeiro-page .kpi-card h2 {
+    font-size: 1.2rem !important;
+    margin-top: 8px;
   }
 
   .financeiro-page .fade-in {

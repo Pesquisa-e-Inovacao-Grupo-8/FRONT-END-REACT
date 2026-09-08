@@ -1,5 +1,7 @@
 //src/pages/Serviços.jsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { mostrarAvisoObrigatorio } from "../components/utils/confirm-dialog";
 import "../styles/servico.css";
 import CardServico from "../components/serviços/CardServico";
 
@@ -20,6 +22,15 @@ const galleryImages = [
 
 export default function Serviços() {
   const [activeNav, setActiveNav] = useState("Serviços");
+  const navigate = useNavigate();
+
+  const iniciarAgendamento = () => {
+    if (!localStorage.getItem("token")) {
+      mostrarAvisoObrigatorio("Crie uma conta ou faça login para agendar");
+      return;
+    }
+    navigate("/agendamento");
+  };
 
   return (
     <>
@@ -51,7 +62,7 @@ export default function Serviços() {
       <section className="cta-section">
         <h2>Pronta para experimentar?</h2>
         <p>Agende agora e garanta seu horário preferido</p>
-        <button className="cta-btn"><a href="/login">Fazer Agendamento</a></button>
+        <button className="cta-btn" onClick={iniciarAgendamento}>Fazer Agendamento</button>
       </section>
 
       <footer className="footer">

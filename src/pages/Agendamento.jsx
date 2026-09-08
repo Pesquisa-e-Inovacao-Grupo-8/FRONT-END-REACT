@@ -1,16 +1,19 @@
 //src/pages/Agendamento.jsx
 import { useState, useEffect, Fragment } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getServicos, agendarPeloCliente } from "../js/agendamento.js";
 import { getFuncionarias } from "../js/funcionarias.js";
+import { buscarMeusDados } from "../validate-access";
+import api from "../api";
 import "../styles/agendamento-usuario.css";
-import api from '../api.js'
-
-const TIME_SLOTS = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
-const UNAVAILABLE = ["12:00", "16:00"];
 
 const STEP_LABELS = ["Serviço", "Data e Hora", "Seus Dados"];
+const HORARIOS_POR_PAGINA = 20;
 
 export default function Agendamento() {
+  const [searchParams] = useSearchParams();
+  const pacoteServicoId = searchParams.get("clientePacoteServicoId");
+  const servicoPacoteId = searchParams.get("servicoId");
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,39 +30,79 @@ export default function Agendamento() {
   // Step 2
   const [date, setDate] = useState("");
   const [timeSlot, setTimeSlot] = useState("");
+    const [paginaHorarios, setPaginaHorarios] = useState(0);
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
   const [step2Errors, setStep2Errors] = useState({});
 
   // Step 3
   const [form, setForm] = useState({ name: "", phone: "", email: "", notes: "" });
   const [step3Errors, setStep3Errors] = useState({});
 
-   // Filtro: mostra profissionais que fazem o serviço selecionado
-  const profissionaisFiltrados = serviceId 
-    ? profissionaisDb.filter(p => {
-        const servicoSelecionado = servicosDb.find(s => s.id === serviceId);
-        if (!servicoSelecionado) return true;
-        
-        // Verifica se na lista de serviços do profissional existe o ID ou o Nome do serviço
-        return p.servicos && p.servicos.some(s => 
-          s === serviceId || s.id === serviceId || s === servicoSelecionado.nome || s.nome === servicoSelecionado.nome
-        );
-      })
-    : profissionaisDb;
+  const servicosDisponiveis = servicosDb.filter((servico) => (
+    !servicoPacoteId || String(servico.id) === String(servicoPacoteId)
+  ));
 
-    useEffect(() => {
-  const userId = localStorage.getItem("userId");
-  if (userId) {
-    // Busca dados reais se logado
-    api.get(`/usuarios/${userId}`).then(res => {
-      setForm({
-        name: res.data.nome || "",
-        phone: res.data.telefone || "",
-        email: res.data.email || "",
-        notes: ""
-      });
-    }).catch(err => console.log("Usuário não encontrado", err));
-  }
-}, []);
+  const profissionaisDoServico = profissionaisDb.filter((profissional) => (
+    (profissional.servicos || []).some((vinculo) => {
+      const vinculoId = typeof vinculo === "object"
+        ? vinculo.id || vinculo.servico?.id
+        : vinculo;
+      return String(vinculoId) === String(serviceId);
+    })
+  ));
+
+  const servicoSelecionado = servicosDb.find(servico => String(servico.id) === String(serviceId));
+  const horariosDaPagina = horariosDisponiveis.slice(
+    paginaHorarios * HORARIOS_POR_PAGINA,
+    (paginaHorarios + 1) * HORARIOS_POR_PAGINA
+  );
+  const totalPaginasHorarios = Math.ceil(horariosDisponiveis.length / HORARIOS_POR_PAGINA);
+
+  useEffect(() => {
+    let ativo = true;
+    if (!professionalId || !serviceId || !date) {
+      setHorariosDisponiveis([]);
+      return () => { ativo = false; };
+    }
+
+    api.get("/agendamentos/horarios-disponiveis", {
+      params: { profissionalId: professionalId, servicoId: serviceId, data: date },
+    }).then(response => {
+      if (ativo) setHorariosDisponiveis(response.data || []);
+    }).catch(() => {
+      if (ativo) setHorariosDisponiveis([]);
+    });
+
+    return () => { ativo = false; };
+  }, [professionalId, serviceId, date]);
+
+  useEffect(() => {
+    setPaginaHorarios(0);
+  }, [professionalId, serviceId, date]);
+
+  // Pré-preenche o formulário com os dados do usuário logado.
+  // Usa /usuarios/me (via validate-access.js) em vez de /usuarios/{id},
+  // então funciona pra qualquer role autenticada e não depende do
+  // userId salvo no localStorage. Falha silenciosa: se não conseguir
+  // buscar, o usuário simplesmente preenche manualmente.
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarMeusDados() {
+      const dados = await buscarMeusDados();
+      if (!ativo || !dados) return;
+
+      setForm(f => ({
+        ...f,
+        name: dados.nome || "",
+        phone: dados.telefone || "",
+        email: dados.email || "",
+      }));
+    }
+
+    carregarMeusDados();
+    return () => { ativo = false; };
+  }, []);
 
   // Efeito para carregar Serviços e Profissionais do Backend ao montar a tela
   useEffect(() => {
@@ -71,6 +114,9 @@ export default function Agendamento() {
         ]);
         setServicosDb(servicosApi || []);
         setProfissionaisDb(profissionaisApi || []);
+        if (servicoPacoteId && servicosApi.some(servico => String(servico.id) === String(servicoPacoteId))) {
+          setServiceId(servicoPacoteId);
+        }
       } catch (error) {
         console.error("Falha ao carregar opções do backend:", error);
       }
@@ -126,10 +172,10 @@ export default function Agendamento() {
 
   async function handleConfirm() {
     setIsSubmitting(true);
-    
+
     const servicoSelecionado = servicosDb.find(s => s.id === serviceId);
     const meuId = localStorage.getItem("userId");
-    
+
     // Monta o payload no formato que nosso Orquestrador espera
     const payloadCompleto = {
       serviceId,
@@ -137,6 +183,7 @@ export default function Agendamento() {
       clienteId: meuId,
       date,
       time: timeSlot,
+      clientePacoteServicoId: pacoteServicoId || null,
       duracaoServico: servicoSelecionado ? servicoSelecionado.duracaoMinutos : 60,
       ...form
     };
@@ -221,39 +268,66 @@ export default function Agendamento() {
 
           {!done && step === 1 && (
             <>
-              <div className="card-title">Escolha o Serviço e Profissional</div>
+              <div className="card-title">Escolha o Serviço e o Profissional</div>
 
               <div className="field">
                 <label>Serviço</label>
-                <select
-                  className={step1Errors.serviceId ? "error" : ""}
-                  value={serviceId}
-                  onChange={e => { setServiceId(e.target.value); setStep1Errors(p => ({ ...p, serviceId: "" })); }}
-                >
-                  <option value="">Selecione um serviço</option>
-                  {servicosDb.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.nome} — R$ {s.preco.toFixed(2).replace('.', ',')} · {s.duracaoMinutos}min
-                    </option>
-                  ))}
-                </select>
+                {servicosDisponiveis.length === 0 ? (
+                  <div className="service-selection-empty">Nenhum serviço disponível no momento.</div>
+                ) : (
+                  <div className="booking-services-grid" role="radiogroup" aria-label="Serviços disponíveis">
+                    {servicosDisponiveis.map(servico => {
+                      const selecionado = serviceId === servico.id;
+                      return (
+                        <button
+                          key={servico.id}
+                          type="button"
+                          className={`booking-service-card${selecionado ? " selected" : ""}`}
+                          onClick={() => {
+                            setServiceId(servico.id);
+                            setProfessionalId("");
+                            setStep1Errors(p => ({ ...p, serviceId: "", professionalId: "" }));
+                          }}
+                          role="radio"
+                          aria-checked={selecionado}
+                        >
+                          <span className="booking-service-card__icon" aria-hidden="true">✨</span>
+                          <span className="booking-service-card__content">
+                            <strong>{servico.nome}</strong>
+                            <span>{servico.descricao || "Serviço de beleza"}</span>
+                            <small>R$ {Number(servico.preco || 0).toFixed(2).replace('.', ',')} · {servico.duracaoMinutos || 60} min</small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 {step1Errors.serviceId && <div className="error-msg">{step1Errors.serviceId}</div>}
               </div>
 
               <div className="field">
                 <label>Profissional</label>
-                <select
-                  className={step1Errors.professionalId ? "error" : ""}
-                  value={professionalId}
-                  onChange={e => { setProfessionalId(e.target.value); setStep1Errors(p => ({ ...p, professionalId: "" })); }}
-                >
-                  <option value="">Selecione um profissional</option>
-                  {profissionaisFiltrados.map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.nome}
-                    </option>
-                  ))}
-                </select>
+                {!serviceId ? (
+                  <div className="service-selection-empty">Selecione um serviço primeiro.</div>
+                ) : profissionaisDoServico.length === 0 ? (
+                  <div className="service-selection-empty">Nenhum profissional realiza este serviço.</div>
+                ) : (
+                  <select
+                    className={step1Errors.professionalId ? "error" : ""}
+                    value={professionalId}
+                    onChange={e => {
+                      setProfessionalId(e.target.value);
+                      setStep1Errors(p => ({ ...p, professionalId: "" }));
+                    }}
+                  >
+                    <option value="">Selecione um profissional</option>
+                    {profissionaisDoServico.map(profissional => (
+                      <option key={profissional.id} value={profissional.id}>
+                        {profissional.nome}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 {step1Errors.professionalId && <div className="error-msg">{step1Errors.professionalId}</div>}
               </div>
 
@@ -288,18 +362,28 @@ export default function Agendamento() {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   Horário
                 </label>
-                <div className="time-grid">
-                  {TIME_SLOTS.map(t => (
+                            <div className="time-grid">
+                              {horariosDaPagina.map(t => (
                     <button
                       key={t}
-                      className={`time-slot${timeSlot === t ? " selected" : ""}${UNAVAILABLE.includes(t) ? " disabled" : ""}`}
-                      onClick={() => { if (!UNAVAILABLE.includes(t)) { setTimeSlot(t); setStep2Errors(p => ({ ...p, timeSlot: "" })); } }}
+                      className={`time-slot${timeSlot === t ? " selected" : ""}`}
+                      onClick={() => { setTimeSlot(t); setStep2Errors(p => ({ ...p, timeSlot: "" })); }}
                       type="button"
                     >
                       {t}
                     </button>
                   ))}
+                  {horariosDisponiveis.length === 0 && (
+                    <div className="service-selection-empty">Nenhum horário disponível para esta data.</div>
+                  )}
                 </div>
+                {totalPaginasHorarios > 1 && (
+                  <div className="horarios-paginacao" aria-label="Paginação de horários">
+                    <button type="button" onClick={() => setPaginaHorarios(pagina => Math.max(0, pagina - 1))} disabled={paginaHorarios === 0}>Anterior</button>
+                    <span>{paginaHorarios + 1} / {totalPaginasHorarios}</span>
+                    <button type="button" onClick={() => setPaginaHorarios(pagina => Math.min(totalPaginasHorarios - 1, pagina + 1))} disabled={paginaHorarios === totalPaginasHorarios - 1}>Próxima</button>
+                  </div>
+                )}
                 {step2Errors.timeSlot && <div className="error-msg" style={{ marginTop: 8 }}>{step2Errors.timeSlot}</div>}
               </div>
 

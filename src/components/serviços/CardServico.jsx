@@ -1,10 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api, { normalizeArray } from '../../api';
+import { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
 
 export default function CardServico() {
+  const navigate = useNavigate();
 const [servicos, setServicos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(''); 
+
+  const agendarServico = (servicoId) => {
+    if (!localStorage.getItem('token')) {
+      mostrarAvisoObrigatorio('Crie uma conta ou faça login para agendar');
+      return;
+    }
+
+    navigate(`/agendamento?servicoId=${encodeURIComponent(servicoId)}`);
+  };
 
   useEffect(() => {
     api.get('/servicos')
@@ -43,7 +55,7 @@ const [servicos, setServicos] = useState([]);
               </div>
               <div className="card-name">{svc.nome}</div>
               <div className="card-desc">{svc.descricao}</div>
-              <button className="card-btn">Agendar</button>
+              <button className="card-btn" onClick={() => agendarServico(svc.id)}>Agendar</button>
             </div>
           )) : (
             <div style={{ color: '#666', padding: '1rem 0' }}>Nenhum serviço disponível no momento.</div>

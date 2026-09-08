@@ -134,13 +134,13 @@ export default function Cadastro() {
         telefone: form.telefone,
         email: form.email,
         senha: form.senha,
-        tipo: "CLIENTE", // Fixo como cliente
         ativo: true
       };
 
-      await api.post("/usuarios", payload);
+      await api.post("/auth/cadastrar", payload);
 
       mostrarMensagem('Conta criada com sucesso! Redirecionando para o login.', 'success');
+      
       setTimeout(() => navigate("/login"), 1500);
 
     } catch (error) {

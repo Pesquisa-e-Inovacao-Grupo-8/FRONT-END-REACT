@@ -49,6 +49,16 @@ export default function Sidebar({ open, onClose }) {
           </>
         )}
 
+        {role === "PROFISSIONAL" && (
+          <NavLink
+            to="/admin/inicio-profissional"
+            className={({ isActive }) => `item ${isActive ? 'active' : ''}`}
+            onClick={onClose}
+          >
+            Início
+          </NavLink>
+        )}
+
         {/* Renderiza para ADMIN e PROFISSIONAL */}
         <NavLink 
           to="/admin/agendamentos" 
