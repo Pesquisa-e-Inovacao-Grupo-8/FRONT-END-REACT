@@ -1,6 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 
+const dialogRoots = new WeakMap();
+
+function getDialogRoot(container) {
+  let root = dialogRoots.get(container);
+  if (!root) {
+    root = createRoot(container);
+    dialogRoots.set(container, root);
+  }
+  return root;
+}
+
 function ConfirmDialog({ mensagem, onConfirm, onCancel, confirmLabel = 'Confirmar', cancelLabel = 'Cancelar', showCancel = true }) {
   const dialogRef = useRef(null);
 
@@ -85,12 +96,13 @@ export function mostrarConfirmacaoAssincrona(mensagem, opts = {}) {
     document.body.appendChild(container);
   }
 
-  const root = createRoot(container);
+  const root = getDialogRoot(container);
 
   return new Promise((resolve) => {
     const cleanup = () => {
       try {
         root.unmount();
+        dialogRoots.delete(container);
       } catch (e) {
         // ignore
       }
@@ -133,12 +145,13 @@ export function mostrarAvisoObrigatorio(mensagem, opts = {}) {
     document.body.appendChild(container);
   }
 
-  const root = createRoot(container);
+  const root = getDialogRoot(container);
 
   return new Promise((resolve) => {
     const cleanup = () => {
       try {
         root.unmount();
+        dialogRoots.delete(container);
       } catch (e) {}
       if (container && container.parentNode) container.parentNode.removeChild(container);
     };

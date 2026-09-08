@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { getMeusPacotes } from "../js/pacotes";
 import { agendarPeloCliente } from "../js/agendamento";
 import { getFuncionarias } from "../js/funcionarias";
+import api from "../api";
 import "../styles/meus-pacotes.css";
 
-const HORARIOS = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
-const HORARIOS_INDISPONIVEIS = ["12:00", "16:00"];
+const HORARIOS_POR_PAGINA = 20;
 
 function formatarValidade(data) {
   if (!data) return "Validade não informada";
@@ -22,8 +22,10 @@ export default function MeusPacotes() {
   const [agendamento, setAgendamento] = useState(null);
   const [data, setData] = useState("");
   const [horario, setHorario] = useState("");
+  const [paginaHorarios, setPaginaHorarios] = useState(0);
   const [salvando, setSalvando] = useState(false);
   const [mensagemAgendamento, setMensagemAgendamento] = useState("");
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
 
   useEffect(() => {
     getMeusPacotes()
@@ -44,6 +46,39 @@ export default function MeusPacotes() {
         return String(vinculoId) === String(agendamento.servico.id);
       }))
     : [];
+
+
+  useEffect(() => {
+    let ativo = true;
+    if (!agendamento?.profissionalId || !agendamento?.servico?.id || !data) {
+      setHorariosDisponiveis([]);
+      return () => { ativo = false; };
+    }
+
+    api.get("/agendamentos/horarios-disponiveis", {
+      params: {
+        profissionalId: agendamento.profissionalId,
+        servicoId: agendamento.servico.id,
+        data,
+      },
+    }).then(response => {
+      if (ativo) setHorariosDisponiveis(response.data || []);
+    }).catch(() => {
+      if (ativo) setHorariosDisponiveis([]);
+    });
+
+    return () => { ativo = false; };
+  }, [agendamento?.profissionalId, agendamento?.servico?.id, data]);
+
+  const horariosDaPagina = horariosDisponiveis.slice(
+    paginaHorarios * HORARIOS_POR_PAGINA,
+    (paginaHorarios + 1) * HORARIOS_POR_PAGINA
+  );
+  const totalPaginasHorarios = Math.ceil(horariosDisponiveis.length / HORARIOS_POR_PAGINA);
+
+  useEffect(() => {
+    setPaginaHorarios(0);
+  }, [agendamento?.profissionalId, agendamento?.servico?.id, data]);
 
   function abrirAgendamento(pacote, servico) {
     setAgendamento({ pacote, servico });
@@ -174,12 +209,20 @@ export default function MeusPacotes() {
                 <div className="package-booking-field">
                   <span>Horário</span>
                   <div className="package-time-grid">
-                    {HORARIOS.map(horarioDisponivel => {
-                      const indisponivel = HORARIOS_INDISPONIVEIS.includes(horarioDisponivel);
-                      return <button key={horarioDisponivel} type="button" disabled={indisponivel} className={horario === horarioDisponivel ? "selected" : ""} onClick={() => setHorario(horarioDisponivel)}>{horarioDisponivel}</button>;
+                    {horariosDaPagina.map(horarioDisponivel => {
+                      return <button key={horarioDisponivel} type="button" className={horario === horarioDisponivel ? "selected" : ""} onClick={() => setHorario(horarioDisponivel)}>{horarioDisponivel}</button>;
                     })}
+                    {horariosDisponiveis.length === 0 && <p>Nenhum horário disponível para esta data.</p>}
                   </div>
                 </div>
+
+                {totalPaginasHorarios > 1 && (
+                  <div className="horarios-paginacao" aria-label="Paginação de horários">
+                    <button type="button" onClick={() => setPaginaHorarios(pagina => Math.max(0, pagina - 1))} disabled={paginaHorarios === 0}>Anterior</button>
+                    <span>{paginaHorarios + 1} / {totalPaginasHorarios}</span>
+                    <button type="button" onClick={() => setPaginaHorarios(pagina => Math.min(totalPaginasHorarios - 1, pagina + 1))} disabled={paginaHorarios === totalPaginasHorarios - 1}>Próxima</button>
+                  </div>
+                )}
 
                 <div className="package-booking-actions">
                   <button className="package-booking-cancel" onClick={() => setAgendamento(null)}>Cancelar</button>

@@ -109,9 +109,7 @@ export default function AgendamentosPage() {
             }).filter(s => s !== undefined);
           }
 
-          if (!servicosFinal || servicosFinal.length === 0) {
-            servicosFinal = resServicos.data;
-          }
+          if (!servicosFinal) servicosFinal = [];
 
           acc[profissional.nome] = servicosFinal;
           return acc;
