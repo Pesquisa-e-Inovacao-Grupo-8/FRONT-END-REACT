@@ -4,12 +4,11 @@ import { useSearchParams } from "react-router-dom";
 import { getServicos, agendarPeloCliente } from "../js/agendamento.js";
 import { getFuncionarias } from "../js/funcionarias.js";
 import { buscarMeusDados } from "../validate-access";
+import api from "../api";
 import "../styles/agendamento-usuario.css";
 
-const TIME_SLOTS = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
-const UNAVAILABLE = ["12:00", "16:00"];
-
 const STEP_LABELS = ["Serviço", "Data e Hora", "Seus Dados"];
+const HORARIOS_POR_PAGINA = 20;
 
 export default function Agendamento() {
   const [searchParams] = useSearchParams();
@@ -31,6 +30,8 @@ export default function Agendamento() {
   // Step 2
   const [date, setDate] = useState("");
   const [timeSlot, setTimeSlot] = useState("");
+    const [paginaHorarios, setPaginaHorarios] = useState(0);
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
   const [step2Errors, setStep2Errors] = useState({});
 
   // Step 3
@@ -49,6 +50,35 @@ export default function Agendamento() {
       return String(vinculoId) === String(serviceId);
     })
   ));
+
+  const servicoSelecionado = servicosDb.find(servico => String(servico.id) === String(serviceId));
+  const horariosDaPagina = horariosDisponiveis.slice(
+    paginaHorarios * HORARIOS_POR_PAGINA,
+    (paginaHorarios + 1) * HORARIOS_POR_PAGINA
+  );
+  const totalPaginasHorarios = Math.ceil(horariosDisponiveis.length / HORARIOS_POR_PAGINA);
+
+  useEffect(() => {
+    let ativo = true;
+    if (!professionalId || !serviceId || !date) {
+      setHorariosDisponiveis([]);
+      return () => { ativo = false; };
+    }
+
+    api.get("/agendamentos/horarios-disponiveis", {
+      params: { profissionalId: professionalId, servicoId: serviceId, data: date },
+    }).then(response => {
+      if (ativo) setHorariosDisponiveis(response.data || []);
+    }).catch(() => {
+      if (ativo) setHorariosDisponiveis([]);
+    });
+
+    return () => { ativo = false; };
+  }, [professionalId, serviceId, date]);
+
+  useEffect(() => {
+    setPaginaHorarios(0);
+  }, [professionalId, serviceId, date]);
 
   // Pré-preenche o formulário com os dados do usuário logado.
   // Usa /usuarios/me (via validate-access.js) em vez de /usuarios/{id},
@@ -332,18 +362,28 @@ export default function Agendamento() {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   Horário
                 </label>
-                <div className="time-grid">
-                  {TIME_SLOTS.map(t => (
+                            <div className="time-grid">
+                              {horariosDaPagina.map(t => (
                     <button
                       key={t}
-                      className={`time-slot${timeSlot === t ? " selected" : ""}${UNAVAILABLE.includes(t) ? " disabled" : ""}`}
-                      onClick={() => { if (!UNAVAILABLE.includes(t)) { setTimeSlot(t); setStep2Errors(p => ({ ...p, timeSlot: "" })); } }}
+                      className={`time-slot${timeSlot === t ? " selected" : ""}`}
+                      onClick={() => { setTimeSlot(t); setStep2Errors(p => ({ ...p, timeSlot: "" })); }}
                       type="button"
                     >
                       {t}
                     </button>
                   ))}
+                  {horariosDisponiveis.length === 0 && (
+                    <div className="service-selection-empty">Nenhum horário disponível para esta data.</div>
+                  )}
                 </div>
+                {totalPaginasHorarios > 1 && (
+                  <div className="horarios-paginacao" aria-label="Paginação de horários">
+                    <button type="button" onClick={() => setPaginaHorarios(pagina => Math.max(0, pagina - 1))} disabled={paginaHorarios === 0}>Anterior</button>
+                    <span>{paginaHorarios + 1} / {totalPaginasHorarios}</span>
+                    <button type="button" onClick={() => setPaginaHorarios(pagina => Math.min(totalPaginasHorarios - 1, pagina + 1))} disabled={paginaHorarios === totalPaginasHorarios - 1}>Próxima</button>
+                  </div>
+                )}
                 {step2Errors.timeSlot && <div className="error-msg" style={{ marginTop: 8 }}>{step2Errors.timeSlot}</div>}
               </div>
 

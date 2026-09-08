@@ -292,6 +292,30 @@
   opacity: 0.4;
 }
 
+.horarios-paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+  color: #777;
+  font-size: 0.85rem;
+}
+
+.horarios-paginacao button {
+  border: 1px solid #e0d8cc;
+  border-radius: 6px;
+  padding: 7px 12px;
+  background: #faf8f4;
+  color: #555;
+  cursor: pointer;
+}
+
+.horarios-paginacao button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .package-booking-actions {
   display: flex;
   justify-content: flex-end;

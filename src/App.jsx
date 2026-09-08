@@ -306,7 +306,7 @@ export default function App() {
           <Route
             path="configuracoes"
             element={
-              <PrivateRoute allowedRoles={["ADMIN", "PROFISSIONAL"]}>
+              <PrivateRoute allowedRoles={["PROFISSIONAL"]}>
                 <ConfiguracoesProfissional />
               </PrivateRoute>
             }

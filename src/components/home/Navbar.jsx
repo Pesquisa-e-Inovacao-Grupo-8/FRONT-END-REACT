@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logoImage from "../../assets/renatah.png";
+import { mostrarAvisoObrigatorio } from "../utils/confirm-dialog";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -80,7 +81,14 @@ export default function Navbar() {
             <NavLink
               to={link.to}
               className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={closeMenu}
+              onClick={(event) => {
+                if (link.to === "/agendamento" && !isLoggedIn) {
+                  event.preventDefault();
+                  mostrarAvisoObrigatorio("Crie uma conta ou faça login para agendar");
+                  return;
+                }
+                closeMenu();
+              }}
             >
               {link.label}
             </NavLink>
