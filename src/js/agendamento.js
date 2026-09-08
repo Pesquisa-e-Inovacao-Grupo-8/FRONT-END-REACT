@@ -152,7 +152,12 @@ export async function agendarPeloCliente(dadosFormulario) {
         return novoAgendamento;
 
     } catch (error) {
-        console.error("Falha geral ao criar agendamento do cliente:", error);
+        console.error("Falha geral ao criar agendamento do cliente:", {
+            status: error.response?.status,
+            url: error.config?.url,
+            method: error.config?.method,
+            data: error.response?.data,
+        });
         throw error;
     }
 }
