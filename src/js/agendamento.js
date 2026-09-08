@@ -134,7 +134,8 @@ export async function agendarPeloCliente(dadosFormulario) {
             ordemPedido: `WEB-${Date.now()}`,
             clienteId: meuId,
             profissionalId: dadosFormulario.professionalId,
-            servicoId: dadosFormulario.serviceId
+            servicoId: dadosFormulario.serviceId,
+            clientePacoteServicoId: dadosFormulario.clientePacoteServicoId || null
         };
 
         console.log("Criando agendamento...", agendamentoDTO);
@@ -144,7 +145,8 @@ export async function agendarPeloCliente(dadosFormulario) {
         console.log("Vinculando serviço...");
         await api.post(`/agendamentoServicos`, {
             agendamentoId: novoAgendamento.id,
-            servicoId: dadosFormulario.serviceId
+            servicoId: dadosFormulario.serviceId,
+            clientePacoteServicoId: dadosFormulario.clientePacoteServicoId || null
         });
 
         return novoAgendamento;

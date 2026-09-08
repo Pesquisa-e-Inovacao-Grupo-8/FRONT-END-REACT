@@ -3,6 +3,7 @@ import Chart from "react-apexcharts";
 import { Calendar, DollarSign, Clock, TrendingUp } from "lucide-react";
 import api from "../../api";
 import "../../styles/app.css";
+import "../../styles/acesso-negado.css";
 
 export default function Dashboard() {
   const [nomeUsuario, setNomeUsuario] = useState("Administrador");

@@ -21,8 +21,7 @@ export default function ConfiguracoesUsuario({ visao = "usuario" }) {
  useEffect(() => {
   async function carregarUsuario() {
     try {
-      const id = localStorage.getItem("userId");
-      const res = await api.get(`/usuarios/${id}`);
+      const res = await api.get("/usuarios/me");
       setUsuario(res.data);
     } catch (erro) {
       console.error(erro);
@@ -47,14 +46,12 @@ export default function ConfiguracoesUsuario({ visao = "usuario" }) {
     try {
       setSalvando(true);
 
-      const id = localStorage.getItem("userId");
-
       const dadosAtualizados = {
         ...usuario,
         cpf: usuario.cpf,
       };
 
-      await api.put(`/usuarios/${id}`, dadosAtualizados);
+      await api.put("/usuarios/me", dadosAtualizados);
 
       mostrarSucessoMensagem("Usuário atualizado com sucesso!");
     } catch (erro) {
@@ -119,8 +116,13 @@ export default function ConfiguracoesUsuario({ visao = "usuario" }) {
         <input
           type="email"
           value={usuario.email}
-          onChange={(e) => alterarCampo("email", e.target.value)}
-          style={inputStyle}
+          disabled
+          style={{
+            ...inputStyle,
+            backgroundColor: "#eee",
+            cursor: "not-allowed",
+            color: "#777",
+          }}
         />
 
         {visao === "admin" && (

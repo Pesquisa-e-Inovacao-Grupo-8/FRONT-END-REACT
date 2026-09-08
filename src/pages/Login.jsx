@@ -1,6 +1,7 @@
 //src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import api from "../api";
 import { mostrarConfirmacao, mostrarErro } from "../components/utils/modal-confirmação";
 import { mostrarCarregamento } from "../components/utils/modal-carregamento";
@@ -55,25 +56,20 @@ export default function Login() {
       });
 
       const token = response.data.token;
-      localStorage.setItem("token", token);
 
-      const usersRes = await api.get("/usuarios");
-      console.log("Usuários recebidos do backend:", usersRes.data);
-
-      const usuarioLogado = usersRes.data.find(
-        (u) => u.email?.toLowerCase() === email.toLowerCase()
-      );
-
-      if (!usuarioLogado) {
+      if (!token) {
         cancelarLoading();
-        mostrarErro("Usuário não encontrado.", 2600);
+        mostrarErro("Email ou senha inválidos", 2600);
         return;
       }
 
-      localStorage.setItem("userId", usuarioLogado.id);
-      localStorage.setItem("clientId", usuarioLogado.cliente_id);
-      localStorage.setItem("userName", usuarioLogado.nome);
-      localStorage.setItem("userRole", usuarioLogado.tipo);
+      // 👇 decodifica o token em vez de buscar em /usuarios
+      const decoded = jwtDecode(token);
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", decoded.id);
+      localStorage.setItem("userName", decoded.nome);
+      localStorage.setItem("userRole", decoded.tipo);
 
       // Mostra o modal
       cancelarLoading();
@@ -82,17 +78,13 @@ export default function Login() {
 
       // Aguarda o modal terminar antes de navegar
       setTimeout(() => {
-        if (usuarioLogado.tipo === "ADMIN") {
+        if (decoded.tipo === "ADMIN") {
           navigate("/admin/dashboard");
-        } else if (usuarioLogado.tipo === "PROFISSIONAL") {
-          navigate("/admin/agendamentos");
+        } else if (decoded.tipo === "PROFISSIONAL") {
+          navigate("/admin/inicio-profissional");
         } else {
           navigate("/");
         }
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
 
       }, 2200);
 
