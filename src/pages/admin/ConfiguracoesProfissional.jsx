@@ -1,17 +1,36 @@
 //src/pages/admin/ConfiguracoesProfissional.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import "../../styles/agendamentos-usuario.css"; // Reaproveitando estilos
-import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../../components/utils/mensagem';
+import { mostrarSucessoMensagem } from '../../components/utils/mensagem';
 import { mostrarAvisoObrigatorio } from '../../components/utils/confirm-dialog';
 
+const inputStyle = {
+  width: "100%",
+  padding: "10px",
+  border: "1px solid #ddd",
+  borderRadius: "6px",
+  fontSize: "0.95rem",
+  backgroundColor: "#fff",
+};
+
+const DIAS_DA_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+
+const criarHorariosPadrao = () => Array.from({ length: 7 }, (_, index) => ({
+  diaSemana: index + 1,
+  horaInicio: "09:00",
+  horaFim: "18:00",
+  intervaloMinutos: 15,
+  ativo: index < 6,
+}));
+
 export default function ConfiguracoesProfissional() {
-    const navigate = useNavigate();
   const [servicosDoSalao, setServicosDoSalao] = useState([]);
-  const [meusServicos, setMeusServicos] = useState([]); // IDs dos serviços que eu faço
+  const [meusServicos, setMeusServicos] = useState([]);
+  const [horarios, setHorarios] = useState(criarHorariosPadrao);
   const [loading, setLoading] = useState(true);
-  const [salvando, setSalvando] = useState(false);
+  const [salvandoEspecialidades, setSalvandoEspecialidades] = useState(false);
+  const [salvandoHorarios, setSalvandoHorarios] = useState(false);
 
   // Busca os dados ao carregar a página
 useEffect(() => {
@@ -22,14 +41,33 @@ useEffect(() => {
         const resServicos = await api.get("/servicos");
         setServicosDoSalao(resServicos.data);
 
+        try {
+          const resHorarios = await api.get("/profissionais/me/horarios");
+          if (Array.isArray(resHorarios.data) && resHorarios.data.length) {
+            const horariosSalvos = new Map(resHorarios.data.map(horario => [horario.diaSemana, horario]));
+            setHorarios(criarHorariosPadrao().map(padrao => {
+              const horario = horariosSalvos.get(padrao.diaSemana);
+              if (!horario) return padrao;
+
+              return {
+                ...padrao,
+                ...horario,
+                horaInicio: String(horario.horaInicio || padrao.horaInicio).slice(0, 5),
+                horaFim: String(horario.horaFim || padrao.horaFim).slice(0, 5),
+                intervaloMinutos: Number(horario.intervaloMinutos ?? padrao.intervaloMinutos),
+                ativo: horario.ativo !== false,
+              };
+            }));
+          }
+        } catch (erroHorarios) {
+          console.warn("Horários ainda não disponíveis; usando configuração padrão.", erroHorarios);
+        }
+
         // 2. Busca no banco de dados (Java) os serviços já marcados deste profissional
-        const meuId = localStorage.getItem("userId");
-        if (meuId) {
-            const resMeus = await api.get(`/profissionais/meus-servicos/${meuId}`);
-            // Pega apenas os IDs dos serviços retornados pelo banco para marcar os checkboxes
-            if (resMeus.data) {
-                setMeusServicos(resMeus.data.map(s => s.id));
-            }
+        const resMeus = await api.get("/profissionais/meus-servicos");
+        // Pega apenas os IDs dos serviços retornados pelo banco para marcar os checkboxes
+        if (resMeus.data) {
+          setMeusServicos(resMeus.data.map(s => s.id));
         }
 
       } catch (error) {
@@ -52,14 +90,37 @@ useEffect(() => {
     }
   };
 
+  const alterarHorario = (diaSemana, campo, valor) => {
+    setHorarios(prev => prev.map(horario => (
+      horario.diaSemana === diaSemana ? { ...horario, [campo]: valor } : horario
+    )));
+  };
+
+  const salvarHorarios = async () => {
+    try {
+      setSalvandoHorarios(true);
+      await api.put("/profissionais/me/horarios", horarios.map(horario => ({
+        diaSemana: horario.diaSemana,
+        horaInicio: horario.ativo ? `${horario.horaInicio}:00` : "00:00:00",
+        horaFim: horario.ativo ? `${horario.horaFim}:00` : "00:00:00",
+        intervaloMinutos: Number(horario.intervaloMinutos) || 0,
+        ativo: horario.ativo,
+      })));
+      mostrarSucessoMensagem("Seus horários foram salvos com sucesso!");
+    } catch (error) {
+      console.error(error);
+      await mostrarAvisoObrigatorio("Erro ao salvar seus horários.");
+    } finally {
+      setSalvandoHorarios(false);
+    }
+  };
+
 const salvarEspecialidades = async () => {
     try {
-      setSalvando(true);
-      
-      const meuId = localStorage.getItem("userId");
+      setSalvandoEspecialidades(true);
       
       // Envia a lista de IDs (meusServicos) para o Java
-      await api.post(`/profissionais/vincular-servicos/${meuId}`, meusServicos);
+      await api.post("/profissionais/vincular-servicos", meusServicos);
       
       mostrarSucessoMensagem("Suas especialidades foram salvas com sucesso no banco de dados!");
       
@@ -67,7 +128,7 @@ const salvarEspecialidades = async () => {
       console.error(error);
       await mostrarAvisoObrigatorio("Erro ao salvar configurações no servidor. Contate o suporte.");
     } finally {
-      setSalvando(false);
+      setSalvandoEspecialidades(false);
     }
   };
 
@@ -121,21 +182,48 @@ const salvarEspecialidades = async () => {
 
         <button 
           onClick={salvarEspecialidades}
-          disabled={salvando || meusServicos.length === 0}
+          disabled={salvandoEspecialidades}
           style={{
             marginTop: "30px",
             width: "100%",
             padding: "15px",
-            backgroundColor: salvando || meusServicos.length === 0 ? "#ccc" : "#1a1a2e",
+            backgroundColor: salvandoEspecialidades ? "#ccc" : "#1a1a2e",
             color: "white",
             border: "none",
             borderRadius: "5px",
-            fontSize: "1.1rem",
+            fontSize: "0.95rem",
             fontWeight: "bold",
-            cursor: salvando || meusServicos.length === 0 ? "not-allowed" : "pointer"
+            cursor: salvandoEspecialidades ? "not-allowed" : "pointer"
           }}
         >
-          {salvando ? "Salvando..." : "Salvar Minhas Especialidades"}
+          {salvandoEspecialidades ? "Salvando..." : "Salvar Minhas Especialidades"}
+        </button>
+      </div>
+
+      <div className="booking-card" style={{ padding: "30px", marginTop: "20px" }}>
+        <h3 style={{ marginBottom: "10px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>
+          Meus horários de atendimento
+        </h3>
+        <p style={{ color: "#777", marginBottom: "20px" }}>
+          Defina quando você atende e o espaço entre um agendamento e outro.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {horarios.map(horario => (
+            <div key={horario.diaSemana} style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr auto", gap: "10px", alignItems: "center" }}>
+              <strong>{DIAS_DA_SEMANA[horario.diaSemana - 1]}</strong>
+              <input type="time" value={horario.horaInicio} disabled={!horario.ativo} onChange={e => alterarHorario(horario.diaSemana, "horaInicio", e.target.value)} style={inputStyle} />
+              <input type="time" value={horario.horaFim} disabled={!horario.ativo} onChange={e => alterarHorario(horario.diaSemana, "horaFim", e.target.value)} style={inputStyle} />
+              <input type="number" min="0" max="240" step="5" value={horario.intervaloMinutos} disabled={!horario.ativo} onChange={e => alterarHorario(horario.diaSemana, "intervaloMinutos", e.target.value)} style={inputStyle} />
+              <label style={{ display: "flex", alignItems: "center", gap: "5px", whiteSpace: "nowrap" }}>
+                <input type="checkbox" checked={horario.ativo} onChange={e => alterarHorario(horario.diaSemana, "ativo", e.target.checked)} /> Ativo
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={salvarHorarios} disabled={salvandoHorarios} style={{ marginTop: "20px", width: "100%", padding: "15px", backgroundColor: salvandoHorarios ? "#ccc" : "#1a1a2e", color: "white", border: "none", borderRadius: "5px", fontWeight: "bold", cursor: salvandoHorarios ? "not-allowed" : "pointer" }}>
+          {salvandoHorarios ? "Salvando..." : "Salvar Meus Horários"}
         </button>
       </div>
     </div>

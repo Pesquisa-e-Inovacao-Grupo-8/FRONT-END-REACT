@@ -15,18 +15,22 @@ export function normalizeArray(value) {
   return [];
 }
 
+
 const envName = (getEnv('VITE_ENV') || import.meta.env.MODE || 'PRD').toLowerCase();
 const configuredBaseUrl = getEnv('VITE_API_BASE_URL') || import.meta.env.VITE_API_BASE_URL;
 
-const apiBaseUrl = configuredBaseUrl || {
+const isDev = envName === 'development' || envName === 'dev';
+
+// Em ambiente de desenvolvimento usamos o json-server rodando em 3001
+const apiBaseUrl = configuredBaseUrl || (isDev ? 'http://127.0.0.1:8080' : {
   dev: "http://127.0.0.1:8080",
   development: "http://127.0.0.1:8080",
   qa: "https://qa-spring.renatahtokutomi.com",
   prd: "https://spring.renatahtokutomi.com",
   production: "https://spring.renatahtokutomi.com",
-}[envName] || "https://spring.renatahtokutomi.com";
+}[envName]) || "https://spring.renatahtokutomi.com";
 
-console.log("API Base URL= ", apiBaseUrl);
+console.log("API Base URL= ", apiBaseUrl, "(env:", envName, ")");
 
 const api = axios.create({
   baseURL: apiBaseUrl,
@@ -41,5 +45,30 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    const requestUrl = error.config?.url || "";
+
+    if (status === 401 && !requestUrl.includes("/auth/")) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userRole");
+
+      if (window.location.pathname !== "/login") {
+        window.location.assign("/login");
+      }
+    }
+
+    if (status === 403 && window.location.pathname !== "/acesso-negado") {
+      window.location.assign("/acesso-negado");
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default api;

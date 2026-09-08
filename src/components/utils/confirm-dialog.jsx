@@ -1,7 +1,35 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 
+const dialogRoots = new WeakMap();
+
+function getDialogRoot(container) {
+  let root = dialogRoots.get(container);
+  if (!root) {
+    root = createRoot(container);
+    dialogRoots.set(container, root);
+  }
+  return root;
+}
+
 function ConfirmDialog({ mensagem, onConfirm, onCancel, confirmLabel = 'Confirmar', cancelLabel = 'Cancelar', showCancel = true }) {
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const elementoAnterior = document.activeElement;
+    dialogRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onCancel();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      elementoAnterior?.focus?.();
+    };
+  }, [onCancel]);
+
   return (
     <div
       style={{
@@ -17,6 +45,10 @@ function ConfirmDialog({ mensagem, onConfirm, onCancel, confirmLabel = 'Confirma
     >
       <div
         role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-titulo"
+        tabIndex={-1}
+        ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -28,11 +60,12 @@ function ConfirmDialog({ mensagem, onConfirm, onCancel, confirmLabel = 'Confirma
           fontFamily: 'Jost, sans-serif'
         }}
       >
-        <div style={{ marginBottom: '12px', fontWeight: 700, color: '#222' }}>Confirmação</div>
+        <div id="confirm-dialog-titulo" style={{ marginBottom: '12px', fontWeight: 700, color: '#222' }}>Confirmação</div>
         <div style={{ marginBottom: '18px', color: '#333' }}>{mensagem}</div>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
           {showCancel && (
             <button
+              type="button"
               style={{ padding: '8px 12px', background: '#e5e7eb', border: 'none', borderRadius: '8px' }}
               onClick={onCancel}
             >
@@ -40,6 +73,7 @@ function ConfirmDialog({ mensagem, onConfirm, onCancel, confirmLabel = 'Confirma
             </button>
           )}
           <button
+            type="button"
             style={{ padding: '8px 12px', background: '#A8883A', color: '#fff', border: 'none', borderRadius: '8px' }}
             onClick={onConfirm}
           >
@@ -62,12 +96,13 @@ export function mostrarConfirmacaoAssincrona(mensagem, opts = {}) {
     document.body.appendChild(container);
   }
 
-  const root = createRoot(container);
+  const root = getDialogRoot(container);
 
   return new Promise((resolve) => {
     const cleanup = () => {
       try {
         root.unmount();
+        dialogRoots.delete(container);
       } catch (e) {
         // ignore
       }
@@ -91,6 +126,7 @@ export function mostrarConfirmacaoAssincrona(mensagem, opts = {}) {
         onCancel={handleCancel}
         confirmLabel={opts.confirmLabel}
         cancelLabel={opts.cancelLabel}
+        showCancel={opts.showCancel !== false}
       />
     );
   });
@@ -109,12 +145,13 @@ export function mostrarAvisoObrigatorio(mensagem, opts = {}) {
     document.body.appendChild(container);
   }
 
-  const root = createRoot(container);
+  const root = getDialogRoot(container);
 
   return new Promise((resolve) => {
     const cleanup = () => {
       try {
         root.unmount();
+        dialogRoots.delete(container);
       } catch (e) {}
       if (container && container.parentNode) container.parentNode.removeChild(container);
     };

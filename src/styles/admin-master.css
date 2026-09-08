@@ -112,7 +112,7 @@ body,
 }
 
 .btn-novo {
-  background-color: #b8960c;
+  background: linear-gradient(to right, #1a1a2e, #21315c);
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -150,7 +150,7 @@ body,
   background-color: #eee;
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.5rem;
   font-weight: bold;
   color: #555;
 }
@@ -182,6 +182,11 @@ body,
   color: #273142;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.admin-modal-panel input{
+  padding: 10px 5px !important;
+  font-size: 0.95rem;
 }
 
 .admin-modal-panel input:not([type="checkbox"]):not([type="radio"]):focus,
@@ -278,6 +283,58 @@ body,
   align-items: center;
 }
 
+.admin-modal-panel .produto-form-inline {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-modal-panel .produto-form-inline input {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-modal-panel .produto-form-inline input:first-child {
+  flex: 2 1 150px;
+}
+
+.admin-modal-panel .produto-form-inline input:not(:first-child) {
+  flex: 1 1 90px;
+}
+
+.admin-modal-panel .produto-form-inline button {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  padding: 0 !important;
+}
+
+.admin-modal-panel .produto-cancel-button {
+  min-width: 76px;
+  min-height: 32px;
+  padding: 7px 11px !important;
+  font-size: 0.75rem;
+}
+
+.admin-modal-panel .produto-section {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.admin-modal-panel .produto-section-header {
+  min-width: 0;
+  gap: 10px;
+}
+
+.admin-modal-panel .produto-section-header label {
+  min-width: 0;
+}
+
 @media (max-width: 768px) {
   .crud-section {
     width: min(100% - 28px, 680px);
@@ -350,10 +407,131 @@ body,
 
   .admin-modal-panel form > div[style*="display: flex"] {
     flex-wrap: wrap;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .admin-modal-panel form > div[style*="display: flex"] > * {
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .admin-modal-panel form > div[style*="display: flex"] > input {
+    flex: 1 1 100% !important;
+    width: 100%;
+  }
+
+  .admin-modal-panel form > div[style*="display: flex"] > button {
+    flex: 0 0 auto;
+  }
+
+  .admin-modal-panel form div[style*="display: flex"] {
+    display: flex;
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .admin-modal-panel form div[style*="display: flex"] input {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .admin-modal-panel form div[style*="display: flex"] > input {
+    flex: 1 1 100% !important;
+    width: 100%;
+  }
+
+  .admin-modal-panel .produto-form-inline {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 6px !important;
+    padding: 6px !important;
+    overflow: hidden;
+  }
+
+  .admin-modal-panel .produto-section-header {
+    padding-right: 34px;
+  }
+
+  .admin-modal-panel .produto-section-header .produto-cancel-button {
+    flex: 0 0 auto;
+  }
+
+  .admin-modal-panel .produto-form-inline input {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-width: 0;
+    min-height: 38px;
+    padding: 5px 4px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .admin-modal-panel .produto-form-inline button {
+    flex: 0 0 28px;
+    align-self: flex-end;
+    width: 28px;
+    height: 28px;
+    padding: 0 !important;
   }
 
   .btn-salvar-pacote,
   .btn-cancelar-modal {
-    flex: 1 1 140px;
+    flex: 0 1 auto;
+    min-width: 84px;
+    min-height: 36px;
+    padding: 8px 12px !important;
+    font-size: 0.78rem;
+  }
+
+  .admin-modal-panel .btn-cancelar-modal {
+    min-width: 64px;
+    min-height: 30px;
+    padding: 6px 9px !important;
+    font-size: 0.78rem;
+  }
+
+  .admin-modal-panel .modal-actions-mobile {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: 10px !important;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-modal-panel .modal-actions-mobile > button {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    font-size: 0.78rem !important;
+    font-weight: 700;
+    box-sizing: border-box;
+  }
+
+  .admin-modal-panel .produto-modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: 10px !important;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-modal-panel .produto-modal-actions .btn-cancelar-modal,
+  .admin-modal-panel .produto-modal-actions .btn-salvar-modal {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 15px !important;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    box-sizing: border-box;
   }
 }
