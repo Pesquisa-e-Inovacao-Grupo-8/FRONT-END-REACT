@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import api from "../../api";
 import "../../styles/app.css"; 
+import "../../styles/acesso-negado.css";
+
+
 
 export default function Financeiro() {
   const [abaAtiva, setAbaAtiva] = useState("transacoes");
@@ -17,6 +20,9 @@ export default function Financeiro() {
     { id: 3, cliente: "Carlos Mendes", valor: 85.0, data: "18/05/2026", metodo: "DINHEIRO", status: "PAGO" },
   ]);
 
+  const role = localStorage.getItem('userRole');
+  if (role !== 'ADMIN') return <Navigate to="/acesso-negado" replace />;
+  
   // Dispara a busca de dados assim que a tela abre
   useEffect(() => {
     carregarDadosFinanceiros();

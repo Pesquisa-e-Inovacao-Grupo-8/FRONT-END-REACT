@@ -50,6 +50,7 @@ export default function Navbar() {
 
     if (isLoggedIn) {
       navLinks.push({ to: "/agendamentos", label: "Meus Agendamentos" });
+      navLinks.push({ to: "/meus-pacotes", label: "Meus Pacotes" });
       navLinks.push({ to: "/configuracoes-usuario", label: "Minha Conta" });
     }
   }

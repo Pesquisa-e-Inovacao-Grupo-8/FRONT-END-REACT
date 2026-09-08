@@ -51,7 +51,7 @@ export default function VitrinePacotes() {
 
   return (
     <>
-      <div className="page" style={{ padding: "40px", maxWidth: "900px", margin: "0 auto", minHeight: "70vh" }}>
+      <div className="page" style={{ padding: "40px", maxWidth: "900px", margin: "0 auto", minHeight: "76vh" }}>
         <div className="page-hero">
           <h1>Nossos <em>Pacotes</em></h1>
           <p>Economize adquirindo nossos combos exclusivos de serviços</p>

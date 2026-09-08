@@ -1,6 +1,6 @@
 //src/pages/admin/Agendamentos.jsx
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import NewSchedule from "../../components/admin/NovoAgendamento";
 import Calendar from "../../components/admin/Calendario";
 import AgendamentoGrid from "../../components/admin/GridAgendamentos";
@@ -10,6 +10,7 @@ import { getAgendamentos, salvarAgendamento } from '../../js/agendamento';
 import api from '../../api';
 import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../../components/utils/mensagem';
 import { mostrarAvisoObrigatorio } from '../../components/utils/confirm-dialog';
+
 
 const toMinutes = (hora = '00:00') => {
   const [h, m] = String(hora).split(':').map(Number);
@@ -48,6 +49,7 @@ const normalizarAgendamento = (agendamento) => {
 
 export default function AgendamentosPage() {
   const navigate = useNavigate();
+  const role = localStorage.getItem('userRole');
   const [perfisProfissionais, setPerfisProfissionais] = useState({});
   const FUNCIONARIAS = Object.keys(perfisProfissionais);
   const [funcionariaAtual, setFuncionariaAtual] = useState('');
@@ -149,6 +151,10 @@ export default function AgendamentosPage() {
       })
     );
   }, [pendentes]);
+
+  if (role !== 'ADMIN' && role !== 'PROFISSIONAL') {
+    return <Navigate to="/acesso-negado" replace />;
+  }
 
   const adicionarAgendamento = async (novo) => {
     if (!novo.data) {

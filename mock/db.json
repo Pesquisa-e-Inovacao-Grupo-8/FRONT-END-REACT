@@ -66,6 +66,11 @@
       "id": "c0000000-0000-0000-0000-000000000001",
       "observacoes": "Cliente VIP",
       "fk_usuario": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "c0000000-0000-0000-0000-000000000002",
+      "observacoes": "Cliente para testes locais",
+      "fk_usuario": "mock-client-id"
     }
   ],
   "profissionais": [
@@ -202,12 +207,36 @@
       "data": "2026-09-11",
       "horaInicio": "11:00:00",
       "horaFim": "11:45:00",
-      "status": "PENDENTE",
+      "status": "CANCELADO",
       "ordemPedido": "WEB-1788646028871",
       "clienteId": "00000000-0000-0000-0000-000000000001",
       "profissionalId": "pr000000-0000-0000-0000-000000000001",
       "servicoId": "srv-0001",
       "id": "Efj-qee"
+    },
+    {
+      "data": "2026-09-11",
+      "horaInicio": "11:00:00",
+      "horaFim": "11:45:00",
+      "status": "CANCELADO",
+      "ordemPedido": "WEB-1788648091732",
+      "clienteId": "00000000-0000-0000-0000-000000000001",
+      "profissionalId": "pr000000-0000-0000-0000-000000000001",
+      "servicoId": "srv-0001",
+      "id": "568PiTo"
+    },
+    {
+      "data": "2026-09-09",
+      "horaInicio": "10:00:00",
+      "horaFim": "10:45:00",
+      "status": "CANCELADO",
+      "ordemPedido": "WEB-1788650124395",
+      "clienteId": "00000000-0000-0000-0000-000000000001",
+      "profissionalId": "pr000000-0000-0000-0000-000000000001",
+      "servicoId": "srv-0001",
+      "clientePacoteServicoId": "cps-0001",
+      "id": "agd-1788650124428",
+      "pacoteConsumoConfirmado": false
     }
   ],
   "clientePacotes": [
@@ -220,6 +249,45 @@
       "expiracao": null,
       "ativo": 1,
       "dt_expiracao": "2026-10-01T00:00:00Z"
+    },
+    {
+      "id": "cp-mock-001",
+      "fk_cliente": "c0000000-0000-0000-0000-000000000002",
+      "fk_pacote": "pkt-0001",
+      "status": "ATIVO",
+      "ativo": true,
+      "data_compra": "2026-09-01T10:00:00Z",
+      "dt_expiracao": "2027-03-01T00:00:00Z"
+    },
+    {
+      "ativo": true,
+      "dtExpiracao": "2027-03-05T22:26:29",
+      "qtdUsos": 5,
+      "id": "LfMjhv-"
+    },
+    {
+      "ativo": true,
+      "dtExpiracao": "2027-03-05T22:26:44",
+      "qtdUsos": 5,
+      "id": "4_JEBpi"
+    },
+    {
+      "ativo": true,
+      "dtExpiracao": "2027-03-05T22:26:51",
+      "qtdUsos": 5,
+      "id": "BK143HN"
+    },
+    {
+      "ativo": true,
+      "dtExpiracao": "2027-03-05T22:43:02",
+      "qtdUsos": 5,
+      "id": "eTT7Kua"
+    },
+    {
+      "ativo": true,
+      "dtExpiracao": "2027-03-05T22:43:09",
+      "qtdUsos": 5,
+      "id": "iPMDaiX"
     }
   ],
   "pagamento": [
@@ -244,6 +312,11 @@
       "id": "ps-0001",
       "fk_pacote": "pkt-0001",
       "fk_servico": "srv-0001"
+    },
+    {
+      "id": "ps-0002",
+      "fk_pacote": "pkt-0001",
+      "fk_servico": "srv-0002"
     }
   ],
   "cliente_pacote_servico": [
@@ -252,6 +325,20 @@
       "fk_cliente_pacote": "cp-0001",
       "fk_servico": "srv-0001",
       "quantidade_disponivel": 3
+    },
+    {
+      "id": "cps-mock-001",
+      "fk_cliente_pacote": "cp-mock-001",
+      "fk_servico": "srv-0001",
+      "quantidade_disponivel": 4,
+      "quantidade_configurada": 5
+    },
+    {
+      "id": "cps-mock-002",
+      "fk_cliente_pacote": "cp-mock-001",
+      "fk_servico": "srv-0002",
+      "quantidade_disponivel": 2,
+      "quantidade_configurada": 5
     }
   ],
   "agendamentoServicos": [
@@ -265,6 +352,17 @@
       "agendamentoId": "Efj-qee",
       "servicoId": "srv-0001",
       "id": "ikw0Ibr"
+    },
+    {
+      "agendamentoId": "568PiTo",
+      "servicoId": "srv-0001",
+      "id": "clvFmfy"
+    },
+    {
+      "agendamentoId": "agd-1788650124428",
+      "servicoId": "srv-0001",
+      "clientePacoteServicoId": "cps-0001",
+      "id": "sb56GYI"
     }
   ],
   "servicoProdutos": [
