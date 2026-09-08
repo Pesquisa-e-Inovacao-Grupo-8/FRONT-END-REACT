@@ -37,15 +37,18 @@ export default function Agendamento() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", notes: "" });
   const [step3Errors, setStep3Errors] = useState({});
 
-  const profissionalSelecionado = profissionaisDb.find(p => p.id === professionalId);
-  const servicosDoProfissional = profissionalSelecionado
-    ? servicosDb.filter(servico => (!servicoPacoteId || String(servico.id) === String(servicoPacoteId)) && (profissionalSelecionado.servicos || []).some(vinculo => {
-        const vinculoId = typeof vinculo === "object"
-          ? vinculo.id || vinculo.servico?.id
-          : vinculo;
-        return String(vinculoId) === String(servico.id);
-      }))
-    : [];
+  const servicosDisponiveis = servicosDb.filter((servico) => (
+    !servicoPacoteId || String(servico.id) === String(servicoPacoteId)
+  ));
+
+  const profissionaisDoServico = profissionaisDb.filter((profissional) => (
+    (profissional.servicos || []).some((vinculo) => {
+      const vinculoId = typeof vinculo === "object"
+        ? vinculo.id || vinculo.servico?.id
+        : vinculo;
+      return String(vinculoId) === String(serviceId);
+    })
+  ));
 
   // Pré-preenche o formulário com os dados do usuário logado.
   // Usa /usuarios/me (via validate-access.js) em vez de /usuarios/{id},
@@ -235,38 +238,15 @@ export default function Agendamento() {
 
           {!done && step === 1 && (
             <>
-              <div className="card-title">Escolha o Profissional e o Serviço</div>
-
-              <div className="field">
-                <label>Profissional</label>
-                <select
-                  className={step1Errors.professionalId ? "error" : ""}
-                  value={professionalId}
-                  onChange={e => {
-                    setProfessionalId(e.target.value);
-                    setServiceId("");
-                    setStep1Errors(p => ({ ...p, professionalId: "", serviceId: "" }));
-                  }}
-                >
-                  <option value="">Selecione um profissional</option>
-                  {profissionaisDb.map(profissional => (
-                    <option key={profissional.id} value={profissional.id}>
-                      {profissional.nome}
-                    </option>
-                  ))}
-                </select>
-                {step1Errors.professionalId && <div className="error-msg">{step1Errors.professionalId}</div>}
-              </div>
+              <div className="card-title">Escolha o Serviço e o Profissional</div>
 
               <div className="field">
                 <label>Serviço</label>
-                {!professionalId ? (
-                  <div className="service-selection-empty">Selecione um Profissional</div>
-                ) : servicosDoProfissional.length === 0 ? (
-                  <div className="service-selection-empty">Nenhum serviço disponível para este profissional.</div>
+                {servicosDisponiveis.length === 0 ? (
+                  <div className="service-selection-empty">Nenhum serviço disponível no momento.</div>
                 ) : (
                   <div className="booking-services-grid" role="radiogroup" aria-label="Serviços disponíveis">
-                    {servicosDoProfissional.map(servico => {
+                    {servicosDisponiveis.map(servico => {
                       const selecionado = serviceId === servico.id;
                       return (
                         <button
@@ -275,7 +255,8 @@ export default function Agendamento() {
                           className={`booking-service-card${selecionado ? " selected" : ""}`}
                           onClick={() => {
                             setServiceId(servico.id);
-                            setStep1Errors(p => ({ ...p, serviceId: "" }));
+                            setProfessionalId("");
+                            setStep1Errors(p => ({ ...p, serviceId: "", professionalId: "" }));
                           }}
                           role="radio"
                           aria-checked={selecionado}
@@ -292,6 +273,32 @@ export default function Agendamento() {
                   </div>
                 )}
                 {step1Errors.serviceId && <div className="error-msg">{step1Errors.serviceId}</div>}
+              </div>
+
+              <div className="field">
+                <label>Profissional</label>
+                {!serviceId ? (
+                  <div className="service-selection-empty">Selecione um serviço primeiro.</div>
+                ) : profissionaisDoServico.length === 0 ? (
+                  <div className="service-selection-empty">Nenhum profissional realiza este serviço.</div>
+                ) : (
+                  <select
+                    className={step1Errors.professionalId ? "error" : ""}
+                    value={professionalId}
+                    onChange={e => {
+                      setProfessionalId(e.target.value);
+                      setStep1Errors(p => ({ ...p, professionalId: "" }));
+                    }}
+                  >
+                    <option value="">Selecione um profissional</option>
+                    {profissionaisDoServico.map(profissional => (
+                      <option key={profissional.id} value={profissional.id}>
+                        {profissional.nome}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {step1Errors.professionalId && <div className="error-msg">{step1Errors.professionalId}</div>}
               </div>
 
               <div className="card-actions">
