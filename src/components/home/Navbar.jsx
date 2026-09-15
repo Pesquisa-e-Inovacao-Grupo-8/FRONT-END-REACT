@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logoImage from "../../assets/renatah.png";
 import { mostrarAvisoObrigatorio } from "../utils/confirm-dialog";
+import { normalizarRole } from "../../validate-access";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function Navbar() {
     if (token) {
       setIsLoggedIn(true);
       setUserName(nomeSalvo ? nomeSalvo.split(" ")[0] : "Usuário");
-      setUserRole(roleSalvo || "CLIENTE");
+      setUserRole(normalizarRole(roleSalvo || "CLIENTE"));
     }
   }, []);
 

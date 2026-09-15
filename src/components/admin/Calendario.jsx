@@ -3,7 +3,7 @@ import React from 'react';
 import { ChevronLeft, ChevronRight, User } from 'lucide-react';
 import '../../styles/calendar.css';
 
-export default function Calendario({ agendamentos, selectedDay, selectedMonth, selectedYear, onDaySelect, onMonthChange, funcionaria }) {
+export default function Calendario({ agendamentos, selectedDay, selectedMonth, selectedYear, onDaySelect, onMonthChange, funcionaria, mostrarProfissional = true, todasAsProfissionais = false }) {
   const MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
   const hoje = new Date();
   const hojeSemHorario = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
@@ -13,7 +13,15 @@ export default function Calendario({ agendamentos, selectedDay, selectedMonth, s
   const daysCount = getDaysInMonth(selectedMonth, selectedYear);
   const dias = Array.from({ length: daysCount }, (_, i) => i + 1);
 
-  const temAgendamento = (dia) => agendamentos.some(a => a.dia === dia && a.mes === selectedMonth && a.ano === selectedYear && a.funcionaria === funcionaria);
+  const getAgendamentosDoDia = (dia) => agendamentos.filter(a => (
+    a.dia === dia
+    && a.mes === selectedMonth
+    && a.ano === selectedYear
+    && a.status !== 'CANCELADO'
+    && (todasAsProfissionais || a.funcionaria === funcionaria)
+  ));
+  const contagensDoMes = dias.map(dia => getAgendamentosDoDia(dia).length);
+  const maiorContagemDoMes = Math.max(...contagensDoMes, 0);
   const ehHoje = (dia) => (
     dia === hoje.getDate()
     && selectedMonth === (hoje.getMonth() + 1)
@@ -54,7 +62,7 @@ export default function Calendario({ agendamentos, selectedDay, selectedMonth, s
         <button onClick={handlePrevMonth} disabled={!podeVoltarMes} aria-label="Mês anterior"><ChevronLeft size={18} /></button>
         <div className="calendario-header__center">
           <span className="mes-label">{`${MESES[selectedMonth - 1]} ${selectedYear}`}</span>
-          {funcionaria && (
+          {mostrarProfissional && funcionaria && (
             <span className="calendario-funcionaria-tag">
               <User size={13} /> {funcionaria}
             </span>
@@ -72,7 +80,11 @@ export default function Calendario({ agendamentos, selectedDay, selectedMonth, s
         {Array.from({ length: firstWeekday }, (_, i) => <div key={`vazio-${i}`} className="dia-vazio" />)}
 
         {dias.map(dia => {
-          const comAgendamento = temAgendamento(dia);
+          const quantidadeAgendamentos = getAgendamentosDoDia(dia).length;
+          const comAgendamento = quantidadeAgendamentos > 0;
+          const intensidade = maiorContagemDoMes > 0
+            ? Math.ceil((quantidadeAgendamentos / maiorContagemDoMes) * 3)
+            : 0;
           const isHoje = ehHoje(dia);
           const isPassado = ehPassado(dia);
           return (
@@ -82,12 +94,18 @@ export default function Calendario({ agendamentos, selectedDay, selectedMonth, s
             className={`dia-celula ${selectedDay === dia ? 'selecionado' : ''} ${comAgendamento ? 'com-agendamento' : ''} ${isHoje ? 'hoje' : ''} ${isPassado ? 'dia-celula--passado' : ''}`}
             onClick={() => !isPassado && onDaySelect(dia)}
             disabled={isPassado}
-            aria-label={`Dia ${dia}${isPassado ? ', indisponível' : ''}${comAgendamento ? ', com agendamento' : ''}${selectedDay === dia ? ', selecionado' : ''}`}
+            aria-label={`Dia ${dia}${isPassado ? ', indisponível' : ''}${comAgendamento ? `, ${quantidadeAgendamentos} agendamento${quantidadeAgendamentos === 1 ? '' : 's'}` : ', sem agendamentos'}${selectedDay === dia ? ', selecionado' : ''}`}
           >
             {isHoje && <span className="dia-hoje-badge">Hoje</span>}
             <span className="dia-numero">{dia}</span>
             {comAgendamento && (
-              <div className="badge-agendamento" title="Agendamentos marcados neste dia">📅</div>
+              <div className={`indicador-agendamentos indicador-agendamentos--${intensidade}`} title={`${quantidadeAgendamentos} agendamento${quantidadeAgendamentos === 1 ? '' : 's'} neste dia`}>
+                <span className="indicador-agendamentos__icone" aria-hidden="true">📅</span>
+                <span className="indicador-agendamentos__quantidade">{quantidadeAgendamentos}</span>
+                <span className="indicador-agendamentos__pontos" aria-hidden="true">
+                  {[1, 2, 3].map(ponto => <i key={ponto} className={ponto <= intensidade ? 'ativo' : ''} />)}
+                </span>
+              </div>
             )}
           </button>
         )})}

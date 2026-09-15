@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../../api";
+import { Navigate } from "react-router-dom";
+import { possuiPermissao } from "../../validate-access";
 import "../../styles/app.css"; 
 import "../../styles/acesso-negado.css";
 
@@ -20,8 +22,7 @@ export default function Financeiro() {
     { id: 3, cliente: "Carlos Mendes", valor: 85.0, data: "18/05/2026", metodo: "DINHEIRO", status: "PAGO" },
   ]);
 
-  const role = localStorage.getItem('userRole');
-  if (role !== 'ADMIN') return <Navigate to="/acesso-negado" replace />;
+  if (!possuiPermissao(["ADMIN"])) return <Navigate to="/acesso-negado" replace />;
   
   // Dispara a busca de dados assim que a tela abre
   useEffect(() => {

@@ -2,9 +2,10 @@
 import { NavLink } from "react-router-dom";
 import "../../styles/sidebar.css";
 import "../../styles/admin-master.css";
+import { normalizarRole } from "../../validate-access";
 
 export default function Sidebar({ open, onClose }) {
-  const role = localStorage.getItem("userRole"); // "ADMIN" ou "PROFISSIONAL"
+  const role = normalizarRole(localStorage.getItem("userRole"));
 
   return (
     <aside className={`sidebar ${open ? "open" : ""}`}>

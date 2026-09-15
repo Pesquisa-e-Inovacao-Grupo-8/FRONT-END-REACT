@@ -37,6 +37,7 @@ export default function Agendamento() {
   // Step 3
   const [form, setForm] = useState({ name: "", phone: "", email: "", notes: "" });
   const [step3Errors, setStep3Errors] = useState({});
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const servicosDisponiveis = servicosDb.filter((servico) => (
     !servicoPacoteId || String(servico.id) === String(servicoPacoteId)
@@ -155,6 +156,7 @@ export default function Agendamento() {
     if (!form.email.trim()) errs.email = "Informe seu e-mail.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
       errs.email = "E-mail inválido.";
+    if (!acceptedTerms) errs.terms = "Leia e aceite os termos de agendamento.";
     setStep3Errors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -196,6 +198,10 @@ export default function Agendamento() {
     } finally {
       setIsSubmitting(false);
     }
+
+    console.log("SERVIÇO:", servicoSelecionado);
+    console.log("DURAÇÃO:", servicoSelecionado?.duracaoMinutos);
+    console.log("PAYLOAD:", payloadCompleto);
   }
 
   function resetAll() {
@@ -203,6 +209,7 @@ export default function Agendamento() {
     setServiceId(""); setProfessionalId(""); setStep1Errors({});
     setDate(""); setTimeSlot(""); setStep2Errors({});
     setForm({ name: "", phone: "", email: "", notes: "" }); setStep3Errors({});
+    setAcceptedTerms(false);
   }
 
   // Pega os nomes bonitos para mostrar no resumo final
@@ -244,10 +251,10 @@ export default function Agendamento() {
           )}
         </div>
 
-        <div className="booking-card">
+        <div className="booking-flow-card">
 
           {done && (
-            <div className="success-screen">
+            <div className="booking-flow-success-screen">
               <div className="success-icon">✓</div>
               <h2>Agendamento Confirmado!</h2>
               <p>
@@ -255,25 +262,25 @@ export default function Agendamento() {
                 Você receberá uma confirmação em <strong>{form.email}</strong>.<br />
                 Até breve, <strong>{form.name.split(" ")[0]}</strong>! ✨
               </p>
-              <div className="summary-box">
+              <div className="booking-flow-summary-box">
                 <h3>Resumo do Agendamento</h3>
-                <div className="summary-row"><span>Serviço</span><span>{serviceLabel}</span></div>
-                <div className="summary-row"><span>Profissional</span><span>{professionalLabel}</span></div>
-                <div className="summary-row"><span>Data</span><span>{new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</span></div>
-                <div className="summary-row"><span>Horário</span><span>{timeSlot}</span></div>
+                <div className="booking-flow-summary-row"><span>Serviço</span><span>{serviceLabel}</span></div>
+                <div className="booking-flow-summary-row"><span>Profissional</span><span>{professionalLabel}</span></div>
+                <div className="booking-flow-summary-row"><span>Data</span><span>{new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</span></div>
+                <div className="booking-flow-summary-row"><span>Horário</span><span>{timeSlot}</span></div>
               </div>
-              <button className="btn-new" onClick={resetAll}>Novo Agendamento</button>
+              <button className="booking-flow-btn-new" onClick={resetAll}>Novo Agendamento</button>
             </div>
           )}
 
           {!done && step === 1 && (
             <>
-              <div className="card-title">Escolha o Serviço e o Profissional</div>
+              <div className="booking-flow-card-title">Escolha o Serviço e o Profissional</div>
 
-              <div className="field">
+              <div className="booking-flow-field">
                 <label>Serviço</label>
                 {servicosDisponiveis.length === 0 ? (
-                  <div className="service-selection-empty">Nenhum serviço disponível no momento.</div>
+                  <div className="booking-flow-service-selection-empty">Nenhum serviço disponível no momento.</div>
                 ) : (
                   <div className="booking-services-grid" role="radiogroup" aria-label="Serviços disponíveis">
                     {servicosDisponiveis.map(servico => {
@@ -302,15 +309,15 @@ export default function Agendamento() {
                     })}
                   </div>
                 )}
-                {step1Errors.serviceId && <div className="error-msg">{step1Errors.serviceId}</div>}
+                {step1Errors.serviceId && <div className="booking-flow-error-msg">{step1Errors.serviceId}</div>}
               </div>
 
-              <div className="field">
+              <div className="booking-flow-field">
                 <label>Profissional</label>
                 {!serviceId ? (
-                  <div className="service-selection-empty">Selecione um serviço primeiro.</div>
+                  <div className="booking-flow-service-selection-empty">Selecione um serviço primeiro.</div>
                 ) : profissionaisDoServico.length === 0 ? (
-                  <div className="service-selection-empty">Nenhum profissional realiza este serviço.</div>
+                  <div className="booking-flow-service-selection-empty">Nenhum profissional realiza este serviço.</div>
                 ) : (
                   <select
                     className={step1Errors.professionalId ? "error" : ""}
@@ -328,21 +335,21 @@ export default function Agendamento() {
                     ))}
                   </select>
                 )}
-                {step1Errors.professionalId && <div className="error-msg">{step1Errors.professionalId}</div>}
+                {step1Errors.professionalId && <div className="booking-flow-error-msg">{step1Errors.professionalId}</div>}
               </div>
 
-              <div className="card-actions">
+              <div className="booking-flow-card-actions">
                 <span />
-                <button className="btn-next" onClick={handleNext}>Próximo</button>
+                <button className="booking-flow-btn-next" onClick={handleNext}>Próximo</button>
               </div>
             </>
           )}
 
           {!done && step === 2 && (
             <>
-              <div className="card-title">Escolha Data e Horário</div>
+              <div className="booking-flow-card-title">Escolha Data e Horário</div>
 
-              <div className="field">
+              <div className="booking-flow-field">
                 <label>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                   Data
@@ -354,19 +361,19 @@ export default function Agendamento() {
                   min={new Date().toISOString().split("T")[0]}
                   onChange={e => { setDate(e.target.value); setTimeSlot(""); setStep2Errors(p => ({ ...p, date: "" })); }}
                 />
-                {step2Errors.date && <div className="error-msg">{step2Errors.date}</div>}
+                {step2Errors.date && <div className="booking-flow-error-msg">{step2Errors.date}</div>}
               </div>
 
-              <div className="field">
+              <div className="booking-flow-field">
                 <label>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   Horário
                 </label>
-                            <div className="time-grid">
+                            <div className="booking-flow-time-grid">
                               {horariosDaPagina.map(t => (
                     <button
                       key={t}
-                      className={`time-slot${timeSlot === t ? " selected" : ""}`}
+                      className={`booking-flow-time-slot${timeSlot === t ? " selected" : ""}`}
                       onClick={() => { setTimeSlot(t); setStep2Errors(p => ({ ...p, timeSlot: "" })); }}
                       type="button"
                     >
@@ -374,39 +381,39 @@ export default function Agendamento() {
                     </button>
                   ))}
                   {horariosDisponiveis.length === 0 && (
-                    <div className="service-selection-empty">Nenhum horário disponível para esta data.</div>
+                    <div className="booking-flow-service-selection-empty">Nenhum horário disponível para esta data.</div>
                   )}
                 </div>
                 {totalPaginasHorarios > 1 && (
-                  <div className="horarios-paginacao" aria-label="Paginação de horários">
+                  <div className="booking-flow-horarios-paginacao" aria-label="Paginação de horários">
                     <button type="button" onClick={() => setPaginaHorarios(pagina => Math.max(0, pagina - 1))} disabled={paginaHorarios === 0}>Anterior</button>
                     <span>{paginaHorarios + 1} / {totalPaginasHorarios}</span>
                     <button type="button" onClick={() => setPaginaHorarios(pagina => Math.min(totalPaginasHorarios - 1, pagina + 1))} disabled={paginaHorarios === totalPaginasHorarios - 1}>Próxima</button>
                   </div>
                 )}
-                {step2Errors.timeSlot && <div className="error-msg" style={{ marginTop: 8 }}>{step2Errors.timeSlot}</div>}
+                {step2Errors.timeSlot && <div className="booking-flow-error-msg" style={{ marginTop: 8 }}>{step2Errors.timeSlot}</div>}
               </div>
 
-              <div className="card-actions">
-                <button className="btn-back" onClick={handleBack}>Voltar</button>
-                <button className="btn-next" onClick={handleNext}>Próximo</button>
+              <div className="booking-flow-card-actions">
+                <button className="booking-flow-btn-back" onClick={handleBack}>Voltar</button>
+                <button className="booking-flow-btn-next" onClick={handleNext}>Próximo</button>
               </div>
             </>
           )}
 
           {!done && step === 3 && (
             <>
-              <div className="card-title">Seus Dados</div>
+              <div className="booking-flow-card-title">Seus Dados</div>
 
-              <div className="summary-box">
+              <div className="booking-flow-summary-box">
                 <h3>Resumo da Escolha</h3>
-                <div className="summary-row"><span>Serviço</span><span>{serviceLabel}</span></div>
-                <div className="summary-row"><span>Profissional</span><span>{professionalLabel}</span></div>
-                {date && <div className="summary-row"><span>Data</span><span>{new Date(date + "T12:00:00").toLocaleDateString("pt-BR")}</span></div>}
-                {timeSlot && <div className="summary-row"><span>Horário</span><span>{timeSlot}</span></div>}
+                <div className="booking-flow-summary-row"><span>Serviço</span><span>{serviceLabel}</span></div>
+                <div className="booking-flow-summary-row"><span>Profissional</span><span>{professionalLabel}</span></div>
+                {date && <div className="booking-flow-summary-row"><span>Data</span><span>{new Date(date + "T12:00:00").toLocaleDateString("pt-BR")}</span></div>}
+                {timeSlot && <div className="booking-flow-summary-row"><span>Horário</span><span>{timeSlot}</span></div>}
               </div>
 
-              <div className="field">
+              <div className="booking-flow-field">
                 <label>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   Nome Completo
@@ -418,10 +425,10 @@ export default function Agendamento() {
                   value={form.name}
                   onChange={e => { setForm(f => ({ ...f, name: e.target.value })); setStep3Errors(p => ({ ...p, name: "" })); }}
                 />
-                {step3Errors.name && <div className="error-msg">{step3Errors.name}</div>}
+                {step3Errors.name && <div className="booking-flow-error-msg">{step3Errors.name}</div>}
               </div>
 
-              <div className="field">
+              <div className="booking-flow-field">
                 <label>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 3h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 10.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17.92z"/></svg>
                   Telefone
@@ -433,10 +440,10 @@ export default function Agendamento() {
                   value={form.phone}
                   onChange={e => { setForm(f => ({ ...f, phone: e.target.value })); setStep3Errors(p => ({ ...p, phone: "" })); }}
                 />
-                {step3Errors.phone && <div className="error-msg">{step3Errors.phone}</div>}
+                {step3Errors.phone && <div className="booking-flow-error-msg">{step3Errors.phone}</div>}
               </div>
 
-              <div className="field">
+              <div className="booking-flow-field">
                 <label>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                   E-mail
@@ -448,10 +455,10 @@ export default function Agendamento() {
                   value={form.email}
                   onChange={e => { setForm(f => ({ ...f, email: e.target.value })); setStep3Errors(p => ({ ...p, email: "" })); }}
                 />
-                {step3Errors.email && <div className="error-msg">{step3Errors.email}</div>}
+                {step3Errors.email && <div className="booking-flow-error-msg">{step3Errors.email}</div>}
               </div>
 
-              <div className="field">
+              <div className="booking-flow-field">
                 <label>Observações (opcional)</label>
                 <textarea
                   placeholder="Alguma preferência ou observação especial?"
@@ -460,9 +467,34 @@ export default function Agendamento() {
                 />
               </div>
 
-              <div className="card-actions">
-                <button className="btn-back" onClick={handleBack} disabled={isSubmitting}>Voltar</button>
-                <button className="btn-next" onClick={handleConfirm} disabled={isSubmitting}>
+              <div className="booking-flow-terms">
+                <h3>Regras de cancelamento</h3>
+                <p>
+                  Após o pagamento, o agendamento só poderá ser cancelado com no mínimo
+                  24 horas de antecedência. Caso contrário, será cobrada uma taxa de 25%
+                  sobre o valor do reembolso.
+                </p>
+                <p>
+                  A mesma taxa de 25% se aplica aos agendamentos comuns, mesmo quando
+                  não houver pagamento antecipado.
+                </p>
+                <label className="booking-flow-terms-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={event => {
+                      setAcceptedTerms(event.target.checked);
+                      setStep3Errors(previous => ({ ...previous, terms: "" }));
+                    }}
+                  />
+                  <span>Li os termos de agendamento e estou de acordo</span>
+                </label>
+                {step3Errors.terms && <div className="booking-flow-error-msg">{step3Errors.terms}</div>}
+              </div>
+
+              <div className="booking-flow-card-actions">
+                <button className="booking-flow-btn-back" onClick={handleBack} disabled={isSubmitting}>Voltar</button>
+                <button className="booking-flow-btn-next" onClick={handleNext} disabled={isSubmitting}>
                   {isSubmitting ? "Processando..." : "Confirmar Agendamento"}
                 </button>
               </div>

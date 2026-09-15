@@ -47,8 +47,8 @@ export default function ConfiguracoesUsuario({ visao = "usuario" }) {
       setSalvando(true);
 
       const dadosAtualizados = {
-        ...usuario,
-        cpf: usuario.cpf,
+        nome: usuario.nome,
+        telefone: usuario.telefone,
       };
 
       await api.put("/usuarios/me", dadosAtualizados);
@@ -133,7 +133,7 @@ export default function ConfiguracoesUsuario({ visao = "usuario" }) {
               onChange={(e) => alterarCampo("tipo", e.target.value)}
               style={inputStyle}
             >
-              <option value="ADM">Administrador</option>
+              <option value="ADMIN">Administrador</option>
               <option value="CLIENTE">Cliente</option>
               <option value="PROFISSIONAL">Profissional</option>
             </select>

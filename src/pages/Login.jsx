@@ -86,6 +86,10 @@ export default function Login() {
           navigate("/");
         }
 
+        setTimeout(() => { 
+          window.location.reload();
+        }, 500);
+
       }, 2200);
 
     } catch (error) {
