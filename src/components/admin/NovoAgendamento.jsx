@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import api from "../../api";
+import api, { normalizeArray } from "../../api";
+import { normalizarRole } from "../../validate-access";
 import mostrarConfirmacaoAssincrona from '../utils/confirm-dialog';
 import "../../styles/app.css";
 
@@ -37,7 +38,7 @@ const temAlteracoes = (formData, funcionariaAtual) => {
   );
 };
 
-export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, profissionalId, servicosDisponiveis = [] }) {
+export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, profissionalId, profissionaisDisponiveis = [], servicosDisponiveis = [], controleCabecalho = null }) {
   const [aberto, setAberto] = useState(false);
   const [formData, setFormData] = useState({ ...INITIAL_STATE, funcionaria });
 
@@ -46,8 +47,9 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
 
   const [clientesCadastrados, setClientesCadastrados] = useState([]);
   const [isClienteAvulso, setIsClienteAvulso] = useState(false);
-  const userRole = localStorage.getItem("userRole"); // Para verificar se é ADMIN
-  const [profissionaisDisponiveis, setProfissionaisDisponiveis] = useState([]);
+  const userRole = normalizarRole(localStorage.getItem("userRole"));
+  const [profissionaisDaModal, setProfissionaisDaModal] = useState(profissionaisDisponiveis);
+  const [servicosDaProfissional, setServicosDaProfissional] = useState(servicosDisponiveis);
 
   const [buscaCliente, setBuscaCliente] = useState("");
   const [dropdownClienteAberto, setDropdownClienteAberto] = useState(false);
@@ -59,12 +61,18 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
     if (aberto) {
       api.get('/usuarios').then(res => {
         setClientesCadastrados(res.data.filter(u => u.tipo === 'CLIENTE'));
-        if (userRole === 'ADMIN') {
-          setProfissionaisDisponiveis(res.data.filter(u => u.tipo === 'PROFISSIONAL'));
+        if (userRole === 'ADMIN' && !profissionaisDisponiveis.length) {
+          setProfissionaisDaModal(res.data.filter(u => u.tipo === 'PROFISSIONAL'));
         }
       });
     }
-  }, [aberto, userRole]);
+  }, [aberto, userRole, profissionaisDisponiveis]);
+
+  useEffect(() => {
+    if (profissionaisDisponiveis.length) {
+      setProfissionaisDaModal(profissionaisDisponiveis);
+    }
+  }, [profissionaisDisponiveis]);
 
   useEffect(() => {
     if (dadosIniciais) {
@@ -84,7 +92,7 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
     (c.telefone && c.telefone.includes(buscaCliente))
   );
 
-  const profissionaisFiltradosPesquisa = profissionaisDisponiveis.filter(p =>
+  const profissionaisFiltradosPesquisa = profissionaisDaModal.filter(p =>
     p.nome.toLowerCase().includes(buscaProfissional.toLowerCase())
   );
 
@@ -101,11 +109,30 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
     setDropdownProfissionalAberto(false);
   };
 
+  const profissionalSelecionado = profissionaisDaModal.find(
+    profissional => profissional.nome === formData.funcionaria
+  );
+
+  useEffect(() => {
+    if (!aberto) return;
+
+    const idDaProfissional = profissionalSelecionado?.id || profissionalId;
+
+    if (!idDaProfissional) {
+      setServicosDaProfissional(servicosDisponiveis || []);
+      return;
+    }
+
+    api.get(`/profissionais/${idDaProfissional}/servicos`)
+      .then(res => setServicosDaProfissional(normalizeArray(res.data)))
+      .catch(() => setServicosDaProfissional(servicosDisponiveis || []));
+  }, [aberto, profissionalId, profissionalSelecionado, servicosDisponiveis]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
     if (name === "servico") {
-      const servicoEscolhido = servicosDisponiveis.find(s => String(s.id) === String(value));
+      const servicoEscolhido = servicosDaProfissional.find(s => String(s.id) === String(value));
       setFormData(prev => ({
         ...prev,
         servico: value,
@@ -139,7 +166,8 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
       telefoneClienteAvulso: !formData.clienteId ? formData.telefone : null,
 
       // Agora o profissionalId existe e vem direto do componente pai!
-      profissionalId: profissionalId,
+      profissionalId: profissionalSelecionado?.id || profissionalId,
+      funcionaria: formData.funcionaria,
       servicoId: formData.servico
     };
 
@@ -160,9 +188,12 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
     <div className="container novo-agendamento-container">
       <div className="header">
         <h2 className="agenda-header-title">Agendamentos</h2>
-        <button className="btn-app agenda-new-button" onClick={() => setAberto(true)} type="button" style={{ backgroundColor: "#1a1a2e", color: "white", padding: "10px 20px", borderRadius: "5px", border: "none", cursor: "pointer", fontWeight: "bold" }}>
-          + {tituloModal}
-        </button>
+        <div className="agenda-header-actions">
+          {controleCabecalho}
+          <button className="btn-app agenda-new-button" onClick={() => setAberto(true)} type="button" style={{ backgroundColor: "#1a1a2e", color: "white", padding: "10px 20px", borderRadius: "5px", border: "none", cursor: "pointer", fontWeight: "bold" }}>
+            + {tituloModal}
+          </button>
+        </div>
       </div>
 
       {aberto && (
@@ -244,7 +275,7 @@ export default function NovoAgendamento({ aoSalvar, dadosIniciais, funcionaria, 
                   <label style={{ display: "block", marginBottom: "5px", fontSize: "0.9rem", fontWeight: "bold" }}>Serviço</label>
                   <select name="servico" value={formData.servico} onChange={handleChange} required style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}>
                     <option value="">Selecione um serviço</option>
-                    {(servicosDisponiveis || []).map((s) => (
+                    {(servicosDaProfissional || []).map((s) => (
                       <option key={s.id} value={s.id}>{s.nome} ({s.duracaoMinutos} min)</option>
                     ))}
                   </select>

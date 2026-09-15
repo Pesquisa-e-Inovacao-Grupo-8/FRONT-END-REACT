@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import api, { normalizeArray } from '../../api';
 import { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
 
+const SERVICOS_POR_PAGINA = 6;
+
 export default function CardServico() {
   const navigate = useNavigate();
-const [servicos, setServicos] = useState([]);
+  const [servicos, setServicos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(''); 
+  const [erro, setErro] = useState('');
+  const [paginaAtual, setPaginaAtual] = useState(1);
 
   const agendarServico = (servicoId) => {
     if (!localStorage.getItem('token')) {
@@ -31,6 +34,13 @@ const [servicos, setServicos] = useState([]);
       });
   }, []);
 
+  const totalPaginas = Math.ceil(servicos.length / SERVICOS_POR_PAGINA);
+  const primeiroServico = (paginaAtual - 1) * SERVICOS_POR_PAGINA;
+  const servicosDaPagina = servicos.slice(
+    primeiroServico,
+    primeiroServico + SERVICOS_POR_PAGINA
+  );
+
   if (loading) return <div style={{ textAlign: 'center', padding: '2rem' }}>Carregando serviços...</div>;
   if (erro) return <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>{erro}</div>;
   
@@ -39,7 +49,7 @@ const [servicos, setServicos] = useState([]);
         <div className="category-section">
         <h2 className="category-title">Todos os Serviços</h2>
         <div className="services-grid">
-          {Array.isArray(servicos) && servicos.length > 0 ? servicos.map((svc) => (
+          {Array.isArray(servicos) && servicos.length > 0 ? servicosDaPagina.map((svc) => (
             <div className="service-card" key={svc.id}>
               <div className="card-top">
                 <div className="card-icon">✨</div>
@@ -61,6 +71,25 @@ const [servicos, setServicos] = useState([]);
             <div style={{ color: '#666', padding: '1rem 0' }}>Nenhum serviço disponível no momento.</div>
           )}
         </div>
+        {totalPaginas > 1 && (
+          <nav className="services-pagination" aria-label="Paginação de serviços">
+            <button
+              type="button"
+              onClick={() => setPaginaAtual(pagina => Math.max(1, pagina - 1))}
+              disabled={paginaAtual === 1}
+            >
+              Anterior
+            </button>
+            <span>Página {paginaAtual} de {totalPaginas}</span>
+            <button
+              type="button"
+              onClick={() => setPaginaAtual(pagina => Math.min(totalPaginas, pagina + 1))}
+              disabled={paginaAtual === totalPaginas}
+            >
+              Próxima
+            </button>
+          </nav>
+        )}
       </div>
       </main>
     );

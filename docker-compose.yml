@@ -1,0 +1,9 @@
+services:
+  frontend:
+    image: imagestreampi/front-end-react-prd:99
+    container_name: front-end-react
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    env_file:
+      - .env

@@ -1,7 +1,4 @@
-import axios from 'axios';
 import api, { normalizeArray } from '../api';
-
-const FLASK_URL = 'https://spring.renatahtokutomi.com:8088/flask-infinity-pay';
 
 export function cancelarAgendamento(agendamento) {
     agendamento.status = 'CANCELADO';
@@ -15,8 +12,14 @@ export function finalizarAgendamento(agendamento) {
 
 export async function gerarLinkPagamento(agendamento) {
     try {
-        const response = await axios.post(`${FLASK_URL}/create-checkout`, agendamento);
-        console.log('Resposta do Infinity Pay:', response.data);
+        const agendamentoId = agendamento?.id || agendamento?.idAgendamento;
+
+        if (!agendamentoId) {
+            throw new Error('Agendamento sem identificador');
+        }
+
+        const response = await api.post(`/agendamentos/${agendamentoId}/payment-link`);
+        console.log('Resposta do pagamento:', response.data);
         return response.data;
     } catch (error) {
         console.error('Falha ao gerar link de pagamento no Infinity Pay', error);
@@ -46,8 +49,14 @@ export async function salvarAgendamento(payload) {
         return response.data;
 
     } catch (error) {
-        console.error('Falha ao criar agendamento no Spring Boot:', error);
-        throw new Error('Falha ao criar agendamento');
+        console.error('Falha ao criar agendamento no Spring Boot:', {
+            message: error.message,
+            status: error.response?.status,
+            url: error.config?.url,
+            method: error.config?.method,
+            data: error.response?.data
+        });
+        throw error;
     }
 }
 export async function criarAgendamento(payload) {
@@ -93,7 +102,8 @@ export async function getAgendamentos() {
                 funcionaria: agend.profissional?.usuario?.nome || 'Profissional Não Informado',
                 servico: nomeServico,
                 status: agend.status,
-                pagamentoStatus: agend.pagamentoStatus || 'PENDENTE'
+                pagamentoStatus: agend.pagamentoStatus || 'PENDENTE',
+                link_pagamento: agend.linkPagamento || agend.link_pagamento || ''
             };
         });
     } catch (error) {
@@ -141,13 +151,6 @@ export async function agendarPeloCliente(dadosFormulario) {
         console.log("Criando agendamento...", agendamentoDTO);
         const responseAgendamento = await api.post(`/agendamentos`, agendamentoDTO);
         const novoAgendamento = responseAgendamento.data;
-
-        console.log("Vinculando serviço...");
-        await api.post(`/agendamentoServicos`, {
-            agendamentoId: novoAgendamento.id,
-            servicoId: dadosFormulario.serviceId,
-            clientePacoteServicoId: dadosFormulario.clientePacoteServicoId || null
-        });
 
         return novoAgendamento;
 

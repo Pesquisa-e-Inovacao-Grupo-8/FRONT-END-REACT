@@ -39,10 +39,10 @@ export default function GerenciarPacotes() {
   };
 
   const toggleServico = (idServico) => {
-    if (servicosSelecionados.includes(idServico)) {
-      setServicosSelecionados(prev => prev.filter(id => id !== idServico));
+    if (servicosSelecionados.some(servico => servico.id === idServico)) {
+      setServicosSelecionados(prev => prev.filter(servico => servico.id !== idServico));
     } else {
-      setServicosSelecionados(prev => [...prev, idServico]);
+      setServicosSelecionados(prev => [...prev, { id: idServico, quantidade: 6 }]);
     }
   };
 
@@ -58,6 +58,11 @@ export default function GerenciarPacotes() {
       return;
     }
 
+    if (!textoObrigatorio(novoPacote.descricao)) {
+      await mostrarAvisoObrigatorio("Preencha a descrição do pacote!");
+      return;
+    }
+
     if (!moeda(novoPacote.precoTotal, { minimo: 0, incluirMinimo: false })) {
       await mostrarAvisoObrigatorio("Informe um preço válido e maior que zero.");
       return;
@@ -65,6 +70,11 @@ export default function GerenciarPacotes() {
 
     if (servicosSelecionados.length === 0) {
       await mostrarAvisoObrigatorio("Selecione pelo menos um serviço para o pacote.");
+      return;
+    }
+
+    if (servicosSelecionados.some(servico => !Number.isInteger(Number(servico.quantidade)) || Number(servico.quantidade) < 1)) {
+      await mostrarAvisoObrigatorio("Informe um limite de agendamentos válido para cada serviço.");
       return;
     }
 
@@ -82,10 +92,13 @@ export default function GerenciarPacotes() {
       const pacoteCriadoId = res.data.id;
 
       // 2. Vincula os serviços escolhidos a este pacote na tabela pacote_servico
-      for (let servicoId of servicosSelecionados) {
+      for (const servico of servicosSelecionados) {
         // Preço zerado ou mockado aqui, pois o preço real do pacote está no precoTotal
-        await api.post(`/pacoteServicos?pacoteId=${pacoteCriadoId}&servicoId=${servicoId}`, {
-          preco: 0.0 
+        await api.post(`/pacoteServicos?pacoteId=${pacoteCriadoId}&servicoId=${servico.id}`, {
+          pacoteId: pacoteCriadoId,
+          servicoId: servico.id,
+          preco: 0.0,
+          quantidade: Number(servico.quantidade)
         });
       }
 
@@ -97,7 +110,8 @@ export default function GerenciarPacotes() {
 
     } catch (error) {
       console.error("Erro ao salvar pacote", error);
-      await mostrarAvisoObrigatorio("Erro ao criar pacote. Contate o suporte.");
+      const mensagem = error.response?.data?.message || error.response?.data?.detail;
+      await mostrarAvisoObrigatorio(mensagem || "Erro ao criar pacote. Contate o suporte.");
     } finally {
       setSalvando(false);
     }
@@ -183,10 +197,25 @@ export default function GerenciarPacotes() {
                   <label key={servico.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                     <input 
                       type="checkbox" 
-                      checked={servicosSelecionados.includes(servico.id)}
+                      checked={servicosSelecionados.some(selecionado => selecionado.id === servico.id)}
                       onChange={() => toggleServico(servico.id)}
                     />
-                    {servico.nome} (R$ {servico.preco.toFixed(2)})
+                    <span>{servico.nome} (R$ {servico.preco.toFixed(2)})</span>
+                    {servicosSelecionados.some(selecionado => selecionado.id === servico.id) && (
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={servicosSelecionados.find(selecionado => selecionado.id === servico.id).quantidade}
+                        onChange={event => setServicosSelecionados(prev => prev.map(selecionado => (
+                          selecionado.id === servico.id
+                            ? { ...selecionado, quantidade: event.target.value }
+                            : selecionado
+                        )))}
+                        aria-label={`Limite de agendamentos para ${servico.nome}`}
+                        style={{ width: '80px', padding: '5px' }}
+                      />
+                    )}
                   </label>
                 ))}
               </div>

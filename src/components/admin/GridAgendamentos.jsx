@@ -1,25 +1,27 @@
-//src/components/admin/GridAgendamentos.jsx
-import React, { useState , useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import ModalAgendamento from './ModalAgendamentos';
-
 import '../../styles/agendamento-grid.css';
+import api from '../../api';
 
 const DAY_START_HOUR = 8;
 const DAY_END_HOUR = 19;
-const HOUR_HEIGHT = 84;
+
+const MINUTOS_POR_HORA = 60;
+const ALTURA_POR_HORA = 437;
+const AJUSTE_ALTURA_EVENTO = 5;
+const INTERVALO_MARCACAO_MINUTOS = 10;
 
 const toMinutes = (hora = '00:00') => {
-  const [h, m] = hora.split(':').map(Number);
+  const [h, m] = String(hora).split(':').map(Number);
   return (h * 60) + (m || 0);
 };
 
 const toHourString = (minutes) => {
   const h = String(Math.floor(minutes / 60)).padStart(2, '0');
   const m = String(minutes % 60).padStart(2, '0');
+
   return `${h}:${m}`;
 };
-
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 const getPagamentoStatus = (agendamento) => {
   return (
@@ -32,158 +34,424 @@ const getPagamentoStatus = (agendamento) => {
 
 const getPagamentoVisual = (status = '') => {
   if (['FINALIZADO', 'CONCLUIDO', 'CONCLUÍDO'].includes(status)) {
-    return { label: 'Finalizado', className: 'finalizado' };
+    return {
+      label: 'Finalizado',
+      className: 'finalizado'
+    };
   }
 
   if (['PAGO', 'CONFIRMADO', 'APROVADO'].includes(status)) {
-    return { label: 'Confirmado', className: 'confirmado' };
+    return {
+      label: 'Confirmado',
+      className: 'confirmado'
+    };
   }
 
-  return { label: 'Pendente', className: 'pendente' };
+  return {
+    label: 'Pendente',
+    className: 'pendente'
+  };
 };
 
-export default function GridAgendamento({ dia, mes, ano, agendamentosDoDia = [], funcionaria, onAtualizar }) {
+export default function GridAgendamento({
+  dia,
+  mes,
+  ano,
+  agendamentosDoDia = [],
+  funcionaria,
+  mostrarProfissional = true,
+  todasAsProfissionais = false,
+  profissionais = [],
+  onAtualizar
+}) {
   const [modalAgendamento, setModalAgendamento] = useState(null);
   const [agendamentos, setAgendamentos] = useState(agendamentosDoDia);
-  const [agoraMinutos, setAgoraMinutos] = useState(() => {
-    const agora = new Date();
-    return (agora.getHours() * 60) + agora.getMinutes();
-  });
-  const DAY_START_MINUTES = DAY_START_HOUR * 60;
-  const DAY_END_MINUTES = DAY_END_HOUR * 60;
-  const TOTAL_MINUTES = DAY_END_MINUTES - DAY_START_MINUTES;
-  const totalHoras = DAY_END_HOUR - DAY_START_HOUR;
+  const [servicos, setServicos] = useState([]);
 
+  /*
+   * Mantém os agendamentos sincronizados
+   * com o componente pai.
+   */
   useEffect(() => {
     setAgendamentos(agendamentosDoDia);
   }, [dia, mes, ano, agendamentosDoDia]);
 
+  /*
+   * Busca os serviços para descobrir a duração
+   * quando o agendamento não possui duracaoMinutos.
+   */
   useEffect(() => {
-    const atualizarAgora = () => {
-      const agora = new Date();
-      setAgoraMinutos((agora.getHours() * 60) + agora.getMinutes());
+    let ativo = true;
+
+    async function carregarServicos() {
+      try {
+        const response = await api.get('/servicos');
+
+        if (ativo) {
+          setServicos(response.data || []);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar serviços:', error);
+
+        if (ativo) {
+          setServicos([]);
+        }
+      }
+    }
+
+    carregarServicos();
+
+    return () => {
+      ativo = false;
     };
-
-    atualizarAgora();
-    const timer = setInterval(atualizarAgora, 60 * 1000);
-
-    return () => clearInterval(timer);
   }, []);
-  
-  const agendamentosVisiveis = agendamentos.filter((item) => item.status !== "CANCELADO");
-  const agendamentosTimeline = agendamentosVisiveis
-    .map((a) => {
-      const inicioOriginal = toMinutes(a.hora || '08:00');
-      const duracao = clamp(parseInt(a.duracaoMinutos || a.duracao || 60, 10) || 60, 15, 360);
-      const inicio = clamp(inicioOriginal, DAY_START_MINUTES, DAY_END_MINUTES - 15);
-      const fim = clamp(inicio + duracao, DAY_START_MINUTES + 15, DAY_END_MINUTES);
-      const offset = inicio - DAY_START_MINUTES;
-      const duracaoRender = fim - inicio;
+
+  /*
+   * Remove cancelados.
+   */
+  const agendamentosVisiveis = agendamentos.filter(
+    item => item.status !== 'CANCELADO'
+  );
+
+  const profissionaisDaTimeline = todasAsProfissionais
+    ? profissionais
+    : [funcionaria];
+
+  /*
+   * Descobre a duração correta.
+   *
+   * Prioridade:
+   *
+   * 1. duracaoMinutos do agendamento
+   * 2. duracao do agendamento
+   * 3. duração cadastrada no serviço
+   * 4. 60 minutos
+   */
+  const getDuracaoAgendamento = (agendamento) => {
+    const duracaoDoAgendamento = Number(
+      agendamento.duracaoMinutos ?? agendamento.duracao
+    );
+
+    if (
+      Number.isFinite(duracaoDoAgendamento) &&
+      duracaoDoAgendamento > 0
+    ) {
+      return duracaoDoAgendamento;
+    }
+
+    const servico = servicos.find((s) => {
+      const mesmoId =
+        String(s.id) === String(agendamento.servicoId);
+
+      const mesmoNome =
+        String(s.nome || '').trim().toLowerCase() ===
+        String(agendamento.servico || '').trim().toLowerCase();
+
+      return mesmoId || mesmoNome;
+    });
+
+    const duracaoDoServico = Number(
+      servico?.duracaoMinutos
+    );
+
+    if (
+      Number.isFinite(duracaoDoServico) &&
+      duracaoDoServico > 0
+    ) {
+      return duracaoDoServico;
+    }
+
+    return 60;
+  };
+
+  /*
+   * Cria apenas as linhas visuais das horas.
+   *
+   * 08:00
+   * 09:00
+   * 10:00
+   * ...
+   * 19:00
+   */
+  const raiasHorarios = Array.from(
+    {
+      length: DAY_END_HOUR - DAY_START_HOUR
+    },
+    (_, i) => {
+      const horaInicio = DAY_START_HOUR + i;
 
       return {
-        ...a,
-        inicio,
-        fim,
-        inicioLabel: toHourString(inicio),
-        fimLabel: toHourString(fim),
-        top: (offset / 60) * HOUR_HEIGHT,
-        height: Math.max((duracaoRender / 60) * HOUR_HEIGHT, 38),
+        horaLabel: `${String(horaInicio).padStart(2, '0')}:00`
       };
-    })
-    .sort((a, b) => a.inicio - b.inicio);
+    }
+  );
 
-  const totalOcupados = agendamentosVisiveis.length;
-  const minutosOcupados = agendamentosTimeline.reduce((acc, item) => acc + (item.fim - item.inicio), 0);
-  const minutosLivres = Math.max(TOTAL_MINUTES - minutosOcupados, 0);
-  const totalLivres = `${Math.floor(minutosLivres / 60)}h ${String(minutosLivres % 60).padStart(2, '0')}m`;
-  const timelineHeight = totalHoras * HOUR_HEIGHT;
-  const marcadoresHora = Array.from({ length: totalHoras + 1 }, (_, i) => DAY_START_HOUR + i);
-  const marcadoresMeiaHora = Array.from({ length: totalHoras * 2 + 1 }, (_, i) => i);
-  const hoje = new Date();
-  const diaSelecionadoEhHoje = Number(dia) === hoje.getDate()
-    && Number(mes) === (hoje.getMonth() + 1)
-    && Number(ano) === hoje.getFullYear();
-  const horarioAtualNoIntervalo = agoraMinutos >= DAY_START_MINUTES && agoraMinutos <= DAY_END_MINUTES;
-  const mostrarLinhaHorarioAtual = diaSelecionadoEhHoje && horarioAtualNoIntervalo;
-  const linhaHorarioAtualTop = ((agoraMinutos - DAY_START_MINUTES) / 60) * HOUR_HEIGHT;
-  const horarioAtualLabel = toHourString(agoraMinutos);
+  /*
+   * Calcula a posição vertical do agendamento.
+   *
+   * Exemplo:
+   *
+   * 08:00 -> top 0
+   * 08:30 -> top 40
+  * 09:00 -> top 96
+  * 09:30 -> top 144
+   */
+  const getEventPosition = (agendamento) => {
+    const inicio = toMinutes(
+      agendamento.hora || '08:00'
+    );
+
+    const duracao = getDuracaoAgendamento(
+      agendamento
+    );
+
+    const inicioDaAgenda =
+      DAY_START_HOUR * MINUTOS_POR_HORA;
+
+    const top =
+      ((inicio - inicioDaAgenda) / MINUTOS_POR_HORA) *
+      ALTURA_POR_HORA;
+
+    const height =
+      (duracao / MINUTOS_POR_HORA) *
+      ALTURA_POR_HORA;
+
+    return {
+      top: Math.max(0, top),
+      height: Math.max(30, height + AJUSTE_ALTURA_EVENTO),
+      inicio,
+      duracao
+    };
+  };
 
   return (
-    <div className="agendamento-grid">
+    <div className={`agendamento-grid ${todasAsProfissionais ? 'agendamento-grid--todas' : ''}`}>
+
+      {/* ============================================================
+          CABEÇALHO
+          ============================================================ */}
+
       <div className="agendamento-grid__header">
-        <span className="agendamento-grid__header-title">Horários Marcados e Disponíveis</span>
-        <span className="agendamento-grid__header-chip">{funcionaria || "Profissional"}</span>
+        <span className="agendamento-grid__header-title">
+          Timeline - {String(dia).padStart(2, '0')}/
+          {String(mes).padStart(2, '0')}/
+          {ano}
+        </span>
+
+        {mostrarProfissional && (
+          <span className="agendamento-grid__header-chip">
+            {todasAsProfissionais ? 'Todas as profissionais' : (funcionaria || 'Profissional')}
+          </span>
+        )}
       </div>
+
+      {/* ============================================================
+          RESUMO
+          ============================================================ */}
 
       <div className="agendamento-grid__summary">
-        <p className="agendamento-grid__title">Calendário: {String(dia).padStart(2, '0')}/{String(mes).padStart(2, '0')}/{ano}</p>
-        <div className="agendamento-grid__stats" aria-label="Resumo dos horários">
-          <span className="agendamento-grid__stat agendamento-grid__stat--ocupados">Ocupados: {totalOcupados}</span>
-          <span className="agendamento-grid__stat agendamento-grid__stat--livres">Livres: {totalLivres}</span>
+        <p className="agendamento-grid__title">
+          Calendário:{' '}
+          {String(dia).padStart(2, '0')}/
+          {String(mes).padStart(2, '0')}/
+          {ano}
+        </p>
+
+        <div className="agendamento-grid__stats">
+          <span className="agendamento-grid__stat agendamento-grid__stat--ocupados">
+            Ocupados: {agendamentosVisiveis.length}
+          </span>
         </div>
       </div>
 
-      <div className="agendamento-grid__timeline">
-        <div className="agendamento-grid__timeline-hours" style={{ height: `${timelineHeight}px` }}>
-          {marcadoresHora.map((h, idx) => (
-            <span key={h} className="agendamento-grid__timeline-hour" style={{ top: `${idx * HOUR_HEIGHT}px` }}>
-              {String(h).padStart(2, '0')}:00
-            </span>
-          ))}
-        </div>
+      <div className="agendamento-grid__timeline-scroll">
+        {/* ============================================================
+            TIMELINE
+            ============================================================ */}
 
-        <div className="agendamento-grid__timeline-track" style={{ height: `${timelineHeight}px` }}>
-          {marcadoresMeiaHora.map((marker) => (
-            <div
-              key={`line-${marker}`}
-              className={`agendamento-grid__line ${marker % 2 === 0 ? 'agendamento-grid__line--full' : 'agendamento-grid__line--half'}`}
-              style={{ top: `${marker * (HOUR_HEIGHT / 2)}px` }}
-            />
-          ))}
+      <div
+        className="agendamento-grid__dynamic-timeline"
+        style={todasAsProfissionais ? {
+          minWidth: `calc(var(--agenda-time-rail, 56px) + ${Math.max(profissionaisDaTimeline.length, 1) * 220}px)`
+        } : undefined}
+      >
 
-          {mostrarLinhaHorarioAtual && (
-            <div
-              className="agendamento-grid__current-time"
-              style={{ top: `${linhaHorarioAtualTop}px` }}
-              aria-label={`Horário atual: ${horarioAtualLabel}`}
-            >
-              <span className="agendamento-grid__current-time-dot" />
-              <span className="agendamento-grid__current-time-label">Agora {horarioAtualLabel}</span>
-            </div>
-          )}
+        {todasAsProfissionais && (
+          <div
+            className="agendamento-grid__professional-columns"
+            style={{
+              gridTemplateColumns: `var(--agenda-time-rail, 56px) repeat(${Math.max(profissionaisDaTimeline.length, 1)}, minmax(var(--professional-column-min, 220px), 1fr))`,
+              minWidth: `calc(var(--agenda-time-rail, 56px) + ${Math.max(profissionaisDaTimeline.length, 1) * 220}px)`
+            }}
+          >
+            <span aria-hidden="true" />
+            {profissionaisDaTimeline.map((nome) => (
+              <span key={nome} className="agendamento-grid__professional-column-title">
+                {nome}
+              </span>
+            ))}
+          </div>
+        )}
 
-          {agendamentosTimeline.map((agendamento) => {
-            const isTiny = agendamento.height <= 52;
-            const isSmall = agendamento.height > 52 && agendamento.height <= 76;
-            const pagamentoStatus = getPagamentoStatus(agendamento);
-            const pagamentoVisual = getPagamentoVisual(pagamentoStatus);
+        <div className="agendamento-grid__timeline-body">
 
-            return (
-              <button
-                key={agendamento.id}
-                type="button"
-                className={`agendamento-grid__event agendamento-grid__event--${(agendamento.status || 'PENDENTE').toLowerCase()} ${isTiny ? 'agendamento-grid__event--tiny' : ''} ${isSmall ? 'agendamento-grid__event--small' : ''}`}
-                style={{ top: `${agendamento.top}px`, height: `${agendamento.height}px` }}
-                onClick={() => setModalAgendamento(agendamento)}
-                title={`${agendamento.cliente} • ${agendamento.inicioLabel} - ${agendamento.fimLabel} • Pagamento: ${pagamentoStatus}`}
+          {/* ========================================================
+              LINHAS DAS HORAS
+              ======================================================== */}
+
+          <div className="agendamento-grid__hour-lines">
+
+            {raiasHorarios.map((raia) => (
+              <div
+                key={raia.horaLabel}
+                className="agendamento-grid__hour-row"
               >
-                <div className="agendamento-grid__event-time-group">
-                  <span className="agendamento-grid__event-time">{agendamento.inicioLabel} - {agendamento.fimLabel}</span>
-                  <span className="agendamento-grid__event-service">{agendamento.servico || 'Serviço'}</span>
-                </div>
-                <span className="agendamento-grid__event-client">{agendamento.cliente}</span>
-                <span className={`agendamento-grid__event-payment agendamento-grid__event-payment--${pagamentoVisual.className}`}>
-                  {pagamentoVisual.label}
+                <span className="agendamento-grid__raia-time">
+                  {raia.horaLabel}
                 </span>
-              </button>
-            );
-          })}
+
+                <div className="agendamento-grid__hour-line" />
+
+                <div className="agendamento-grid__minute-lines">
+                  {Array.from(
+                    {
+                      length: MINUTOS_POR_HORA / INTERVALO_MARCACAO_MINUTOS - 1
+                    },
+                    (_, index) => {
+                      const minuto = (index + 1) * INTERVALO_MARCACAO_MINUTOS;
+                      const hora = raia.horaLabel.split(':')[0];
+                      const minutoLabel = `${hora}:${String(minuto).padStart(2, '0')}`;
+
+                      return (
+                        <div
+                          key={minuto}
+                          className="agendamento-grid__minute-line"
+                          style={{
+                            top: `${(minuto / MINUTOS_POR_HORA) * 100}%`
+                          }}
+                        >
+                          <span className="agendamento-grid__minute-label">
+                            {minutoLabel}
+                          </span>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Linha final das 19:00 */}
+            <div className="agendamento-grid__hour-row agendamento-grid__hour-row--final">
+              <span className="agendamento-grid__raia-time">
+                {String(DAY_END_HOUR).padStart(2, '0')}:00
+              </span>
+
+              <div className="agendamento-grid__hour-line" />
+            </div>
+
+          </div>
+
+          {/* ========================================================
+              EVENTOS
+              ======================================================== */}
+
+          <div
+            className="agendamento-grid__events-layer"
+            style={{
+              gridTemplateColumns: `repeat(${Math.max(profissionaisDaTimeline.length, 1)}, minmax(220px, 1fr))`
+            }}
+          >
+
+            {profissionaisDaTimeline.map((nomeProfissional, profissionalIndex) => (
+              <div
+                key={nomeProfissional || profissionalIndex}
+                className="agendamento-grid__professional-column"
+              >
+              {agendamentosVisiveis
+                .filter(agendamento => agendamento.funcionaria === nomeProfissional)
+                .map((agendamento) => {
+
+              const {
+                top,
+                height,
+                inicio,
+                duracao
+              } = getEventPosition(agendamento);
+
+              const fim = inicio + duracao;
+
+              const fimLabel = toHourString(fim);
+
+              const pagamentoStatus =
+                getPagamentoStatus(agendamento);
+
+              const pagamentoVisual =
+                getPagamentoVisual(pagamentoStatus);
+
+              return (
+                <button
+                  key={`${nomeProfissional}-${agendamento.id}`}
+                  type="button"
+                  className={`agendamento-grid__event agendamento-grid__event--coluna-${profissionalIndex % 6} agendamento-grid__event--${(
+                    agendamento.status || 'PENDENTE'
+                  ).toLowerCase()}`}
+                  style={{
+                    top: `${top}px`,
+                    height: `${height}px`
+                  }}
+                  onClick={() =>
+                    setModalAgendamento(agendamento)
+                  }
+                >
+
+                  <div className="agendamento-grid__event-time-group">
+
+                    <span className="agendamento-grid__event-time">
+                      {agendamento.hora || '--:--'} - {fimLabel}
+                    </span>
+
+                    <span className="agendamento-grid__event-service">
+                      {agendamento.servico || 'Serviço'}
+                    </span>
+
+                  </div>
+
+                  <span className="agendamento-grid__event-client">
+                    {agendamento.cliente || 'Cliente'}
+                  </span>
+
+                  <span
+                    className={`agendamento-grid__event-payment agendamento-grid__event-payment--${pagamentoVisual.className}`}
+                  >
+                    {pagamentoVisual.label}
+                  </span>
+
+                </button>
+              );
+                })}
+              </div>
+            ))}
+
+          </div>
+
         </div>
+
       </div>
+      </div>
+
+      {/* ============================================================
+          MODAL
+          ============================================================ */}
 
       {modalAgendamento && (
-        <ModalAgendamento agendamento={modalAgendamento} onClose={() => setModalAgendamento(null)} onAtualizar={onAtualizar} />
+        <ModalAgendamento
+          agendamento={modalAgendamento}
+          onClose={() => setModalAgendamento(null)}
+          onAtualizar={onAtualizar}
+        />
       )}
+
     </div>
   );
 }

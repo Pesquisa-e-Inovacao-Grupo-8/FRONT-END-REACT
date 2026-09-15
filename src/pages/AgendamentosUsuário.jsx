@@ -1,9 +1,8 @@
 //src/pages/AgendamentoUsuario.jsx
 import { useState, useEffect, useRef } from 'react';
-import axios from "axios";
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { getAgendamentosPorCliente, atualizarStatusAgendamento } from '../js/agendamento.js';
+import { getAgendamentosPorCliente, atualizarStatusAgendamento, gerarLinkPagamento } from '../js/agendamento.js';
 import '../styles/agendamentos-usuario.css'
 
 const SOCKET_URL = "https://spring.renatahtokutomi.com:8088/ws-payment"; //rota do microservico
@@ -14,12 +13,11 @@ function formatDate(dateStr) {
     .replace(/^\w/, c => c.toUpperCase());
 }
 
-function StatusBadge({ status }) {
-  const s = String(status).toUpperCase();
-  if (s == "CONFIRMADO") return <span className="badge badge-confirmed"><span className="badge-dot"/>Confirmado</span>;
-  if (s == "CANCELADO") return <span className="badge badge-cancelled"><span className="badge-dot"/>Cancelado</span>;
-  if (s == "FINALIZADO" || s === "DONE") return <span className="badge badge-done"><span className="badge-dot"/>Concluído</span>;
-  return <span className="badge badge-pending"><span className="badge-dot"/>Pendente</span>;
+function isPaidBooking(booking) {
+  const status = String(booking.status).toUpperCase();
+  const paymentStatus = String(booking.pagamentoStatus || booking.status_pagamento).toUpperCase();
+  return status === "CONFIRMADO" || status === "PAGO & CONFIRMADO" ||
+    paymentStatus === "PAGO" || paymentStatus === "APROVADO";
 }
 
 export default function AgendamentosUsuário() {
@@ -27,6 +25,9 @@ export default function AgendamentosUsuário() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("upcoming");
   const [cancelModal, setCancelModal] = useState(null);
+  const [paymentBooking, setPaymentBooking] = useState(null);
+  const [paymentTermsAccepted, setPaymentTermsAccepted] = useState(false);
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [socketStatus, setSocketStatus] = useState("connecting"); // "connecting" | "connected" | "disconnected"
   const [notification, setNotification] = useState(null); // { message, type }
   const socketRef = useRef(null);
@@ -45,12 +46,18 @@ export default function AgendamentosUsuário() {
         client.subscribe('/topic/pagamentos', (message) => {
           const data = JSON.parse(message.body);
           console.log("[STOMP] Pagamento confirmado recebido:", data);
+          const orderNsu = data.order_nsu || data.orderNsu || data.id;
 
           // Atualiza o estado
           setBookings(prev =>
             prev.map(b =>
-              b.id === data.order_nsu
-                ? { ...b, status: data.status ?? "CONFIRMADO" }
+              String(b.id) === String(orderNsu)
+                ? {
+                    ...b,
+                    status: "CONFIRMADO",
+                    status_pagamento: "PAGO",
+                    pagamentoStatus: "PAGO"
+                  }
                 : b
             )
           );
@@ -129,7 +136,7 @@ export default function AgendamentosUsuário() {
     const status = String(b.status).toUpperCase();
 
     if (activeTab === "upcoming") {
-      return (status === "CONFIRMADO" || status === "PENDENTE") && bDate >= today;
+      return (status === "CONFIRMADO" || status === "PENDENTE" || status === "PAGO & CONFIRMADO") && bDate >= today;
     }
     if (activeTab === "history") {
       return status === "FINALIZADO" || status === "CANCELADO" || bDate < today;
@@ -138,14 +145,35 @@ export default function AgendamentosUsuário() {
   });
 
   // ─── Pagamento ────────────────────────────────────────────────────────────
-  async function gerarPagamento(id) {
-    const payload = {
-      jwt: localStorage.getItem("token"),
-      idAgendamento: id
-    };
-    const response = await axios.post("https://spring.renatahtokutomi.com:8088/flask-infinity-pay/create-checkout", payload);
-    console.log("Resposta do pagamento:", response.data);
-    window.open(response.data.url, "_blank");
+  function abrirRevisaoPagamento(booking) {
+    setPaymentBooking(booking);
+    setPaymentTermsAccepted(false);
+  }
+
+  async function gerarPagamento() {
+    if (!paymentBooking || !paymentTermsAccepted) return;
+
+    setIsPaymentLoading(true);
+    try {
+      let checkoutUrl = paymentBooking.link_pagamento;
+
+      if (!checkoutUrl) {
+        const response = await gerarLinkPagamento(paymentBooking);
+        checkoutUrl = response?.url || response?.checkoutUrl;
+      }
+
+      if (!checkoutUrl) {
+        throw new Error("A API não retornou um link de checkout");
+      }
+
+      window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+      setPaymentBooking(null);
+    } catch (error) {
+      console.error("Erro ao gerar pagamento:", error);
+      showNotification("Não foi possível iniciar o pagamento. Tente novamente.", "error");
+    } finally {
+      setIsPaymentLoading(false);
+    }
   }
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -186,48 +214,51 @@ export default function AgendamentosUsuário() {
         <div className="empty"><p>Nenhum agendamento encontrado.</p></div>
       ) : (
         filtered.map(b => (
-          <div className="booking-card" key={b.id}>
-            <div className="card-header">
-              <div className="card-header-left">
-                <span className="card-service-name">{b.servico}</span>
-                <StatusBadge status={b.status} />
+          <div className="appointment-card" key={b.id}>
+            <div className="appointment-card__header">
+              <div className="appointment-card__header-left">
+                <span className="appointment-card__service-name">{b.servico}</span>
               </div>
-              <div className="card-header-right">
-                <div className="card-price">Pendente</div>
+              <div className="appointment-card__header-right">
+                <div className="appointment-card__price">
+                  {isPaidBooking(b) ? "Confirmado" : "Pendente"}
+                </div>
               </div>
             </div>
 
-            <div className="card-professional">
+            <div className="appointment-card__professional">
                👤 {b.funcionaria}
             </div>
 
-            <div className="card-details">
-              <div className="detail-item">
-                <div className="detail-label">📅 Data</div>
-                <div className="detail-value">{formatDate(b)}</div>
+            <div className="appointment-card__details">
+              <div className="appointment-card__detail-item">
+                <div className="appointment-card__detail-label">📅 Data</div>
+                <div className="appointment-card__detail-value">{formatDate(b)}</div>
               </div>
-              <div className="detail-item">
-                <div className="detail-label">⏰ Horário</div>
-                <div className="detail-value">{b.hora}</div>
+              <div className="appointment-card__detail-item">
+                <div className="appointment-card__detail-label">⏰ Horário</div>
+                <div className="appointment-card__detail-value">{b.hora}</div>
               </div>
             </div>
 
-            <div className="card-actions">
-              {String(b.status).toUpperCase() === "PENDENTE" ? (
+            <div className="appointment-card__actions">
+              {!isPaidBooking(b) ? (
                 <>
-                  <button className="btn-payment" onClick={() => gerarPagamento(b.id)}>
-                    Realizar Pagamento
+                  <button className="appointment-card__payment" onClick={() => abrirRevisaoPagamento(b)}>
+                    {b.link_pagamento ? "Efetuar pagamento" : "Gerar link"}
                   </button>
-                  <button className="btn-cancel" onClick={() => setCancelModal(b.id)}>
+                  <button className="appointment-card__cancel" onClick={() => setCancelModal(b.id)}>
                     Cancelar Agendamento
                   </button>
                 </>
               ) : (
-                <span className="status-paid">
-                  <button className="btn-rebook" onClick={() => setCancelModal(b.id)}>
-                    Reagendar
-                  </button>
-                </span>
+                <div className="status-paid">
+                  <strong>AGENDAMENTO PAGO</strong>
+                  <span>
+                    Em caso de cancelamento ou reagendamento, entre em contato com um
+                    administrador ou profissional.
+                  </span>
+                </div>
               )}
             </div>
           </div>
@@ -242,6 +273,61 @@ export default function AgendamentosUsuário() {
             <div className="modal-actions">
               <button className="btn-modal-cancel" onClick={() => setCancelModal(null)}>Voltar</button>
               <button className="btn-modal-confirm" onClick={handleCancelConfirm}>Sim, cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {paymentBooking && (
+        <div className="modal-overlay">
+          <div className="modal payment-review-modal">
+            <h2>Revise seu agendamento</h2>
+            <div className="payment-booking-summary">
+              <div><span>Serviço</span><strong>{paymentBooking.servico}</strong></div>
+              <div><span>Profissional</span><strong>{paymentBooking.funcionaria}</strong></div>
+              <div><span>Data</span><strong>{formatDate(paymentBooking)}</strong></div>
+              <div><span>Horário</span><strong>{paymentBooking.hora}</strong></div>
+            </div>
+
+            <div className="booking-terms">
+              <h3>Antes de pagar</h3>
+              <p>
+                Após o pagamento, o agendamento só poderá ser cancelado com 24 horas de
+                antecedência. Caso contrário, será cobrada uma taxa de 25% sobre o reembolso.
+              </p>
+              <p>
+                A taxa de cancelamento de 25% também se aplica a agendamentos comuns sem
+                pagamento antecipado.
+              </p>
+              <label className="terms-checkbox">
+                <input
+                  type="checkbox"
+                  checked={paymentTermsAccepted}
+                  onChange={event => setPaymentTermsAccepted(event.target.checked)}
+                />
+                <span>Li os termos de agendamento e estou de acordo</span>
+              </label>
+            </div>
+
+            <div className="modal-actions">
+              <button
+                className="btn-modal-cancel"
+                onClick={() => setPaymentBooking(null)}
+                disabled={isPaymentLoading}
+              >
+                Voltar
+              </button>
+              <button
+                className="btn-modal-save"
+                onClick={gerarPagamento}
+                disabled={!paymentTermsAccepted || isPaymentLoading}
+              >
+                {isPaymentLoading
+                  ? "Abrindo pagamento..."
+                  : paymentBooking.link_pagamento
+                    ? "Efetuar pagamento"
+                    : "Gerar link"}
+              </button>
             </div>
           </div>
         </div>

@@ -1,12 +1,13 @@
-/*agendamento-grid.css*/
-/* MODAL AGENDAMENTO */
+/* ==========================================================================
+   MODAL AGENDAMENTO
+   ========================================================================== */
+
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,17 +17,26 @@
 .modal-content {
   background: #fff;
   border-radius: 12px;
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  padding: 2rem 1.5rem 1.5rem;
   min-width: 520px;
   max-width: 95vw;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   position: relative;
   animation: slideInModal 0.2s;
 }
 
 @keyframes slideInModal {
-  from { opacity: 0; transform: translateY(-30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-close {
@@ -87,55 +97,84 @@
   gap: 1rem;
   align-items: flex-start;
 }
-.redirect{
+
+.redirect {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-   margin-top: 10px;
-   font-size: 25px;
+  margin-top: 10px;
+  font-size: 25px;
 }
-.redirect a{
+
+.redirect a {
   text-align: center;
   width: 500px;
+  max-width: 100%;
   border: 1px solid black;
   background-color: #667eea;
   color: white;
   text-decoration: none;
-  border-radius:4px ;
+  border-radius: 4px;
   margin-top: 10px;
   padding: 5px 2px;
 }
 
+
+/* ==========================================================================
+   GRID DE AGENDAMENTOS
+   ========================================================================== */
+
 .agendamento-grid {
   background: white;
-  padding: 1rem;
+  padding: 1.15rem;
   border-radius: 0.75rem;
-  border: 1.5px solid rgba(102, 126, 234, 0.3);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e8dfc8;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+
   display: flex;
   flex-direction: column;
+
   pointer-events: auto;
   position: relative;
+
   width: 100%;
   height: 120%;
+  min-height: 0;
   min-width: 0;
+  max-width: 100%;
+  overflow: scroll;
+  box-sizing: border-box;
 }
+
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
 
 .agendamento-grid__header {
   width: 100%;
   min-height: 2.5rem;
+
   color: white;
   font-size: 18px;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  background: #1a1a2e;
+
   border-radius: 0.5rem;
+
   margin-bottom: 0.75rem;
   padding: 0.55rem 0.8rem;
+
+  box-sizing: border-box;
+
   flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 0.5rem;
 }
 
@@ -146,20 +185,95 @@
 .agendamento-grid__header-chip {
   display: inline-flex;
   align-items: center;
+
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.15);
+
   border-radius: 999px;
+
   padding: 0.15rem 0.55rem;
+
   font-size: 0.78rem;
   font-weight: 600;
+
+  white-space: nowrap;
 }
 
+
+/* ==========================================================================
+   RESUMO
+   ========================================================================== */
+
 .agendamento-grid__summary {
-  border: 1px solid rgba(102, 126, 234, 0.15);
-  background: linear-gradient(180deg, #fcfdff 0%, #f8faff 100%);
+  border: 1px solid #e8dfc8;
+
+  background: #fcfaf2;
+
   border-radius: 0.5rem;
+
   padding: 0.6rem 0.75rem;
   margin-bottom: 0.9rem;
+
+  box-sizing: border-box;
+}
+
+.agendamento-grid__professional-columns {
+  display: grid;
+  width: auto;
+  gap: 8px;
+  margin-left: var(--timeline-inset, 1rem);
+  margin-right: var(--timeline-inset, 1rem);
+  margin-bottom: 8px;
+}
+
+.agendamento-grid--todas .agendamento-grid__professional-columns {
+  flex: 0 0 auto;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.agendamento-grid--todas .agendamento-grid__professional-columns {
+  align-self: flex-start;
+}
+
+.agendamento-grid__timeline-scroll {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+}
+
+.agendamento-grid__professional-column-title {
+  overflow: hidden;
+  padding: 8px 10px;
+  border: 1px solid #e8dfc8;
+  border-top: 3px solid #b8960c;
+  border-radius: 6px;
+  background: #fffdf9;
+  color: #1a1a2e;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agendamento-grid__title {
+  font-size: 0.92rem;
+  font-weight: 600;
+
+  margin: 0 0 0.45rem 0;
+
+  color: #1a1a2e;
+
+  flex-shrink: 0;
 }
 
 .agendamento-grid__stats {
@@ -171,8 +285,11 @@
 .agendamento-grid__stat {
   display: inline-flex;
   align-items: center;
+
   border-radius: 999px;
+
   padding: 0.2rem 0.6rem;
+
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -187,306 +304,455 @@
   color: #166534;
 }
 
-.agendamento-grid__title {
-  font-size: 0.92rem;
-  font-weight: 600;
-  margin: 0 0 0.45rem 0;
-  color: #243047;
-  flex-shrink: 0;
-}
 
-.agendamento-grid__timeline {
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 0.75rem;
-  max-height: 100%;
+/* ==========================================================================
+   TIMELINE
+   ========================================================================== */
+
+/*
+ * Horário:
+ *
+ * 08:00
+ * 09:00
+ * 10:00
+ * ...
+ * 19:00
+ *
+ * 11 horas × 437px = 4807px
+ */
+
+.agendamento-grid__dynamic-timeline {
+  width: 100%;
+
+  flex: 1 1 auto;
   min-height: 0;
-  flex: 1;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  border: 1px solid #e7eaf2;
+  min-width: 0;
+
+  border: 1px solid #e8dfc8;
   border-radius: 0.6rem;
-  background: #fbfcff;
-  padding: 0.65rem;
+
+  background: #fffdf9;
+
+  padding: 1rem;
+
+  box-sizing: border-box;
+
+  max-height: none;
+
+  overflow-y: auto;
+  overflow-x: visible;
 }
 
-.agendamento-grid__timeline::-webkit-scrollbar {
+.agendamento-grid__dynamic-timeline::-webkit-scrollbar {
   width: 8px;
 }
 
-.agendamento-grid__timeline::-webkit-scrollbar-track {
+.agendamento-grid__dynamic-timeline::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 10px;
 }
 
-.agendamento-grid__timeline::-webkit-scrollbar-thumb {
+.agendamento-grid__dynamic-timeline::-webkit-scrollbar-thumb {
   background: #b9c0d4;
   border-radius: 10px;
 }
 
-.agendamento-grid__timeline-hours {
+
+/* ==========================================================================
+   CORPO DA TIMELINE
+   ========================================================================== */
+
+.agendamento-grid__timeline-body {
   position: relative;
-  border-right: 1px solid #dbe3f1;
+
+  width: 100%;
+
+  min-width: 680px;
+
+  /*
+  * 11 horas × 437px
+   */
+  height: 4807px;
+  min-height: 4807px;
 }
 
-.agendamento-grid__timeline-hour {
+
+/* ==========================================================================
+   LINHAS DAS HORAS
+   ========================================================================== */
+
+.agendamento-grid__hour-lines {
   position: absolute;
-  right: 0.5rem;
-  transform: translateY(-50%);
-  font-size: 0.78rem;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 4807px;
+
+  z-index: 1;
+
+  pointer-events: none;
+}
+
+.agendamento-grid__hour-row {
+  position: relative;
+
+  width: 100%;
+  height: 437px;
+
+  display: flex;
+  align-items: flex-start;
+
+  box-sizing: border-box;
+}
+
+.agendamento-grid__hour-row--final {
+  height: 0;
+}
+
+.agendamento-grid__minute-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.agendamento-grid__minute-line {
+  position: absolute;
+  left: 56px;
+  right: 0;
+  border-top: 1px dashed rgba(215, 222, 239, 0.55);
+  border-top-color: rgba(148, 163, 184, 0.72);
+}
+
+.agendamento-grid__minute-label {
+  position: absolute;
+  top: -0.45rem;
+  left: -56px;
+  width: 50px;
+  color: #94a3b8;
+  font-size: 0.64rem;
+  font-weight: 500;
+  line-height: 1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   LABEL DA HORA
+   ========================================================================== */
+
+.agendamento-grid__raia-time {
+  width: 56px;
+  min-width: 56px;
+
+  padding-top: 0;
+
+  font-size: 0.8rem;
   font-weight: 700;
+
   color: #5b6478;
+
+  line-height: 1;
 }
 
-.agendamento-grid__timeline-track {
+
+/* ==========================================================================
+   LINHA HORIZONTAL
+   ========================================================================== */
+
+.agendamento-grid__hour-line {
+  flex: 1;
+
+  height: 1px;
+
+  margin-top: 5px;
+
+  background: #d8cfb8;
+}
+
+
+/* ==========================================================================
+   CAMADA DOS AGENDAMENTOS
+   ========================================================================== */
+
+.agendamento-grid__events-layer {
+  position: absolute;
+
+  top: 0;
+  left: 56px;
+  right: 0;
+
+  /*
+   * Mesma altura da timeline.
+   */
+  height: 4807px;
+
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+}
+
+.agendamento-grid__professional-column {
   position: relative;
-  background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
-  border: 1px solid #dfe5f3;
-  border-radius: 0.5rem;
-  overflow: hidden;
+  min-width: 0;
 }
 
-.agendamento-grid__line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  pointer-events: none;
-}
 
-.agendamento-grid__line--full {
-  border-top: 1px solid #d7deef;
-}
+/* ==========================================================================
+   CARD DE AGENDAMENTO
+   ========================================================================== */
 
-.agendamento-grid__line--half {
-  border-top: 1px dashed #e7ecf7;
-}
-
-.agendamento-grid__current-time {
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 2;
-  border-top: 2px solid #ef4444;
-  pointer-events: none;
-}
-
-.agendamento-grid__current-time-dot {
-  position: absolute;
-  left: 0.4rem;
-  top: -5px;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: #ef4444;
-  box-shadow: 0 0 0 2px #fff;
-}
-
-.agendamento-grid__current-time-label {
-  position: absolute;
-  right: 0.5rem;
-  top: -11px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #b91c1c;
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
-  border-radius: 999px;
-  padding: 0.08rem 0.45rem;
-}
-
-.agendamento-grid__add-hour {
-  position: absolute;
-  right: 0.45rem;
-  z-index: 2;
-  border: 1px solid rgba(102, 126, 234, 0.35);
-  background: #ffffff;
-  color: #5a66a6;
-  border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 0.18rem 0.45rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.agendamento-grid__add-hour:hover {
-  background: #667eea;
-  color: #fff;
-}
+/*
+ * IMPORTANTE:
+ *
+ * O React define:
+ *
+ * top:    posição inicial
+ * height: duração
+ *
+ * Exemplo:
+ *
+ * 09:00 + 120 minutos
+ *
+ * top    = 240px
+  * height = 320px
+ *
+ * Resultado:
+ *
+ * ┌─────────────────────┐
+ * │ 09:00 - 11:00       │
+ * │ Cliente             │
+ * │ Serviço             │
+ * │                     │
+ * └─────────────────────┘
+ */
 
 .agendamento-grid__event {
   position: absolute;
-  left: 0.55rem;
-  right: 0.55rem;
-  z-index: 3;
+
+  left: 0;
+  right: 0;
+
+  width: calc(100% - 8px);
+
+  box-sizing: border-box;
+
   text-align: left;
-  border: 1px solid rgba(45, 70, 172, 0.25);
-  border-left: 4px solid #667eea;
+
+  border: 1px solid #e8dfc8;
+  border-left: 4px solid #b8960c;
+
   border-radius: 0.45rem;
-  background: linear-gradient(135deg, #eef2ff 0%, #f6f0ff 100%);
+
+  background: #fffdf9;
+
   color: #1f2a44;
-  padding: 0.45rem 0.6rem;
+
+  padding: 10px 10px 10px 10px;
+;
+
   cursor: pointer;
+
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
-}
 
-.agendamento-grid__event-time-group {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.12rem;
-  min-width: 108px;
-  flex-shrink: 0;
+  gap: 1rem;
 }
 
 .agendamento-grid__event:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(102, 126, 234, 0.25);
+
+  box-shadow:
+    0 4px 12px rgba(184, 150, 12, 0.16);
+}
+
+
+/* ==========================================================================
+   HORÁRIO + SERVIÇO
+   ========================================================================== */
+
+.agendamento-grid__event-time-group {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+
+  gap: 0.12rem;
+
+  min-width: 132px;
+
+  flex-shrink: 0;
 }
 
 .agendamento-grid__event-time {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #3d4a77;
-  white-space: nowrap;
-}
 
-.agendamento-grid__event-client {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #111827;
+  color: #3d4a77;
+
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
 }
 
 .agendamento-grid__event-service {
   font-size: 0.76rem;
+
   color: #4b5563;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+
+  max-width: 240px;
 }
+
+
+/* ==========================================================================
+   CLIENTE
+   ========================================================================== */
+
+.agendamento-grid__event-client {
+  font-size: 0.88rem;
+  font-weight: 700;
+
+  color: #111827;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  flex-shrink: 1;
+
+  min-width: 0;
+
+  flex-basis: 0;
+}
+
+
+/* ==========================================================================
+   PAGAMENTO
+   ========================================================================== */
 
 .agendamento-grid__event-payment {
   font-size: 0.65rem;
   font-weight: 700;
+
   color: #334155;
+
   white-space: nowrap;
+
   overflow: hidden;
   text-overflow: ellipsis;
+
   flex-shrink: 0;
+
   margin-left: auto;
+
   border: 1px solid transparent;
   border-radius: 999px;
+
   padding: 0.12rem 0.46rem;
+
   line-height: 1.2;
 }
 
+
+/* ==========================================================================
+   STATUS DO PAGAMENTO
+   ========================================================================== */
+
 .agendamento-grid__event-payment--pendente {
   background: #fff7d6;
+
   color: #8a5a00;
+
   border-color: #f2d381;
 }
 
 .agendamento-grid__event-payment--confirmado {
   background: #dcfce7;
+
   color: #166534;
+
   border-color: #86efac;
 }
 
 .agendamento-grid__event-payment--finalizado {
   background: #e2e8f0;
+
   color: #334155;
+
   border-color: #cbd5e1;
 }
 
-.agendamento-grid__event-inline {
-  display: none;
-}
 
-.agendamento-grid__event--small {
-  padding: 0.32rem 0.45rem;
-  gap: 0.35rem;
-}
-
-.agendamento-grid__event--small .agendamento-grid__event-time {
-  font-size: 0.68rem;
-}
-
-.agendamento-grid__event--small .agendamento-grid__event-time-group {
-  min-width: 96px;
-  gap: 0.08rem;
-}
-
-.agendamento-grid__event--small .agendamento-grid__event-client {
-  font-size: 0.8rem;
-}
-
-.agendamento-grid__event--small .agendamento-grid__event-service {
-  font-size: 0.68rem;
-}
-
-.agendamento-grid__event--small .agendamento-grid__event-payment {
-  font-size: 0.62rem;
-}
-
-.agendamento-grid__event--tiny {
-  padding: 0.2rem 0.38rem;
-  gap: 0.25rem;
-}
-
-.agendamento-grid__event--tiny .agendamento-grid__event-time-group {
-  min-width: auto;
-}
-
-.agendamento-grid__event--tiny .agendamento-grid__event-service {
-  display: none;
-}
-
-.agendamento-grid__event--tiny .agendamento-grid__event-client {
-  font-size: 0.74rem;
-}
-
-.agendamento-grid__event--tiny .agendamento-grid__event-payment {
-  font-size: 0.58rem;
-}
+/* ==========================================================================
+   STATUS DO AGENDAMENTO
+   ========================================================================== */
 
 .agendamento-grid__event--pendente {
-  border-left-color: #eab308;
-  background: linear-gradient(135deg, #fff8e6 0%, #fffef5 100%);
+  border-left-color: #d4a72c;
+  background: #fff8e1;
 }
 
 .agendamento-grid__event--confirmado,
 .agendamento-grid__event--pago {
   border-left-color: #16a34a;
-  background: linear-gradient(135deg, #ecfdf3 0%, #f0fdf4 100%);
+  background: #f1f8f2;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.agendamento-grid__event--finalizado {
+  border-left-color: #64748b;
+  background: #f4f4f2;
+}
+
+.agendamento-grid__event--coluna-0 {
+  border-left-color: #b8960c;
+}
+
+.agendamento-grid__event--coluna-1 {
+  border-left-color: #447c9b;
+}
+
+.agendamento-grid__event--coluna-2 {
+  border-left-color: #8b5e83;
+}
+
+.agendamento-grid__event--coluna-3 {
+  border-left-color: #68805b;
+}
+
+.agendamento-grid__event--coluna-4 {
+  border-left-color: #b46b4c;
+}
+
+.agendamento-grid__event--coluna-5 {
+  border-left-color: #6b6d8a;
 }
 
 
-/* RESPONSIVIDADE */
+/* ==========================================================================
+   RESPONSIVIDADE — TABLET
+   ========================================================================== */
+
 @media (max-width: 768px) {
+
   .agendamento-grid {
-    padding: 0.75rem;
     height: auto;
+    padding: 0.75rem;
   }
 
   .agendamento-grid__header {
@@ -506,29 +772,70 @@
     font-size: 0.9rem;
   }
 
-  .agendamento-grid__timeline {
-    grid-template-columns: 62px 1fr;
-    gap: 0.5rem;
-    padding: 0.45rem;
-    max-height: 60vh;
+  .agendamento-grid__dynamic-timeline {
+    padding: 0.65rem;
+    max-height: none;
+    overflow-x: visible;
   }
 
-  .agendamento-grid__timeline-hour {
-    font-size: 0.7rem;
+  .agendamento-grid--todas {
+    --timeline-inset: 0.65rem;
+  }
+
+  .agendamento-grid--todas .agendamento-grid__timeline-scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  .agendamento-grid--todas .agendamento-grid__professional-column-title {
+    min-width: 0;
+    padding: 6px 3px;
+    font-size: 0.62rem;
+  }
+
+  /*
+   * Mantemos a escala da timeline.
+   *
+  * 1 hora = 437px
+   */
+  .agendamento-grid__timeline-body {
+    min-width: 620px;
+    height: 4807px;
+    min-height: 4807px;
+  }
+
+  .agendamento-grid__hour-lines {
+    height: 4807px;
+  }
+
+  .agendamento-grid__events-layer {
+    left: 48px;
+    height: 4807px;
+  }
+
+  .agendamento-grid__raia-time {
+    width: 48px;
+    min-width: 48px;
+
+    font-size: 0.74rem;
+  }
+
+  .agendamento-grid__minute-lines {
+    left: 0;
+  }
+
+  .agendamento-grid__minute-line {
+    left: 48px;
+  }
+
+  .agendamento-grid__minute-label {
+    left: -48px;
   }
 
   .agendamento-grid__event {
-    left: 0.4rem;
-    right: 0.4rem;
-    padding: 0.4rem 0.45rem;
-  }
+    padding: 0.55rem 0.65rem;
 
-  .agendamento-grid__event--small {
-    padding: 0.28rem 0.35rem;
-  }
-
-  .agendamento-grid__event--tiny {
-    padding: 0.18rem 0.3rem;
+    gap: 0.7rem;
   }
 
   .agendamento-grid__event-client {
@@ -537,55 +844,138 @@
 
   .agendamento-grid__event-service {
     font-size: 0.7rem;
+
+    max-width: 170px;
   }
 
-  .agendamento-grid__add-hour {
-    font-size: 0.62rem;
-    padding: 0.16rem 0.35rem;
+  .agendamento-grid__event-time-group {
+    min-width: 112px;
   }
-
-  .agendamento-grid__current-time-label {
-    font-size: 0.6rem;
-    padding: 0.05rem 0.35rem;
-    right: 0.25rem;
-    top: -10px;
-  }
-
-  .agendamento-grid__current-time-dot {
-    width: 8px;
-    height: 8px;
-    top: -4px;
-  }
-
 }
 
-@media (max-width: 460px) {
-  .agendamento-grid {
-    height: auto;
-    padding: 0.6rem;
-  }
 
-  .agendamento-grid__timeline {
-    grid-template-columns: 48px 1fr;
-    gap: 0.3rem;
-    padding: 0.3rem;
-    max-height: 55vh;
+/* ==========================================================================
+   RESPONSIVIDADE — CELULAR
+   ========================================================================== */
+
+@media (max-width: 460px) {
+
+  .agendamento-grid {
+    padding: 0.6rem;
   }
 
   .agendamento-grid__header {
     font-size: 13px;
   }
 
+  .agendamento-grid__header-chip {
+    font-size: 0.65rem;
+  }
+
+  .agendamento-grid__dynamic-timeline {
+    padding: 0.45rem;
+    max-height: none;
+    overflow-x: visible;
+  }
+
+  .agendamento-grid--todas {
+    --timeline-inset: 0.45rem;
+  }
+
+  .agendamento-grid__timeline-body {
+    /*
+     * Mantém uma largura mínima para a timeline
+     * não esmagar os eventos.
+     */
+    min-width: 560px;
+
+    height: 4807px;
+    min-height: 4807px;
+  }
+
+  .agendamento-grid__hour-lines {
+    height: 4807px;
+  }
+
+  .agendamento-grid__events-layer {
+    left: 40px;
+    height: 4807px;
+  }
+
+  .agendamento-grid__raia-time {
+    width: 40px;
+    min-width: 40px;
+
+    font-size: 0.68rem;
+  }
+
+  .agendamento-grid__minute-lines {
+    left: 0;
+  }
+
+  .agendamento-grid__minute-line {
+    left: 40px;
+  }
+
+  .agendamento-grid__minute-label {
+    left: -40px;
+  }
+
+  .agendamento-grid__event {
+    padding: 0.45rem 0.55rem;
+
+    gap: 0.5rem;
+  }
+
+  .agendamento-grid--todas .agendamento-grid__professional-columns {
+    gap: 3px;
+  }
+
+  .agendamento-grid--todas .agendamento-grid__professional-column-title {
+    padding: 5px 2px;
+    font-size: 0.54rem;
+  }
+
+  .agendamento-grid--todas .agendamento-grid__event {
+    width: 100%;
+    padding: 4px 3px;
+    border-left-width: 2px;
+    border-radius: 3px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .agendamento-grid--todas .agendamento-grid__event-time-group {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .agendamento-grid--todas .agendamento-grid__event-time,
+  .agendamento-grid--todas .agendamento-grid__event-service,
+  .agendamento-grid--todas .agendamento-grid__event-client {
+    max-width: 100%;
+    font-size: 0.5rem;
+    line-height: 1.1;
+  }
+
+  .agendamento-grid__event-time-group {
+    min-width: 96px;
+  }
+
   .agendamento-grid__event-time {
-    font-size: 0.66rem;
+    font-size: 0.64rem;
   }
 
   .agendamento-grid__event-client {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
   }
 
   .agendamento-grid__event-service {
-    font-size: 0.64rem;
+    font-size: 0.62rem;
+
+    max-width: 125px;
   }
 
   .agendamento-grid__event-payment {
@@ -596,3 +986,4 @@
     padding: 0.45rem 0.55rem;
   }
 }
+

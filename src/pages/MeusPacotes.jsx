@@ -100,7 +100,9 @@ export default function MeusPacotes() {
         duracaoServico: agendamento.servico.duracaoMinutos,
         clientePacoteServicoId: agendamento.servico.clientePacoteServicoId
       });
-      setMensagemAgendamento("Agendamento criado. O saldo será atualizado após a confirmação do pagamento.");
+      const pacotesAtualizados = await getMeusPacotes();
+      setPacotes(pacotesAtualizados);
+      setMensagemAgendamento("Agendamento criado. Seu saldo foi atualizado.");
     } catch (error) {
       setMensagemAgendamento(error.response?.data?.message || "Não foi possível criar o agendamento.");
     } finally {

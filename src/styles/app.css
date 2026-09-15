@@ -18,11 +18,11 @@ body,
   flex-direction: row;
   align-items: center;
   gap: 12px;
-  border: 1.5px solid rgba(102, 126, 234, 0.3);
+  border: 1px solid #e8dfc8;
   border-radius: 8px;
   padding: 6px 14px;
   background: white;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
   position: relative;
 }
@@ -32,7 +32,7 @@ body,
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #667eea;
+  color: #b8960c;
   line-height: 1;
 }
 
@@ -60,6 +60,50 @@ body,
 .agendamentos-topbar .novo-agendamento-container .header {
   margin-bottom: 0;
   height: 100%;
+}
+
+.agenda-new-schedule-row {
+  width: 100%;
+  margin: 0 auto 16px;
+}
+
+.agenda-new-schedule-row .novo-agendamento-container {
+  width: 100%;
+  margin: 0;
+}
+
+.agenda-new-schedule-row .novo-agendamento-container .header {
+  margin-bottom: 0;
+  gap: 12px;
+}
+
+.agenda-profissional-select {
+  min-width: 210px;
+  height: 42px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  background: #1a1a2e;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.agenda-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.agenda-header-actions .agenda-new-button {
+  margin: 0;
+  height: 42px;
+  box-sizing: border-box;
+  border: 1px solid #fff !important;
 }
 
 .display-flex { display: flex; }
@@ -108,7 +152,7 @@ body,
 
 /* BOTÕES */
 .btn-app {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #1a1a2e;
   color: white;
   border: none;
   padding: 10px 10px;
@@ -117,19 +161,19 @@ body,
   border-radius: 6px;
   transition: all 0.2s;
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 2px 8px rgba(26, 26, 46, 0.18);
 }
 
 .btn-funcionarias{
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #1a1a2e;
   margin: 5px;
   width: 120px;
 }
 
 .btn-app:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #653d91 100%);
+  background: #b8960c;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 14px rgba(184, 150, 12, 0.24);
 }
 .btn-salvar { background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%); box-shadow: 0 2px 8px rgba(67, 160, 71, 0.3); }
 .btn-salvar:hover { background: linear-gradient(135deg, #388e3c 0%, #1b5e20 100%); }
@@ -147,10 +191,10 @@ body,
 
 .btn-app.ativo {
   background: white;
-  color: #667eea;
-  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+  color: #b8960c;
+  box-shadow: 0 4px 14px rgba(184, 150, 12, 0.2);
   transform: translateY(-1px);
-  border: 2px solid #667eea;
+  border: 2px solid #b8960c;
 }
 
 .container {
@@ -177,6 +221,15 @@ body,
   margin: 0;
   color: white;
   font-weight: 700;
+}
+
+.agenda-page .header {
+  background: #1a1a2e;
+  border: 1px solid #1a1a2e;
+}
+
+.agenda-page .header .btn-app {
+  color: #b8960c;
 }
 
 .header .btn-app {
@@ -228,6 +281,11 @@ body,
   color: white;
   padding: 12px 16px;
   border-radius: 12px 12px 0 0;
+}
+
+.agenda-page .novo-agendamento-modal__header {
+  background: #1a1a2e;
+  border-bottom: 3px solid #b8960c;
 }
 
 .novo-agendamento-modal__header h3 {
@@ -472,6 +530,21 @@ body,
     font-size: 0.68rem !important;
   }
 
+  .agenda-page .agenda-header-actions {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .agenda-page .agenda-header-actions .agenda-profissional-select {
+    min-width: 0;
+    max-width: 100%;
+    flex: 1 1 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 0.72rem;
+  }
+
   .agenda-page .funcionaria-selector-label {
     text-align: center;
   }
@@ -497,6 +570,7 @@ body,
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
+    overflow: hidden;
     height: auto !important;
   }
 
@@ -875,6 +949,27 @@ body,
     height: 44px !important;
     max-height: 44px !important;
     box-sizing: border-box;
+  }
+}
+
+@media (max-width: 520px) {
+  .agenda-page .novo-agendamento-container .header {
+    flex-wrap: wrap;
+  }
+
+  .agenda-page .agenda-header-title {
+    flex: 1 1 100%;
+  }
+
+  .agenda-page .agenda-header-actions {
+    width: 100%;
+  }
+
+  .agenda-page .agenda-header-actions .agenda-new-button {
+    flex: 1 1 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
   }
 }
 
