@@ -18,10 +18,10 @@ import Agendamento from "./pages/Agendamento";
 import AgendamentosUsuário from "./pages/AgendamentosUsuário";
 import ConfiguracoesProfissional from "./pages/admin/ConfiguracoesProfissional";
 import ConfiguracoesUsuario from "./pages/admin/ConfiguracoesUsuario";
-import AdminMasterDashboard from "./pages/admin/AdminMasterDashboard";
+// import AdminMasterDashboard from "./pages/admin/AdminMasterDashboard";
 import VitrinePacotes from "./pages/VitrinePacotes";
 import MeusPacotes from "./pages/MeusPacotes";
-import Financeiro from "./pages/admin/Financeiro";
+// import Financeiro from "./pages/admin/Financeiro";
 import Dashboard from "./pages/admin/Dashboard";
 import ProfissionalDashboard from "./pages/admin/ProfissionalDashboard";
 import AcessoNegado from "./pages/AcessoNegado";
@@ -29,6 +29,7 @@ import { getUsuarioLogado, normalizarRole, validarAcessoNoBackend } from "./vali
 import GerenciarUsuarios from "./components/admin/GerenciarUsuarios";
 import GerenciarServicos from "./components/admin/GerenciarServicos";
 import GerenciarPacotes from "./components/admin/GerenciarPacotes";
+import ProdutosPage from "./pages/admin/ProdutosPage";
 
 const isDevEnvironment = () => {
   const mode = (window._env_?.VITE_ENV || "production").toLowerCase();
@@ -290,13 +291,15 @@ export default function App() {
             path="servicos"
             element={<PrivateRoute allowedRoles={["ADMIN"]}><GerenciarServicos /></PrivateRoute>}
           />
+
+            <Route
+            path="produtos"
+            element={<PrivateRoute allowedRoles={["ADMIN"]}><ProdutosPage /></PrivateRoute>}
+          />
+
           <Route
             path="pacotes-gestao"
             element={<PrivateRoute allowedRoles={["ADMIN"]}><GerenciarPacotes /></PrivateRoute>}
-          />
-          <Route
-            path="financeiro"
-            element={<PrivateRoute allowedRoles={["ADMIN"]}><Financeiro /></PrivateRoute>}
           />
 
           <Route
@@ -311,6 +314,7 @@ export default function App() {
               </PrivateRoute>
             }
           />
+
           <Route path="acesso-negado" element={<AcessoNegado />} />
         </Route>
 
