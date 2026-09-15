@@ -126,6 +126,37 @@
     gap: 20px;
   }
 
+  .services-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 28px;
+    color: #777;
+    font-size: 0.85rem;
+  }
+
+  .services-pagination button {
+    padding: 9px 16px;
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .services-pagination button:hover:not(:disabled) {
+    background: var(--gold);
+    color: #fff;
+  }
+
+  .services-pagination button:disabled {
+    border-color: #d8d2c8;
+    color: #aaa;
+    cursor: not-allowed;
+  }
+
   /* CARD */
   .service-card {
     background: #fff;

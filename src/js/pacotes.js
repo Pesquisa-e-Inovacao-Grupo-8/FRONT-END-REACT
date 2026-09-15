@@ -4,15 +4,18 @@ function normalizarServico(servico) {
   return {
     ...servico,
     quantidadeDisponivel: Number(servico.quantidadeDisponivel ?? servico.quantidade_disponivel ?? 0),
-    quantidadeConfigurada: Number(servico.quantidadeConfigurada ?? servico.quantidade_configurada ?? 0),
+    quantidadeConfigurada: Number(servico.quantidadeConfigurada ?? servico.quantidade_configurada ?? servico.quantidadeTotal ?? servico.quantidade_total ?? servico.quantidadeDisponivel ?? 0),
     clientePacoteServicoId: servico.clientePacoteServicoId || servico.idClientePacoteServico || null,
     duracaoMinutos: servico.duracaoMinutos ?? servico.duracao_minutos ?? 60
   };
 }
 
 export function normalizarPacote(pacote) {
+  const dadosPacote = pacote.pacote || pacote;
   return {
     ...pacote,
+    nome: pacote.nome || dadosPacote.nome || "Pacote sem nome",
+    descricao: pacote.descricao || dadosPacote.descricao || "",
     dtExpiracao: pacote.dtExpiracao || pacote.dt_expiracao || pacote.expiracao || null,
     ativo: pacote.ativo !== false && pacote.status !== "INATIVO",
     servicos: (pacote.servicos || []).map(normalizarServico)

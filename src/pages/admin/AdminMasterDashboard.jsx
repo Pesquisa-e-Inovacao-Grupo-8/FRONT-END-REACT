@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import '../../styles/admin-master.css'; 
 import "../../styles/acesso-negado.css";
+import { possuiPermissao } from "../../validate-access";
 
 import GerenciarUsuarios from '../../components/admin/GerenciarUsuarios';
 import GerenciarServicos from '../../components/admin/GerenciarServicos';
@@ -11,8 +12,7 @@ import GerenciarPacotes from '../../components/admin/GerenciarPacotes';
 export default function AdminMasterDashboard() {
   const [abaAtiva, setAbaAtiva] = useState('usuarios');
 
-  const role = localStorage.getItem('userRole')?.replace(/^ROLE_/, '');
-  if (role !== 'ADMIN') return <Navigate to="/acesso-negado" replace />;
+  if (!possuiPermissao(["ADMIN"])) return <Navigate to="/acesso-negado" replace />;
 
   const renderizarConteudo = () => {
     switch (abaAtiva) {

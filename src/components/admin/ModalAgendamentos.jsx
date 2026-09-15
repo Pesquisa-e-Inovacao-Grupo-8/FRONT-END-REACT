@@ -1,25 +1,98 @@
-// src/components/admin/ModalAgendamentos.jsx
-import React, { useState } from "react";
-import { cancelarAgendamento , finalizarAgendamento , gerarLinkPagamento } from "../../js/agendamento.js";
+import React, { useEffect, useState } from "react";
+import {
+  cancelarAgendamento,
+  finalizarAgendamento,
+  gerarLinkPagamento
+} from "../../js/agendamento.js";
 import api from "../../api";
 import "../../styles/agendamento-grid.css";
 import "../../styles/app.css";
-import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from "../utils/mensagem";
+import mostrarMensagem, {
+  mostrarErroMensagem,
+  mostrarSucessoMensagem
+} from "../utils/mensagem";
 import mostrarConfirmacaoAssincrona from "../utils/confirm-dialog";
 
-export default function ModalAgendamento({ agendamento, onClose, onAtualizar, onFinalizar, onCancelar }) {
-  const [checkoutUrl, setCheckoutUrl] = useState(agendamento.link_pagamento || "");
+export default function ModalAgendamento({
+  agendamento,
+  onClose,
+  onAtualizar,
+  onFinalizar,
+  onCancelar
+}) {
+  const [checkoutUrl, setCheckoutUrl] = useState(
+    agendamento?.link_pagamento || ""
+  );
+
   const [gerandoLink, setGerandoLink] = useState(false);
   const [dandoBaixa, setDandoBaixa] = useState(false);
 
-  const statusPagamento = (agendamento.pagamentoStatus || agendamento.status_pagamento || (agendamento.pagamentoAdiantado ? 'PAGO' : 'PENDENTE')).toUpperCase();
-  const telefone = agendamento.telefone || '';
-  const telefoneLimpo = String(telefone).replace(/\D/g, '');
-  const ordemPagamento = agendamento.ordem_pagamento || agendamento.ordemPagamento || 'Não informada';
-  const mensagemWhats = encodeURIComponent(`Olá, ${agendamento.cliente}! Sobre seu agendamento de ${agendamento.servico} em ${agendamento.data} às ${agendamento.hora}.`);
-  const whatsappUrl = telefoneLimpo ? `https://wa.me/${telefoneLimpo}?text=${mensagemWhats}` : '';
+  const [servicos, setServicos] = useState([]);
 
-  const jaEstaPago = statusPagamento === 'PAGO' || statusPagamento === 'APROVADO';
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarServicos() {
+      try {
+        const response = await api.get("/servicos");
+
+        if (ativo) {
+          setServicos(response.data || []);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar serviços:", error);
+
+        if (ativo) {
+          setServicos([]);
+        }
+      }
+    }
+
+    carregarServicos();
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  const statusPagamento = (
+    agendamento.pagamentoStatus ||
+    agendamento.status_pagamento ||
+    (agendamento.pagamentoAdiantado ? "PAGO" : "PENDENTE")
+  ).toUpperCase();
+
+  const telefone = agendamento.telefone || "";
+  const telefoneLimpo = String(telefone).replace(/\D/g, "");
+
+  const ordemPagamento =
+    agendamento.ordem_pagamento ||
+    agendamento.ordemPagamento ||
+    "Não informada";
+
+  const mensagemWhats = encodeURIComponent(
+    `Olá, ${agendamento.cliente}! Sobre seu agendamento de ${agendamento.servico} em ${agendamento.data} às ${agendamento.hora}.`
+  );
+
+  const whatsappUrl = telefoneLimpo
+    ? `https://wa.me/${telefoneLimpo}?text=${mensagemWhats}`
+    : "";
+
+  const servicoAgendamento = servicos.find(
+    s =>
+      String(s.id) === String(agendamento.servicoId) ||
+      String(s.nome).trim().toLowerCase() ===
+        String(agendamento.servico).trim().toLowerCase()
+  );
+
+  const duracaoAgendamento =
+    servicoAgendamento?.duracaoMinutos ??
+    agendamento.duracaoMinutos ??
+    agendamento.duracao ??
+    60;
+
+  const jaEstaPago =
+    statusPagamento === "PAGO" ||
+    statusPagamento === "APROVADO";
 
   const handleGerarLink = async () => {
     try {
@@ -37,6 +110,15 @@ export default function ModalAgendamento({ agendamento, onClose, onAtualizar, on
     } finally {
       setGerandoLink(false);
     }
+  };
+
+  const handlePagamento = () => {
+    if (checkoutUrl) {
+      window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    handleGerarLink();
   };
 
   const handleDarBaixa = async () => {
@@ -79,24 +161,24 @@ export default function ModalAgendamento({ agendamento, onClose, onAtualizar, on
               </button>
             )}
           </div>
-
+              
           <div><b>Cliente:</b> {agendamento.cliente}</div>
           <div><b>Serviço:</b> {agendamento.servico}</div>
           <div><b>Data:</b> {agendamento.data}</div>
           <div><b>Horário:</b> {agendamento.hora}</div>
           <div><b>Funcionária:</b> {agendamento.funcionaria}</div>
-          <div><b>Duração:</b> {agendamento.duracaoMinutos || agendamento.duracao || 60} min</div>
+          <div><b>Duração:</b> {duracaoAgendamento} min</div>
           <div><b>Pagamento adiantado:</b> {agendamento.pagamentoAdiantado ? 'Sim' : 'Não'}</div>
           <div><b>Status do pagamento:</b> {statusPagamento}</div>
           
           <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
             <button 
               className="btn-app"
-              onClick={handleGerarLink}
+              onClick={handlePagamento}
               disabled={gerandoLink || jaEstaPago}
               style={{ flex: 1 }}
             >
-              {gerandoLink ? 'Gerando...' : 'Gerar Link'}
+              {gerandoLink ? 'Gerando...' : checkoutUrl ? 'Efetuar pagamento' : 'Gerar link'}
             </button>
 
             {!jaEstaPago && (

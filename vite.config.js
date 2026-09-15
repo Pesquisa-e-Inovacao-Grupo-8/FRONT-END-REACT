@@ -19,6 +19,11 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/spring/, ''),
       },
+      '/api/payment': {
+        target: 'http://localhost:8088',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/payment/, ''),
+      },
     },
   },
 });

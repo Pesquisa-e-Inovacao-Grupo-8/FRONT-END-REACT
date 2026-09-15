@@ -166,15 +166,15 @@
   .step-line.done { background: #b8960c; }
 
   /* CARD */
-  .booking-card {
+  .booking-flow-card {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.07);
     padding: 36px 40px;
     width: 100%;
-    max-width: 560px;
+    max-width: 2000px;
   }
-  .card-title {
+  .booking-flow-card-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.4rem;
     font-style: italic;
@@ -184,10 +184,10 @@
   }
 
   /* FORM FIELDS */
-  .field {
+  .booking-flow-field {
     margin-bottom: 22px;
   }
-  .field label {
+  .booking-flow-field label {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -198,14 +198,14 @@
     margin-bottom: 8px;
     text-transform: uppercase;
   }
-  .field label svg { flex-shrink: 0; }
+  .booking-flow-field label svg { flex-shrink: 0; }
 
-  .field select,
-  .field input[type="date"],
-  .field input[type="text"],
-  .field input[type="tel"],
-  .field input[type="email"],
-  .field textarea {
+  .booking-flow-field select,
+  .booking-flow-field input[type="date"],
+  .booking-flow-field input[type="text"],
+  .booking-flow-field input[type="tel"],
+  .booking-flow-field input[type="email"],
+  .booking-flow-field textarea {
     width: 100%;
     border: 1.5px solid #e0d8cc;
     border-radius: 8px;
@@ -219,32 +219,32 @@
     appearance: none;
     -webkit-appearance: none;
   }
-  .field select {
+  .booking-flow-field select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
     padding-right: 40px;
     cursor: pointer;
   }
-  .field select:focus,
-  .field input:focus,
-  .field textarea:focus {
+  .booking-flow-field select:focus,
+  .booking-flow-field input:focus,
+  .booking-flow-field textarea:focus {
     border-color: #b8960c;
     box-shadow: 0 0 0 3px rgba(184,150,12,0.1);
   }
-  .field textarea {
+  .booking-flow-field textarea {
     resize: vertical;
     min-height: 100px;
   }
 
   /* TIME SLOTS */
-  .time-grid {
+  .booking-flow-time-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 10px;
     margin-top: 2px;
   }
-  .time-slot {
+  .booking-flow-time-slot {
     border: 1.5px solid #e0d8cc;
     border-radius: 8px;
     padding: 10px 0;
@@ -256,23 +256,23 @@
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s, color 0.2s;
   }
-  .time-slot:hover {
+  .booking-flow-time-slot:hover {
     border-color: #b8960c;
     color: #b8960c;
   }
-  .time-slot.selected {
+  .booking-flow-time-slot.selected {
     background: var(--gold-gradient);
     border-color: var(--gold);
     color: #fff;
     font-weight: 500;
   }
-  .time-slot.disabled {
+  .booking-flow-time-slot.disabled {
     opacity: 0.4;
     cursor: not-allowed;
     pointer-events: none;
   }
 
-  .horarios-paginacao {
+  .booking-flow-horarios-paginacao {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -282,7 +282,7 @@
     font-size: 0.85rem;
   }
 
-  .horarios-paginacao button {
+  .booking-flow-horarios-paginacao button {
     border: 1px solid #e0d8cc;
     border-radius: 6px;
     padding: 7px 12px;
@@ -291,7 +291,7 @@
     cursor: pointer;
   }
 
-  .horarios-paginacao button:disabled {
+  .booking-flow-horarios-paginacao button:disabled {
     cursor: not-allowed;
     opacity: 0.45;
   }
@@ -365,7 +365,7 @@
     font-size: 0.78rem;
     font-weight: 500;
   }
-  .service-selection-empty {
+  .booking-flow-service-selection-empty {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -380,7 +380,7 @@
   }
 
   /* ACTIONS */
-  .card-actions {
+  .booking-flow-card-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -388,7 +388,7 @@
     padding-top: 24px;
     border-top: 1px solid #f0ebe0;
   }
-  .btn-back {
+  .booking-flow-btn-back {
     border: 1.5px solid #b8960c;
     background: transparent;
     color: #b8960c;
@@ -402,8 +402,8 @@
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
   }
-  .btn-back:hover { background: var(--gold-gradient); color: #fff; }
-  .btn-next {
+  .booking-flow-btn-back:hover { background: var(--gold-gradient); color: #fff; }
+  .booking-flow-btn-next {
     border: none;
     background: var(--gold-gradient);
     color: #fff;
@@ -417,21 +417,21 @@
     cursor: pointer;
     transition: background 0.2s, opacity 0.2s;
   }
-  .btn-next:hover { background: var(--gold-gradient-hover); }
-  .btn-next:disabled {
+  .booking-flow-btn-next:hover { background: var(--gold-gradient-hover); }
+  .booking-flow-btn-next:disabled {
     opacity: 0.4;
     cursor: not-allowed;
   }
 
   /* SUMMARY */
-  .summary-box {
+  .booking-flow-summary-box {
     background: #faf8f4;
     border: 1px solid #e8dfc8;
     border-radius: 10px;
     padding: 18px 20px;
     margin-bottom: 22px;
   }
-  .summary-box h3 {
+  .booking-flow-summary-box h3 {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1rem;
     font-style: italic;
@@ -439,17 +439,55 @@
     margin-bottom: 12px;
     font-weight: 600;
   }
-  .summary-row {
+  .booking-flow-summary-row {
     display: flex;
     justify-content: space-between;
     font-size: 0.85rem;
     color: #666;
     padding: 4px 0;
   }
-  .summary-row span:last-child { color: #333; font-weight: 500; }
+  .booking-flow-summary-row span:last-child { color: #333; font-weight: 500; }
+
+  .booking-flow-terms {
+    margin: 20px 0;
+    padding: 16px;
+    background: #fffaf0;
+    border: 1px solid #ead9a8;
+    border-radius: 10px;
+  }
+  .booking-flow-terms h3 {
+    color: #806b18;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 9px;
+    text-transform: uppercase;
+  }
+  .booking-flow-terms p {
+    color: #746d5b;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin-bottom: 9px;
+  }
+  .booking-flow-terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    color: #4f4a3d;
+    cursor: pointer;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    margin-top: 13px;
+  }
+  .booking-flow-terms-checkbox input {
+    accent-color: #b8960c;
+    flex: 0 0 auto;
+    height: 17px;
+    margin-top: 1px;
+    width: 17px;
+  }
 
   /* SUCCESS */
-  .success-screen {
+  .booking-flow-success-screen {
     text-align: center;
     padding: 20px 0;
   }
@@ -464,21 +502,21 @@
     margin: 0 auto 24px;
     font-size: 2rem;
   }
-  .success-screen h2 {
+  .booking-flow-success-screen h2 {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.8rem;
     font-style: italic;
     color: #1a1a2e;
     margin-bottom: 12px;
   }
-  .success-screen p {
+  .booking-flow-success-screen p {
     font-size: 0.9rem;
     color: #888;
     font-weight: 300;
     line-height: 1.7;
     margin-bottom: 28px;
   }
-  .btn-new {
+  .booking-flow-btn-new {
     background: var(--gold-gradient);
     color: #fff;
     border: none;
@@ -492,16 +530,16 @@
     cursor: pointer;
     transition: background 0.2s;
   }
-  .btn-new:hover { background: var(--gold-gradient-hover); }
+  .booking-flow-btn-new:hover { background: var(--gold-gradient-hover); }
 
   /* VALIDATION */
-  .error-msg {
+  .booking-flow-error-msg {
     font-size: 0.75rem;
     color: #c0392b;
     margin-top: 5px;
     font-weight: 400;
   }
-  .field input.error, .field select.error, .field textarea.error {
+  .booking-flow-field input.error, .booking-flow-field select.error, .booking-flow-field textarea.error {
     border-color: #c0392b;
   }
 
@@ -537,8 +575,8 @@
       margin: 0 2px;
       transform: translateY(-12px);
     }
-    .booking-card { padding: 24px 20px; }
-    .time-grid { grid-template-columns: repeat(3, 1fr); }
+    .booking-flow-card { padding: 24px 20px; }
+    .booking-flow-time-grid { grid-template-columns: repeat(3, 1fr); }
     .booking-services-grid { grid-template-columns: 1fr; }
     .booking-hero h1 { font-size: 2rem; }
   }
