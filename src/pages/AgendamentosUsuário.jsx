@@ -5,7 +5,7 @@ import SockJS from 'sockjs-client';
 import { getAgendamentosPorCliente, atualizarStatusAgendamento, gerarLinkPagamento } from '../js/agendamento.js';
 import '../styles/agendamentos-usuario.css'
 
-const SOCKET_URL = "https://spring.renatahtokutomi.com:8088/ws-payment"; //rota do microservico
+const SOCKET_URL = "https://spring.renatahtokutomi.com/ws-payment"; //rota do microservico
 
 function formatDate(dateStr) {
   const d = new Date(dateStr.ano, dateStr.mes - 1, dateStr.dia, 12, 0, 0);
