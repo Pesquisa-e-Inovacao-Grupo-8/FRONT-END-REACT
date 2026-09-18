@@ -3,10 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { getAgendamentosPorCliente, atualizarStatusAgendamento, gerarLinkPagamento } from '../js/agendamento.js';
-import { getEnv } from '../env';
 import '../styles/agendamentos-usuario.css'
 
-const envName = (getEnv('VITE_ENV') || import.meta.env.MODE || 'PRD').toLowerCase();
+const envName = (window._env_?.VITE_ENV || import.meta.env.VITE_ENV || import.meta.env.MODE || 'production').toLowerCase();
 const SOCKET_URL = envName === 'qa'
   ? "https://qa-infinity-pay.renatahtokutomi.com/ws-payment"
   : "https://infinity-pay.renatahtokutomi.com/ws-payment";
