@@ -5,13 +5,10 @@ import SockJS from 'sockjs-client';
 import { getAgendamentosPorCliente, atualizarStatusAgendamento, gerarLinkPagamento } from '../js/agendamento.js';
 import '../styles/agendamentos-usuario.css'
 
-const envName = (getEnv('VITE_ENV') || import.meta.env.MODE || 'PRD').toLowerCase();
-let SOCKET_URL;
-if (envName === 'qa') { 
-  SOCKET_URL = "https://qa-infinity-pay.renatahtokutomi.com/ws-payment"; 
-} else if (envName === 'prd') {
-  SOCKET_URL = "https://infinity-pay.renatahtokutomi.com/ws-payment";
-}
+const envName = (window._env_?.VITE_ENV || import.meta.env.VITE_ENV || import.meta.env.MODE || 'production').toLowerCase();
+const SOCKET_URL = envName === 'qa'
+  ? "https://qa-infinity-pay.renatahtokutomi.com/ws-payment"
+  : "https://infinity-pay.renatahtokutomi.com/ws-payment";
 
 function formatDate(dateStr) {
   const d = new Date(dateStr.ano, dateStr.mes - 1, dateStr.dia, 12, 0, 0);
