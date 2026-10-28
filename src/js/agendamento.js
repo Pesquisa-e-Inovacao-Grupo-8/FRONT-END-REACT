@@ -1,5 +1,5 @@
 import axios from 'axios';
-import api from '../api';
+import api, { normalizeArray, normalizePage } from '../api';
 
 const FLASK_URL = 'http://127.0.0.1:8088/flask-infinity-pay';
 
@@ -59,12 +59,10 @@ export async function getAgendamentos(page = 0, size = 10) {
             api.get(`/agendamentoServicos`)
         ]);
 
-        const paginatedData = agendamentosRes.data;
-        const agendamentosBrutos = Array.isArray(paginatedData) 
-            ? paginatedData 
-            : (paginatedData.content || []);
+        const paginatedData = normalizePage(agendamentosRes.data);
+        const agendamentosBrutos = paginatedData.content;
 
-        const relacoesServicos = agendamentoServicosRes.data || [];
+        const relacoesServicos = normalizeArray(agendamentoServicosRes.data);
 
         const listaMapeada = agendamentosBrutos.map(agend => {
             const [ano, mes, dia] = (agend.data || "2000-01-01").toString().split("-").map(Number);
@@ -89,9 +87,10 @@ export async function getAgendamentos(page = 0, size = 10) {
 
         return {
             content: listaMapeada,
-            totalPages: paginatedData.totalPages || 1,
-            totalElements: paginatedData.totalElements || listaMapeada.length,
-            number: paginatedData.number || 0
+            totalPages: paginatedData.totalPages,
+            totalElements: paginatedData.totalElements,
+            number: paginatedData.number,
+            size: paginatedData.size
         };
 
     } catch (error) {
@@ -100,10 +99,32 @@ export async function getAgendamentos(page = 0, size = 10) {
     }
 }
 
+export async function getTodosAgendamentos(size = 100) {
+    const primeiraPagina = await getAgendamentos(0, size);
+    const paginas = [primeiraPagina];
+
+    for (let page = 1; page < primeiraPagina.totalPages; page += 1) {
+        paginas.push(await getAgendamentos(page, size));
+    }
+
+    return paginas.flatMap(pagina => pagina.content);
+}
+
 export async function getServicos() {
     try {
-        const response = await api.get(`/servicos`);
-        return response.data;
+        const primeiraPagina = normalizePage((await api.get(`/servicos`, {
+            params: { page: 0, size: 100, sort: 'nome,asc' }
+        })).data);
+        const paginas = [primeiraPagina];
+
+        for (let page = 1; page < primeiraPagina.totalPages; page += 1) {
+            const response = await api.get(`/servicos`, {
+                params: { page, size: 100, sort: 'nome,asc' }
+            });
+            paginas.push(normalizePage(response.data));
+        }
+
+        return paginas.flatMap(pagina => pagina.content);
     } catch (error) {
         console.error("Erro ao buscar serviços:", error);
         return [];
@@ -156,10 +177,9 @@ export async function agendarPeloCliente(dadosFormulario) {
 export async function getAgendamentosPorCliente(clienteId) {
     try {
         const meuNome = localStorage.getItem("userName");
-        // Busca a primeira página de até 100 itens para o filtro
-        const res = await getAgendamentos(0, 100); 
+        const res = await getTodosAgendamentos(100);
         
-        return res.content.filter(a => a.cliente === meuNome);
+        return res.filter(a => a.cliente === meuNome);
     } catch (error) {
         console.error("Erro ao filtrar meus agendamentos:", error);
         return [];

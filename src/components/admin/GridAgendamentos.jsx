@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ModalAgendamento from './ModalAgendamentos';
 import '../../styles/agendamento-grid.css';
-import api from '../../api';
+import api, { normalizeArray } from '../../api';
 
 const DAY_START_HOUR = 8;
 const DAY_END_HOUR = 19;
@@ -88,7 +88,7 @@ export default function GridAgendamento({
         const response = await api.get('/servicos');
 
         if (ativo) {
-          setServicos(response.data || []);
+          setServicos(normalizeArray(response.data));
         }
       } catch (error) {
         console.error('Erro ao carregar serviços:', error);

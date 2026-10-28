@@ -1,6 +1,7 @@
 // src/pages/admin/ConfiguracoesProfissional.jsx
 import { useState, useEffect } from "react";
 import api from "../../api";
+import { getServicos } from "../../js/agendamento";
 import "../../styles/configuracoes-profissional.css";
 import { mostrarSucessoMensagem } from "../../components/utils/mensagem";
 import { mostrarAvisoObrigatorio } from "../../components/utils/confirm-dialog";
@@ -75,8 +76,8 @@ export default function ConfiguracoesProfissional() {
         setLoading(true);
 
         // 1. Busca todos os serviços que o salão oferece
-        const resServicos = await api.get("/servicos");
-        setServicosDoSalao(resServicos.data || []);
+        const servicos = await getServicos();
+        setServicosDoSalao(servicos);
 
         try {
           const resHorarios = await api.get("/profissionais/me/horarios");
