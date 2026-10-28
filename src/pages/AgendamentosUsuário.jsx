@@ -3,7 +3,12 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { getAgendamentosPorCliente, atualizarStatusAgendamento, gerarLinkPagamento } from '../js/agendamento.js';
 import '../styles/agendamentos-usuario.css'
-const SOCKET_URL = "https://spring.renatahtokutomi.com/ws-payment"; //rota do microservico
+
+const envName = (window._env_?.VITE_ENV || import.meta.env.VITE_ENV || import.meta.env.MODE || 'production').toLowerCase();
+const SOCKET_URL = envName === 'qa'
+  ? "https://qa-infinity-pay.renatahtokutomi.com/ws-payment"
+  : "https://infinity-pay.renatahtokutomi.com/ws-payment";
+
 function formatDate(dateStr) {
   const d = new Date(dateStr.ano, dateStr.mes - 1, dateStr.dia, 12, 0, 0);
   return d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
