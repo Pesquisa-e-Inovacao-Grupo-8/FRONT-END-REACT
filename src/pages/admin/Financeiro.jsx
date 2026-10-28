@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import api from "../../api";
+import api, { normalizeArray } from "../../api";
+import { getServicos } from "../../js/agendamento";
 import { Navigate } from "react-router-dom";
 import { possuiPermissao } from "../../validate-access";
 import "../../styles/app.css"; 
@@ -34,15 +35,17 @@ export default function Financeiro() {
       setLoading(true);
 
       // Busca os serviços e a tabela associativa simultaneamente
-      const [resServicos, resVinculos] = await Promise.all([
-        api.get('/servicos'),
+      const [servicos, resVinculos] = await Promise.all([
+        getServicos(),
         api.get('/servico-produtos')
       ]);
 
+      const vinculos = normalizeArray(resVinculos.data);
+
       // MÁGICA DO FRONTEND: Cruzamos os dados
       // Para cada serviço, procuramos quais vínculos pertencem a ele
-      const servicosMontados = resServicos.data.map(servico => {
-        const produtosDesteServico = resVinculos.data.filter(
+      const servicosMontados = servicos.map(servico => {
+        const produtosDesteServico = vinculos.filter(
           vinculo => vinculo.servico.id === servico.id
         );
 

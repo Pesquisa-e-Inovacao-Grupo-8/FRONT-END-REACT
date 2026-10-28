@@ -15,6 +15,21 @@ export function normalizeArray(value) {
   return [];
 }
 
+export function normalizePage(value) {
+  const page = value && typeof value === 'object' ? value : {};
+  const content = normalizeArray(page);
+
+  return {
+    content,
+    totalPages: Number(page.totalPages) || (content.length ? 1 : 0),
+    totalElements: Number(page.totalElements) || content.length,
+    number: Number(page.number) || 0,
+    size: Number(page.size) || content.length,
+    first: Boolean(page.first ?? true),
+    last: Boolean(page.last ?? true),
+  };
+}
+
 
 const envName = (getEnv('VITE_ENV') || import.meta.env.MODE || 'PRD').toLowerCase();
 const configuredBaseUrl = getEnv('VITE_API_BASE_URL') || import.meta.env.VITE_API_BASE_URL;

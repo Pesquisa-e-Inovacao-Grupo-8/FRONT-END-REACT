@@ -6,8 +6,7 @@ import Calendar from "../../components/admin/Calendario";
 import AgendamentoGrid from "../../components/admin/GridAgendamentos";
 import { usePagamentoStatusCheck } from '../../js/pagamento-status-check';
 import { getFuncionarias } from '../../js/funcionarias';
-import { getAgendamentos, salvarAgendamento } from '../../js/agendamento';
-import api from '../../api';
+import { getServicos, getTodosAgendamentos, salvarAgendamento } from '../../js/agendamento';
 import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../../components/utils/mensagem';
 import { mostrarAvisoObrigatorio } from '../../components/utils/confirm-dialog';
 import { normalizarRole } from '../../validate-access';
@@ -73,8 +72,8 @@ export default function AgendamentosPage() {
 
   const carregarAgendamentos = async () => {
     try {
-      const agendamentosApi = await getAgendamentos();
-      setAgendamentos((agendamentosApi || []).map(normalizarAgendamento));
+      const agendamentosApi = await getTodosAgendamentos();
+      setAgendamentos(agendamentosApi.map(normalizarAgendamento));
     } catch (error) {
       console.error('[AgendamentosPage] Falha ao recarregar agendamentos:', error);
     }
@@ -89,18 +88,18 @@ export default function AgendamentosPage() {
         const nomeLogado = localStorage.getItem("userName");
         const papelLogado = normalizarRole(localStorage.getItem("userRole"));
 
-        const [funcionariasApi, agendamentosApi, resServicos] = await Promise.all([
+        const [funcionariasApi, agendamentosApi, servicosApi] = await Promise.all([
           getFuncionarias(),
-          getAgendamentos(),
-          api.get("/servicos")
+          getTodosAgendamentos(),
+          getServicos()
         ]);
 
-        console.log("Serviços brutos da API:", resServicos.data);
+        console.log("Serviços brutos da API:", servicosApi);
         console.log("Funcionárias brutas da API:", funcionariasApi);
 
         // Guarda a lista completa para o modal usar depois!
         setListaOriginalFuncionarias(funcionariasApi || []);
-        setServicosDoSalao(resServicos.data);
+        setServicosDoSalao(servicosApi);
 
         const perfis = (funcionariasApi || []).reduce((acc, profissional) => {
           let servicosFinal;
@@ -111,7 +110,7 @@ export default function AgendamentosPage() {
                 ? servicoReferencia.id
                 : servicoReferencia;
 
-              return resServicos.data.find(servico => (
+              return servicosApi.find(servico => (
                 String(servico.id) === String(servicoId)
               ));
             }).filter(Boolean);
@@ -133,7 +132,7 @@ export default function AgendamentosPage() {
           setFuncionariaAtual(primeira);
         }
 
-        setAgendamentos((agendamentosApi || []).map(normalizarAgendamento));
+        setAgendamentos(agendamentosApi.map(normalizarAgendamento));
       } catch (error) {
         console.error('[AgendamentosPage] Falha ao carregar dados:', error);
         setErroApi('Não foi possível carregar dados do backend. Verifique se está logado.');

@@ -1,6 +1,6 @@
 // src/components/admin/GerenciarServicos.jsx
 import { useState, useEffect } from 'react';
-import api from '../../api';
+import api, { normalizeArray, normalizePage } from '../../api';
 import mostrarMensagem, { mostrarErroMensagem, mostrarSucessoMensagem } from '../utils/mensagem';
 import mostrarConfirmacaoAssincrona, { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
 import { decimalNormalizado, duracaoPositiva, moeda, textoObrigatorio } from '../utils/validacao';
@@ -18,6 +18,9 @@ export default function GerenciarServicos() {
   const [produtos, setProdutos] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [termoBusca, setTermoBusca] = useState('');
+  const [paginaAtual, setPaginaAtual] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [totalServicos, setTotalServicos] = useState(0);
 
   // Estados do Modal Principal (Serviço)
   const [modalAberto, setModalAberto] = useState(false);
@@ -34,18 +37,21 @@ export default function GerenciarServicos() {
   const [salvandoProduto, setSalvandoProduto] = useState(false);
 
   useEffect(() => {
-    carregarDados();
-  }, []);
+    carregarDados(paginaAtual);
+  }, [paginaAtual]);
 
-  const carregarDados = async () => {
+  const carregarDados = async (pagina = paginaAtual) => {
     try {
       setLoading(true);
       const [resServicos, resProdutos] = await Promise.all([
-        api.get('/servicos'),
+        api.get('/servicos', { params: { page: pagina, size: 10, sort: 'nome,asc' } }),
         api.get('/produtos') 
       ]);
-      setServicos(resServicos.data);
-      setProdutos(resProdutos.data);
+      const paginaServicos = normalizePage(resServicos.data);
+      setServicos(paginaServicos.content);
+      setTotalPaginas(paginaServicos.totalPages);
+      setTotalServicos(paginaServicos.totalElements);
+      setProdutos(normalizeArray(resProdutos.data));
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       await mostrarAvisoObrigatorio("Erro ao carregar os dados. Contate o suporte.");
@@ -92,9 +98,10 @@ export default function GerenciarServicos() {
     try {
       // Busca quais produtos estão atrelados a este serviço
       const resVinculos = await api.get(`/servico-produtos/servico/${servico.id}`);
-      setLinksOriginais(resVinculos.data); // Guarda tudo (incluindo os IDs dos vínculos para podermos deletar)
+      const vinculos = normalizeArray(resVinculos.data);
+      setLinksOriginais(vinculos); // Guarda tudo (incluindo os IDs dos vínculos para podermos deletar)
       
-      const idsVinculados = resVinculos.data.map(link => link.produto.id);
+      const idsVinculados = vinculos.map(link => link.produto.id);
       setFormNovoServico(prev => ({ ...prev, produtosIds: idsVinculados }));
     } catch (error) {
       console.error("Erro ao buscar produtos do serviço:", error);
@@ -259,7 +266,10 @@ export default function GerenciarServicos() {
             type="text" 
             placeholder="Buscar serviço..." 
             value={termoBusca}
-            onChange={(e) => setTermoBusca(e.target.value)}
+            onChange={(e) => {
+              setTermoBusca(e.target.value);
+              setPaginaAtual(0);
+            }}
             style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '250px' }}
           />
           <button onClick={abrirModalNovo} style={{ padding: '10px 20px', background: 'linear-gradient(to right, #1a1a2e, #21315c)', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
@@ -303,6 +313,28 @@ export default function GerenciarServicos() {
             )}
           </tbody>
         </table>
+      )}
+
+      {!loading && totalPaginas > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+          <span>{totalServicos} serviço(s) • Página {paginaAtual + 1} de {totalPaginas}</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setPaginaAtual(pagina => Math.max(0, pagina - 1))}
+              disabled={paginaAtual === 0}
+            >
+              Anterior
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaginaAtual(pagina => Math.min(totalPaginas - 1, pagina + 1))}
+              disabled={paginaAtual >= totalPaginas - 1}
+            >
+              Próxima
+            </button>
+          </div>
+        </div>
       )}
 
       {/* === MODAL DE CADASTRO/EDIÇÃO === */}

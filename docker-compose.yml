@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: imagestreampi/front-end-react-prd:99
+    image: imagestreampi/front-end-react-prd:999
     container_name: front-end-react
     restart: unless-stopped
     ports:

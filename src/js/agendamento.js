@@ -1,4 +1,7 @@
-import api, { normalizeArray } from '../api';
+import axios from 'axios';
+import api, { normalizeArray, normalizePage } from '../api';
+
+const FLASK_URL = 'http://127.0.0.1:8088/flask-infinity-pay';
 
 export function cancelarAgendamento(agendamento) {
     agendamento.status = 'CANCELADO';
@@ -12,14 +15,8 @@ export function finalizarAgendamento(agendamento) {
 
 export async function gerarLinkPagamento(agendamento) {
     try {
-        const agendamentoId = agendamento?.id || agendamento?.idAgendamento;
-
-        if (!agendamentoId) {
-            throw new Error('Agendamento sem identificador');
-        }
-
-        const response = await api.post(`/agendamentos/${agendamentoId}/payment-link`);
-        console.log('Resposta do pagamento:', response.data);
+        const response = await axios.post(`${FLASK_URL}/create-checkout`, agendamento);
+        console.log('Resposta do Infinity Pay:', response.data);
         return response.data;
     } catch (error) {
         console.error('Falha ao gerar link de pagamento no Infinity Pay', error);
@@ -29,8 +26,6 @@ export async function gerarLinkPagamento(agendamento) {
 
 export async function salvarAgendamento(payload) {
     try {
-        // O payload vindo do NovoAgendamento.jsx JÁ ESTÁ FORMATADO corretamente.
-        // Não precisamos de .split aqui.
         const agendamentoDTO = {
             data: payload.data, // YYYY-MM-DD
             horaInicio: payload.horaInicio, 
@@ -49,73 +44,87 @@ export async function salvarAgendamento(payload) {
         return response.data;
 
     } catch (error) {
-        console.error('Falha ao criar agendamento no Spring Boot:', {
-            message: error.message,
-            status: error.response?.status,
-            url: error.config?.url,
-            method: error.config?.method,
-            data: error.response?.data
-        });
-        throw error;
+        console.error('Falha ao criar agendamento no Spring Boot:', error);
+        throw new Error('Falha ao criar agendamento');
     }
 }
 export async function criarAgendamento(payload) {
     return salvarAgendamento(payload);
 }
 
-export async function getAgendamentos() {
+export async function getAgendamentos(page = 0, size = 10) {
    try {
-        const [agendamentosRes, agendamentoServicosRes, servicosRes] = await Promise.all([
-            api.get(`/agendamentos`),
-            api.get(`/agendamentoServicos`),
-            api.get(`/servicos`)
+        const [agendamentosRes, agendamentoServicosRes] = await Promise.all([
+            api.get(`/agendamentos`, { params: { page, size, sort: 'data,desc' } }),
+            api.get(`/agendamentoServicos`)
         ]);
 
-        const agendamentosBrutos = normalizeArray(agendamentosRes.data);
-        const relacoesServicos = normalizeArray(agendamentoServicosRes.data);
-        const servicos = normalizeArray(servicosRes.data);
+        const paginatedData = normalizePage(agendamentosRes.data);
+        const agendamentosBrutos = paginatedData.content;
 
-        return agendamentosBrutos.map(agend => {
-            // Extração segura da data
+        const relacoesServicos = normalizeArray(agendamentoServicosRes.data);
+
+        const listaMapeada = agendamentosBrutos.map(agend => {
             const [ano, mes, dia] = (agend.data || "2000-01-01").toString().split("-").map(Number);
             
-            const relacao = relacoesServicos.find(rel =>
-                rel.agendamento?.id === agend.id || rel.agendamentoId === agend.id || rel.fk_agendamento === agend.id
-            );
-            const nomeServico = relacao?.servico?.nome ||
-                relacao?.servico?.nomeServico ||
-                (relacao?.servicoId ? servicos.find(servico => servico.id === relacao.servicoId)?.nome : null) ||
-                (agend.servicoId ? servicos.find(servico => servico.id === agend.servicoId)?.nome : null) ||
-                'Serviço Padrão';
+            const relacao = relacoesServicos.find(rel => rel.agendamento && rel.agendamento.id === agend.id);
+            const nomeServico = relacao && relacao.servico ? relacao.servico.nome : 'Serviço Padrão';
             
-            const horaInicio = (agend.horaInicio || agend.hora_inicio) ?
-                (agend.horaInicio || agend.hora_inicio).toString().substring(0, 5) : "00:00";
-            const horaFim = (agend.horaFim || agend.hora_fim) ?
-                (agend.horaFim || agend.hora_fim).toString().substring(0, 5) : "00:00";
+            const horaInicio = agend.horaInicio ? agend.horaInicio.toString().substring(0, 5) : "00:00";
+            const horaFim = agend.horaFim ? agend.horaFim.toString().substring(0, 5) : "00:00";
 
             return {
                 id: agend.id,
                 dia, mes, ano,
                 hora: horaInicio,
                 cliente: agend.cliente?.usuario?.nome || agend.nomeClienteAvulso || 'Avulso',
-                clienteId: agend.clienteId || agend.cliente?.id || agend.fk_cliente,
                 funcionaria: agend.profissional?.usuario?.nome || 'Profissional Não Informado',
                 servico: nomeServico,
                 status: agend.status,
-                pagamentoStatus: agend.pagamentoStatus || 'PENDENTE',
-                link_pagamento: agend.linkPagamento || agend.link_pagamento || ''
+                pagamentoStatus: agend.pagamentoStatus || 'PENDENTE'
             };
         });
+
+        return {
+            content: listaMapeada,
+            totalPages: paginatedData.totalPages,
+            totalElements: paginatedData.totalElements,
+            number: paginatedData.number,
+            size: paginatedData.size
+        };
+
     } catch (error) {
         console.error("Erro ao buscar agendamentos:", error);
-        return [];
+        return { content: [], totalPages: 0, totalElements: 0, number: 0 };
     }
+}
+
+export async function getTodosAgendamentos(size = 100) {
+    const primeiraPagina = await getAgendamentos(0, size);
+    const paginas = [primeiraPagina];
+
+    for (let page = 1; page < primeiraPagina.totalPages; page += 1) {
+        paginas.push(await getAgendamentos(page, size));
+    }
+
+    return paginas.flatMap(pagina => pagina.content);
 }
 
 export async function getServicos() {
     try {
-        const response = await api.get(`/servicos`);
-        return response.data;
+        const primeiraPagina = normalizePage((await api.get(`/servicos`, {
+            params: { page: 0, size: 100, sort: 'nome,asc' }
+        })).data);
+        const paginas = [primeiraPagina];
+
+        for (let page = 1; page < primeiraPagina.totalPages; page += 1) {
+            const response = await api.get(`/servicos`, {
+                params: { page, size: 100, sort: 'nome,asc' }
+            });
+            paginas.push(normalizePage(response.data));
+        }
+
+        return paginas.flatMap(pagina => pagina.content);
     } catch (error) {
         console.error("Erro ao buscar serviços:", error);
         return [];
@@ -144,23 +153,23 @@ export async function agendarPeloCliente(dadosFormulario) {
             ordemPedido: `WEB-${Date.now()}`,
             clienteId: meuId,
             profissionalId: dadosFormulario.professionalId,
-            servicoId: dadosFormulario.serviceId,
-            clientePacoteServicoId: dadosFormulario.clientePacoteServicoId || null
+            servicoId: dadosFormulario.serviceId
         };
 
         console.log("Criando agendamento...", agendamentoDTO);
         const responseAgendamento = await api.post(`/agendamentos`, agendamentoDTO);
         const novoAgendamento = responseAgendamento.data;
 
+        console.log("Vinculando serviço...");
+        await api.post(`/agendamentoServicos`, {
+            agendamentoId: novoAgendamento.id,
+            servicoId: dadosFormulario.serviceId
+        });
+
         return novoAgendamento;
 
     } catch (error) {
-        console.error("Falha geral ao criar agendamento do cliente:", {
-            status: error.response?.status,
-            url: error.config?.url,
-            method: error.config?.method,
-            data: error.response?.data,
-        });
+        console.error("Falha geral ao criar agendamento do cliente:", error);
         throw error;
     }
 }
@@ -168,12 +177,9 @@ export async function agendarPeloCliente(dadosFormulario) {
 export async function getAgendamentosPorCliente(clienteId) {
     try {
         const meuNome = localStorage.getItem("userName");
-        const todosAgendamentos = await getAgendamentos(); 
+        const res = await getTodosAgendamentos(100);
         
-        return todosAgendamentos.filter(a =>
-            (clienteId && a.clienteId === clienteId) ||
-            (meuNome && a.cliente === meuNome)
-        );
+        return res.filter(a => a.cliente === meuNome);
     } catch (error) {
         console.error("Erro ao filtrar meus agendamentos:", error);
         return [];

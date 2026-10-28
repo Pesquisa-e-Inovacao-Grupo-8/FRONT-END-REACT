@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api, { normalizeArray } from '../../api';
+import api, { normalizePage } from '../../api';
 import { mostrarAvisoObrigatorio } from '../utils/confirm-dialog';
 
 const SERVICOS_POR_PAGINA = 6;
@@ -10,7 +10,8 @@ export default function CardServico() {
   const [servicos, setServicos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
-  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [paginaAtual, setPaginaAtual] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(0);
 
   const agendarServico = (servicoId) => {
     if (!localStorage.getItem('token')) {
@@ -22,9 +23,11 @@ export default function CardServico() {
   };
 
   useEffect(() => {
-    api.get('/servicos')
+    api.get('/servicos', { params: { page: paginaAtual, size: SERVICOS_POR_PAGINA, sort: 'nome,asc' } })
       .then((response) => {
-        setServicos(normalizeArray(response.data));
+        const pagina = normalizePage(response.data);
+        setServicos(pagina.content);
+        setTotalPaginas(pagina.totalPages);
         setLoading(false);
       })
       .catch((error) => {
@@ -32,14 +35,7 @@ export default function CardServico() {
         setErro('Não foi possível carregar os serviços. Tente novamente mais tarde.');
         setLoading(false);
       });
-  }, []);
-
-  const totalPaginas = Math.ceil(servicos.length / SERVICOS_POR_PAGINA);
-  const primeiroServico = (paginaAtual - 1) * SERVICOS_POR_PAGINA;
-  const servicosDaPagina = servicos.slice(
-    primeiroServico,
-    primeiroServico + SERVICOS_POR_PAGINA
-  );
+  }, [paginaAtual]);
 
   if (loading) return <div style={{ textAlign: 'center', padding: '2rem' }}>Carregando serviços...</div>;
   if (erro) return <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>{erro}</div>;
@@ -49,7 +45,7 @@ export default function CardServico() {
         <div className="category-section">
         <h2 className="category-title">Todos os Serviços</h2>
         <div className="services-grid">
-          {Array.isArray(servicos) && servicos.length > 0 ? servicosDaPagina.map((svc) => (
+          {servicos.length > 0 ? servicos.map((svc) => (
             <div className="service-card" key={svc.id}>
               <div className="card-top">
                 <div className="card-icon">✨</div>
@@ -75,16 +71,16 @@ export default function CardServico() {
           <nav className="services-pagination" aria-label="Paginação de serviços">
             <button
               type="button"
-              onClick={() => setPaginaAtual(pagina => Math.max(1, pagina - 1))}
-              disabled={paginaAtual === 1}
+              onClick={() => setPaginaAtual(pagina => Math.max(0, pagina - 1))}
+              disabled={paginaAtual === 0}
             >
               Anterior
             </button>
-            <span>Página {paginaAtual} de {totalPaginas}</span>
+            <span>Página {paginaAtual + 1} de {totalPaginas}</span>
             <button
               type="button"
-              onClick={() => setPaginaAtual(pagina => Math.min(totalPaginas, pagina + 1))}
-              disabled={paginaAtual === totalPaginas}
+              onClick={() => setPaginaAtual(pagina => Math.min(totalPaginas - 1, pagina + 1))}
+              disabled={paginaAtual >= totalPaginas - 1}
             >
               Próxima
             </button>

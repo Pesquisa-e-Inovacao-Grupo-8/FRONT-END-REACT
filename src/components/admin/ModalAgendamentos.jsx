@@ -4,7 +4,7 @@ import {
   finalizarAgendamento,
   gerarLinkPagamento
 } from "../../js/agendamento.js";
-import api from "../../api";
+import api, { normalizeArray } from "../../api";
 import "../../styles/agendamento-grid.css";
 import "../../styles/app.css";
 import mostrarMensagem, {
@@ -37,7 +37,7 @@ export default function ModalAgendamento({
         const response = await api.get("/servicos");
 
         if (ativo) {
-          setServicos(response.data || []);
+          setServicos(normalizeArray(response.data));
         }
       } catch (error) {
         console.error("Erro ao carregar serviços:", error);
